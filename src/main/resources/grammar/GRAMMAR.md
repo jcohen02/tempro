@@ -28,7 +28,7 @@ property_expression :- PROPERTY <property_name>
 
 For example, consider the `CellModelType` parameter shown in the image below:
 
-![Example profile tree]('ProfileProperties.png')
+![Example profile tree](ProfileProperties.png)
 
 The property name for this parameter would be written `Physics -> CellModel -> CellModelType`.
 

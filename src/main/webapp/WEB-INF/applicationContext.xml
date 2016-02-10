@@ -7,6 +7,14 @@
     <bean id="profileDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.JdbcProfileDaoImpl">
 	    <property name="dataSource" ref="dataSource"/>
 	</bean>
+	
+	<bean id="constraintDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.JdbcConstraintDaoImpl">
+	    <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id="templateDao" class="uk.ac.imperial.libhpc2.schemaservice.web.dao.impl.TemplateDaoImpl">
+	    
+	</bean>
     
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
 	    <property name="driverClassName" value="org.sqlite.JDBC" />

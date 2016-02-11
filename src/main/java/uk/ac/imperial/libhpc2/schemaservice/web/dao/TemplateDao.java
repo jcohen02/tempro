@@ -57,5 +57,7 @@ public interface TemplateDao {
 	public List<String> getIDs();
 	
 	public String getIdNameMapJson();
+	
+	public boolean exists(String pTemplateId);
 
 }

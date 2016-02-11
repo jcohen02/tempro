@@ -47,19 +47,19 @@ package uk.ac.imperial.libhpc2.schemaservice.web.dao;
 
 import java.util.List;
 
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Constraint;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.ParamConstraint;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 
-public interface ConstraintDao {
+public interface ParamConstraintDao {
 
-	public int add(Constraint pConstraint);
+	public int add(ParamConstraint pConstraint);
 	
 	public int delete(String pTemplateId, String pConstraintName);
 	
-	public List<Constraint> findAll();
+	public List<ParamConstraint> findAll();
 	
-	public Constraint findByName(String pName);
+	public ParamConstraint findByName(String pTemplateId, String pName);
 	
-	public List<Constraint> findByTemplateId(String pTemplateId);
+	public List<ParamConstraint> findByTemplateId(String pTemplateId);
 
 }

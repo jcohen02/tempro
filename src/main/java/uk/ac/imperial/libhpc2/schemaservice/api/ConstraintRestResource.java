@@ -48,8 +48,11 @@ package uk.ac.imperial.libhpc2.schemaservice.api;
 import java.util.List;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -65,9 +68,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import uk.ac.imperial.libhpc2.schemaservice.web.dao.ConstraintDao;
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Constraint;
+import uk.ac.imperial.libhpc2.schemaservice.web.dao.ParamConstraintDao;
+import uk.ac.imperial.libhpc2.schemaservice.web.dao.TemplateDao;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.ParamConstraint;
 
 /**
  * Jersey REST class representing the constraint endpoint
@@ -85,7 +90,14 @@ public class ConstraintRestResource {
      * Constraint data access object for accessing the constraint database
      */
     @Autowired
-	ConstraintDao constraintDao;
+	ParamConstraintDao constraintDao;
+    
+    /**
+     * Template data access object for accessing template details stored in the
+     * servlet context
+     */
+    @Autowired
+	TemplateDao templateDao;
     
     /**
      * ServletContext object used to access profile metadata
@@ -114,10 +126,10 @@ public class ConstraintRestResource {
     public Response getConstraintNamesForTemplateJson(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Constraint> constraints = constraintDao.findByTemplateId(pTemplateId);
+    	List<ParamConstraint> constraints = constraintDao.findByTemplateId(pTemplateId);
     	JSONArray constraintArray = new JSONArray();
     	if(constraints != null) {
-    		for(Constraint c : constraints) {
+    		for(ParamConstraint c : constraints) {
         		constraintArray.put(c.getName());
         	}	
     	}
@@ -145,12 +157,12 @@ public class ConstraintRestResource {
     public Response getConstraintNamesForTemplateText(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Constraint> constraints = constraintDao.findByTemplateId(pTemplateId);
+    	List<ParamConstraint> constraints = constraintDao.findByTemplateId(pTemplateId);
     	StringBuilder constraintNames = new StringBuilder();
     	// If there are no constraints for the specified template (or the template
     	// doesn't exist)...
     	if(constraints != null) {
-	    	for(Constraint c : constraints) {
+	    	for(ParamConstraint c : constraints) {
 	    		constraintNames.append(c.getName());
 	    		constraintNames.append("\n");
 	    	}
@@ -172,15 +184,15 @@ public class ConstraintRestResource {
     public Response getConstraintsForTemplateJson(
     		@PathParam("templateId") String pTemplateId) {
 
-    	List<Constraint> constraints = constraintDao.findByTemplateId(pTemplateId);
+    	List<ParamConstraint> constraints = constraintDao.findByTemplateId(pTemplateId);
     	JSONArray constraintArray = new JSONArray();
     	if(constraints != null) {
-    		for(Constraint c : constraints) {
+    		for(ParamConstraint c : constraints) {
     			JSONObject item = new JSONObject();
     			try {
 					item.put("id", c.getId());
 					item.put("name", c.getName());
-	    			item.put("constraint", c.getConstraint());
+	    			item.put("constraint", c.getExpression());
 	    			constraintArray.put(item);
 				} catch (JSONException e) {
 					String responseText = "{\"status\", \"ERROR\", \"error\"," +
@@ -199,4 +211,132 @@ public class ConstraintRestResource {
 		}
     	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
+    
+    @POST
+    @Path("template/{templateId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json")
+    public Response addConstraint(
+        @PathParam("templateId") String pTemplateId,
+        @RequestBody String pConstraintStr,
+        @Context HttpServletRequest pRequest) throws JSONException {
+    	
+    	JSONObject jsonResponse = new JSONObject();
+    	
+    	// Parse incoming JSON and get the template name and constraint text
+    	String pConstraintName = null;
+    	String pConstraintText = null;
+    	try {
+    		JSONObject formData = new JSONObject(pConstraintStr);
+    		JSONObject constraintJson = formData.getJSONObject("formData");
+    		pConstraintName = constraintJson.getString("dep-name");
+    		pConstraintText = constraintJson.getString("dep-expr");
+    		jsonResponse.put("dep-name", pConstraintName);
+    		jsonResponse.put("dep-expr", pConstraintText);
+    	} catch(JSONException e) {
+    		sLog.error("Error parsing JSON for addConstraint request");
+    			jsonResponse.put("status", "ERROR");
+    			jsonResponse.put("code", "INVALID_JSON");
+    			jsonResponse.put("error", "JSON parse error: " + e.getMessage());
+    		return Response.status(Status.BAD_REQUEST).entity(
+    				jsonResponse.toString()).build();
+    	}
+    	
+    	// Check that the template exists and that it contains a constraint of
+    	// the specified name. If this is not null, we'll get an error 
+    	// response back which we return
+    	Response r = checkForTemplateAndConstraintErrors(pTemplateId, 
+    			pConstraintName, jsonResponse);
+    	if(r != null) {
+    		return r;
+    	}
+		
+    	// We can now add the data into the database.
+    	ParamConstraint constraint = new ParamConstraint();
+    	constraint.setName(pConstraintName);
+    	constraint.setTemplateId(pTemplateId);
+    	constraint.setExpression(pConstraintText);
+    	int id = constraintDao.add(constraint);
+    	if(id > 0) {
+    		sLog.debug("Constraint record added with ID: " + id);
+    		jsonResponse.put("status", "OK");
+    	}
+    	else {
+    		jsonResponse.put("status", "ERROR");
+    		jsonResponse.put("code", "DB_ERROR");
+    		jsonResponse.put("error", "Error storing constraint.");
+    	}
+    	
+		return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+
+    @DELETE
+    @Path("template/{templateId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json")
+    public Response deleteConstraint(
+            @PathParam("templateId") String pTemplateId,
+            @RequestBody String pRequestBody,
+            @Context HttpServletRequest pRequest) throws JSONException {
+        	
+        	JSONObject jsonResponse = new JSONObject();
+        	
+        	// Parse incoming JSON and get the template name and constraint text
+        	String constraintName = null;
+        	try {
+        		JSONObject data = new JSONObject(pRequestBody);
+        		JSONObject dataJson = data.getJSONObject("constraint");
+        		constraintName = dataJson.getString("name");
+        		jsonResponse.put("name", constraintName);
+        		jsonResponse.put("task", "DELETE");
+        	} catch(JSONException e) {
+        		sLog.error("Error parsing JSON for deleteConstraint request");
+        			jsonResponse.put("status", "ERROR");
+        			jsonResponse.put("code", "INVALID_JSON");
+        			jsonResponse.put("error", "JSON parse error when deleting "
+        					+ "constraint: " + e.getMessage());
+        		return Response.status(Status.BAD_REQUEST).entity(
+        				jsonResponse.toString()).build();
+        	}
+
+        	// Check that the template exists and that it contains a constraint of
+        	// the specified name. If this is not null, we'll get an error 
+        	// response back which we return
+        	Response r = checkForTemplateAndConstraintErrors(pTemplateId, 
+        			constraintName, jsonResponse);
+        	if(r != null) {
+        		return r;
+        	}
+    		
+    		return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    private Response checkForTemplateAndConstraintErrors(String pTemplateId,
+    		String pConstraintName, JSONObject pResponse) 
+    				throws JSONException {
+    	// Check if the specified template exists
+    	if(!templateDao.exists(pTemplateId)) {
+    		pResponse.put("status", "ERROR");
+    		pResponse.put("code", "TEMPLATE_DOES_NOT_EXIST");
+    		pResponse.put("error", "The specified template does not "
+    							+ "exist.");
+    		return Response.status(Status.BAD_REQUEST).entity(
+    				pResponse.toString()).build();
+    	}
+    	
+    	// Check if a constraint with this name already exists for this template
+    	if(constraintDao.findByName(pTemplateId, pConstraintName) != null) {
+    		pResponse.put("status", "ERROR");
+    		pResponse.put("code", "CONSTRAINT_NAME_EXISTS");
+    		pResponse.put("error", "A constraint with the specified name "
+    				+ "already exists for this template.");
+    		sLog.debug("Response text to return to client: " + pResponse.toString());
+			return Response.status(Status.CONFLICT).entity(
+					pResponse.toString()).build();
+		}
+    	
+    	return null;
+    }
+
+    
 }

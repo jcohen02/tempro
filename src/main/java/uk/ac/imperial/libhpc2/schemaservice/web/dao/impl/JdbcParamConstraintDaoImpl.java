@@ -57,13 +57,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import uk.ac.imperial.libhpc2.schemaservice.web.dao.ConstraintDao;
-import uk.ac.imperial.libhpc2.schemaservice.web.db.Constraint;
+import uk.ac.imperial.libhpc2.schemaservice.web.dao.ParamConstraintDao;
+import uk.ac.imperial.libhpc2.schemaservice.web.db.ParamConstraint;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 
-public class JdbcConstraintDaoImpl implements ConstraintDao {
+public class JdbcParamConstraintDaoImpl implements ParamConstraintDao {
 
-	private static final Logger sLog = LoggerFactory.getLogger(JdbcConstraintDaoImpl.class.getName());
+	private static final Logger sLog = LoggerFactory.getLogger(JdbcParamConstraintDaoImpl.class.getName());
 	
 	private JdbcTemplate _jdbcTemplate;
 	private SimpleJdbcInsert _insertConstraint;
@@ -71,38 +71,38 @@ public class JdbcConstraintDaoImpl implements ConstraintDao {
 	public void setDataSource(DataSource dataSource) {
 		sLog.debug("Setting data source <" + dataSource + "> for profile data access object.");
 		_jdbcTemplate = new JdbcTemplate(dataSource);
-		_insertConstraint = new SimpleJdbcInsert(_jdbcTemplate).withTableName("constraint").usingGeneratedKeyColumns("id");
+		_insertConstraint = new SimpleJdbcInsert(_jdbcTemplate).withTableName("param_constraint").usingGeneratedKeyColumns("id");
 	}
 	
 	@Override
-	public int add(Constraint pConstraint) {
+	public int add(ParamConstraint pConstraint) {
 		Map<String,String> rowParams = new HashMap<String, String>(2);
 		rowParams.put("name", pConstraint.getName());
 		rowParams.put("templateId", pConstraint.getTemplateId());
-		rowParams.put("constraint", pConstraint.getConstraint());
+		rowParams.put("expression", pConstraint.getExpression());
 		Number id = _insertConstraint.executeAndReturnKey(rowParams);
 		return id.intValue();
 	}
 	
 	@Override
 	public int delete(String pTemplateId, String pConstraintName) {
-		int rowsAffected = _jdbcTemplate.update("DELETE FROM constraint WHERE templateId = ? AND name = ?", new Object[] {pTemplateId, pConstraintName});
+		int rowsAffected = _jdbcTemplate.update("DELETE FROM param_constraint WHERE templateId = ? AND name = ?", new Object[] {pTemplateId, pConstraintName});
 		return rowsAffected;
 	}
 	
 	@Override
-	public List<Constraint> findAll() {
-		List<Map<String,Object>> constraintList = _jdbcTemplate.queryForList("select * from constraint");
-		List<Constraint> constraints = new ArrayList<Constraint>();
+	public List<ParamConstraint> findAll() {
+		List<Map<String,Object>> constraintList = _jdbcTemplate.queryForList("select * from param_constraint");
+		List<ParamConstraint> constraints = new ArrayList<ParamConstraint>();
 		
 		for(Map<String,Object> data : constraintList) {
-			Constraint c = new Constraint(data);
+			ParamConstraint c = new ParamConstraint(data);
 			constraints.add(c);
 		}
 		
 		sLog.debug("Found <{}> constraints", constraints.size());
-		for(Constraint c : constraints) {
-			sLog.debug("Constraint <{}>: {}", c.getName(), c.getConstraint());
+		for(ParamConstraint c : constraints) {
+			sLog.debug("Constraint <{}>: {}", c.getName(), c.getExpression());
 		}
 		sLog.debug("Found <{}> constraints", constraints.size());
 		
@@ -110,12 +110,12 @@ public class JdbcConstraintDaoImpl implements ConstraintDao {
 	}
 	
 	@Override
-	public Constraint findByName(String pName) {
-		List<Map<String,Object>> constraints = _jdbcTemplate.queryForList("select * from constraint where name = ?", pName);	
-		Constraint constraint = null;
+	public ParamConstraint findByName(String pTemplateId, String pName) {
+		List<Map<String,Object>> constraints = _jdbcTemplate.queryForList("select * from param_constraint where templateId = ? and name = ?", pTemplateId, pName);	
+		ParamConstraint constraint = null;
 		if(constraints.size() > 0) {
 			Map<String,Object> constraintData = constraints.get(0);
-			constraint = new Constraint(constraintData);
+			constraint = new ParamConstraint(constraintData);
 		}
 		if(constraints.size() > 1) {
 			sLog.error("More than 1 constraint was found with specified name " +
@@ -128,15 +128,15 @@ public class JdbcConstraintDaoImpl implements ConstraintDao {
 		}
 		
 		sLog.debug("Found constraint with name <{}> and expression <{}>.",
-				constraint.getName(), constraint.getConstraint());
+				constraint.getName(), constraint.getExpression());
 		
 		return constraint;
 	}
 
 	@Override
-	public List<Constraint> findByTemplateId(String pTemplateId) {
+	public List<ParamConstraint> findByTemplateId(String pTemplateId) {
 		List<Map<String,Object>> constraintList = _jdbcTemplate.queryForList(
-				"select * from constraint where templateId = ?", pTemplateId);	
+				"select * from param_constraint where templateId = ?", pTemplateId);	
 		
 		if(constraintList.size() == 0) {
 			sLog.debug("Constraints for templateId <{}> not found.", pTemplateId);
@@ -146,9 +146,9 @@ public class JdbcConstraintDaoImpl implements ConstraintDao {
 		sLog.debug("Found <{}> constraints for template id <{}>.", 
 				constraintList.size(), pTemplateId);
 		
-		List<Constraint> constraintResult = new ArrayList<Constraint>();
+		List<ParamConstraint> constraintResult = new ArrayList<ParamConstraint>();
 		for(Map<String,Object> dbItem : constraintList) {
-			Constraint c = new Constraint(dbItem);
+			ParamConstraint c = new ParamConstraint(dbItem);
 			constraintResult.add(c);
 		}
 		

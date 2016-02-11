@@ -73,3 +73,14 @@ body {
 	cursor: pointer;
 	cursor: hand; 
 }
+
+#dm-dep-info-panel {
+	max-height: 370px;
+	overflow-x: auto;
+}
+
+.del-constraint {
+	float: right;
+	padding-top: 3px;
+	cursor: pointer;
+}

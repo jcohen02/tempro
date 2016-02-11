@@ -72,5 +72,15 @@ public class TemplateDaoImpl implements TemplateDao, ServletContextAware {
 		JSONObject json = new JSONObject(templateIdNameMap);
 		return json.toString();
 	}
+	
+	@Override
+	public boolean exists(String pTemplateId) {
+		Map<String, TempssObject> components = 
+				(Map<String, TempssObject>)_context.getAttribute("components");
+		if(components.containsKey(pTemplateId)) {
+			return true;
+		}
+		return false;
+	}
 
 }

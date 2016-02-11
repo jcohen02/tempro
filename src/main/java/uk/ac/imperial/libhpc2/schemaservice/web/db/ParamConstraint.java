@@ -47,23 +47,23 @@ package uk.ac.imperial.libhpc2.schemaservice.web.db;
 
 import java.util.Map;
 
-public class Constraint {
+public class ParamConstraint {
 	
 	private int _id;
 	private String _name;
 	private String _templateId;
-	private String _constraint;
+	private String _expression;
 	
-	public Constraint() {};
+	public ParamConstraint() {};
 	
-	public Constraint(Map<String,Object> pData) {
+	public ParamConstraint(Map<String,Object> pData) {
 		Integer id = (Integer)pData.get("id");
 		if(id != null) {
 			this._id = (Integer)pData.get("id");
 		}
 		this._name = (String)pData.get("name");
 		this._templateId = (String)pData.get("templateId");
-		this._constraint = (String)pData.get("constraint");
+		this._expression = (String)pData.get("expression");
 	}
 	
 	public int getId() {
@@ -90,11 +90,11 @@ public class Constraint {
 		this._templateId = pTemplateId;
 	}
 	
-	public String getConstraint() {
-		return _constraint;
+	public String getExpression() {
+		return _expression;
 	}
 	
-	public void setConstraint(String pConstraint) {
-		this._constraint = pConstraint;
+	public void setExpression(String pExpr) {
+		this._expression = pExpr;
 	}
 }

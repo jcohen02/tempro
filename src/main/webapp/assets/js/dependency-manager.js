@@ -231,8 +231,39 @@ function confirmDeleteConstraint(e) {
 	log('Confirm deletion of constraint <' + cname + '> for template <' 
 			+ template +'>');
 	
+	var dataObj = new Object();
+	dataObj['name'] = cname
+	dataObj['template'] = template
+	
+	var rootObj = new Object();
+	rootObj['constraint'] = dataObj;
+	var dataJson = JSON.stringify(rootObj);
 	// Make an ajax request to delete the constraint and if the deletion 
 	// is successful, close the modal.
+	$.ajax({
+        method:   'DELETE',
+        url:      '/tempss-service/api/constraints/template/' + template,
+        contentType: 'application/json',
+        data: dataJson,
+        dataType: 'json',
+        success:  function(data) {
+        	if(data.status == 'OK') {
+        		log('Constraint deleted successfully...');
+        		// Now update the constraint list for the current template
+        		// by triggering a click on the currently selected item
+        		$('#dm-template-list .list-group-item.active').trigger('click');
+        	}
+        },
+        error: function(data) {
+        	log('Error deleting dependency:' + JSON.stringify(data));
+        	if("responseJSON" in data) {
+        		var rj = data.responseJSON;
+        		if(rj.status == 'ERROR') {
+            		$('#delete-constraint-error-text').html(data.error);
+            	}
+        	}
+        }
+    });
 	
 	$('#confirm-delete-constraint-modal').modal('hide');
 	

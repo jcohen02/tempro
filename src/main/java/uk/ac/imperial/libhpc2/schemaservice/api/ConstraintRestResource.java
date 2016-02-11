@@ -300,14 +300,20 @@ public class ConstraintRestResource {
         	}
 
         	// Check that the template exists and that it contains a constraint of
-        	// the specified name. If this is not null, we'll get an error 
-        	// response back which we return
+        	// the specified name. If this is not null, then we know the template
+        	// exists.
+        	// TODO: Refactor check for existence of template and constraint
         	Response r = checkForTemplateAndConstraintErrors(pTemplateId, 
         			constraintName, jsonResponse);
-        	if(r != null) {
-        		return r;
+        	if(r == null) {
+        		// return an error
+        		return Response.status(Status.BAD_REQUEST).entity("").build(); 		
         	}
     		
+        	// Now we delete the constraint
+        	constraintDao.delete(pTemplateId, constraintName);
+        	jsonResponse.put("status", "OK");
+        	
     		return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
     

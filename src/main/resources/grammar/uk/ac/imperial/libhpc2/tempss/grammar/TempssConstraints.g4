@@ -4,7 +4,6 @@
 //   OPTION Bidomain REQUIRES \
 //   Numerical Algorithm -> Time Integration -> TimeIntegrationMethod \
 //   OPTION ['IMEXOrder1','IMEXOrder2','IMEXOrder3']
-
 grammar TempssConstraints;
 
 constraint_expr : 'CONSTRAINT' solver_expr property_constraint_expr;
@@ -14,7 +13,7 @@ NEKTAR_SOLVER :   'CardiacElectrophysiology'
                 | 'IncompressibleNavierStokes'
                 | 'CompressibleFlow';
                 
-property_constraint_expr : property_expr 'REQUIRES' property_expr;
+property_constraint_expr : property_expr 'REQUIRES' relation_expr property_expr;
 
 property_expr : 'PROPERTY' property_name 'OPTION' property_value_expr;
 
@@ -23,10 +22,19 @@ property_name : QUOTED_TEXT ( '->' QUOTED_TEXT)*;
 property_value_expr :   QUOTED_TEXT
                       | '[' QUOTED_TEXT (',' QUOTED_TEXT)* ']';
 
+relation_expr : 'RELATION' RELATION_TEXT;
+
 QUOTED_TEXT :   ('\'' TEXT_WITH_SPACES '\'')
               | ('"' TEXT_WITH_SPACES '"')
               | TEXT;
 
+RELATION_TEXT :   '=='
+                | '!='
+                | '>'
+                | '<'
+                | '>='
+                | '<='
+                | 'range';
 
 TEXT : ('a'..'z'|'A'..'Z'|'0'..'9'|'_')+ ;
 ID : [a-z]+ ;             // match lower-case identifiers

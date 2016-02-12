@@ -110,7 +110,7 @@ function displayTemplate(templateId, templateText) {
             hideTreeExpandCollapseButtons(false);
         	
             setEditingProfileName("");
-            $("#template-tree-loading").hide(0);
+            setTimeout(0, loadConstraints(templateId, treeRoot));
         },
         error: function() {
             $("#template-tree-loading").hide(0);

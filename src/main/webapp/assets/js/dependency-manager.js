@@ -271,3 +271,67 @@ function confirmDeleteConstraint(e) {
 	$('#confirm-delete-constraint-modal').modal('hide');
 	
 }
+
+function loadConstraints(templateId, templateTreeRoot) {
+	$.ajax({
+        method:   'GET',
+        url: '/tempss-service/api/constraints/template/' + templateId + '/parsed',
+        contentType: 'application/json',
+        dataType: 'json',
+        success:  function(data) {
+        	log('Got constraint data: ' + JSON.stringify(data));
+        	// Data should be an array of constraint objects
+        	log('Got details of <' + data.length + '> constraints...');
+        	for(var i = 0; i < data.length; i++) {
+        		var c = data[i];
+        		var src = c.source;
+        		var srcVal = c.sourceValue;
+        		var dest = c.destination;
+        		var srcNode = '';
+        		for(var j = 0; j < src.length; j++) {
+        			if(j == src.length - 1) {
+        				srcNode += src[j]; 
+        			}
+        			else {
+        				srcNode += src[j] + ' -> ';
+        			}
+        		}
+        		var targetNode = '';
+        		for(var j = 0; j < dest.length; j++) {
+        			if(j == dest.length - 1) {
+        				targetNode += dest[j]; 
+        			}
+        			else {
+        				targetNode += dest[j] + ' -> ';
+        			}
+        		}
+        		var srcSelector = '';
+        		for(var j = 0; j < src.length; j++) {
+        			if(j > 0) {
+        				srcSelector += '~ ul ';
+        			}
+        			srcSelector += 'span[data-fqname="' + src[j].replace(/\s+/g, '') + '"] ';
+        		}
+        		log('Selector for source element: ' + srcSelector);
+        		var srcEl = $(templateTreeRoot).find(srcSelector);
+        		srcEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node has a dependency on ' + targetNode + '"></i>');
+        		
+        		var destSelector = '';
+        		for(var j = 0; j < dest.length; j++) {
+        			if(j > 0) {
+        				destSelector += '~ ul ';
+        			}
+        			destSelector += 'span[data-fqname="' + dest[j].replace(/\s+/g, '') + '"] ';
+        		}
+        		log('Selector for destination element: ' + destSelector);
+        		var destEl = $(templateTreeRoot).find(destSelector);
+        		destEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node is dependent on the value of ' + srcNode + '"></i>');
+        	}
+			$("#template-tree-loading").hide(0);
+        },
+        error: function(data) {
+        	log('Error getting constraint information:' + JSON.stringify(data));
+        	$("#template-tree-loading").hide(0);
+        }
+    });
+}

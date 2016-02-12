@@ -61,6 +61,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +78,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ParamConstraintDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.TemplateDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.ParamConstraint;
+import uk.ac.imperial.libhpc2.tempss.constraints.ConstraintException;
+import uk.ac.imperial.libhpc2.tempss.constraints.SyntaxErrorListener;
+import uk.ac.imperial.libhpc2.tempss.constraints.TempssNektarConstraint;
+import uk.ac.imperial.libhpc2.tempss.grammar.TempssConstraintsLexer;
+import uk.ac.imperial.libhpc2.tempss.grammar.TempssConstraintsParser;
 
 /**
  * Jersey REST class representing the constraint endpoint
@@ -179,9 +189,9 @@ public class ConstraintRestResource {
      * @return a response object containing the JSON constraint data.
      */
     @GET
-    @Path("template/{templateId}")
+    @Path("template/{templateId}/raw")
     @Produces("application/json")
-    public Response getConstraintsForTemplateJson(
+    public Response getRawConstraintsForTemplate(
     		@PathParam("templateId") String pTemplateId) {
 
     	List<ParamConstraint> constraints = constraintDao.findByTemplateId(pTemplateId);
@@ -212,6 +222,42 @@ public class ConstraintRestResource {
     	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
     
+    @GET
+    @Path("template/{templateId}/parsed")
+    @Produces("application/json")
+    public Response getParsedConstraintsForTemplate(
+    		@PathParam("templateId") String pTemplateId) {
+
+    	List<ParamConstraint> constraints = constraintDao.findByTemplateId(pTemplateId);
+    	JSONArray constraintArray = new JSONArray();
+    	if(constraints != null) {
+    		for(ParamConstraint c : constraints) {
+    			TempssNektarConstraint tnc = null;
+    			JSONObject item = null;
+				try {
+					tnc = new TempssNektarConstraint(c.getExpression());
+					item = tnc.getJson();
+				} catch (ConstraintException e) {
+					sLog.error("Error parsing stored constraint, ignoring "
+							+ "this constraint: " + e.getMessage());
+				}
+
+				if(item != null) {
+					try {
+						item.put("id", c.getId());
+						item.put("name", c.getName());
+						constraintArray.put(item);
+					} catch (JSONException e) {
+						sLog.error("Error adding constraint to array, ignoring "
+								+ "this constraint: " + e.getMessage());
+					}
+				}
+        	}
+    	}
+    	return Response.ok(constraintArray.toString(), 
+    			MediaType.APPLICATION_JSON).build();
+    }
+    
     @POST
     @Path("template/{templateId}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -224,15 +270,15 @@ public class ConstraintRestResource {
     	JSONObject jsonResponse = new JSONObject();
     	
     	// Parse incoming JSON and get the template name and constraint text
-    	String pConstraintName = null;
-    	String pConstraintText = null;
+    	String constraintName = null;
+    	String constraintText = null;
     	try {
     		JSONObject formData = new JSONObject(pConstraintStr);
     		JSONObject constraintJson = formData.getJSONObject("formData");
-    		pConstraintName = constraintJson.getString("dep-name");
-    		pConstraintText = constraintJson.getString("dep-expr");
-    		jsonResponse.put("dep-name", pConstraintName);
-    		jsonResponse.put("dep-expr", pConstraintText);
+    		constraintName = constraintJson.getString("dep-name");
+    		constraintText = constraintJson.getString("dep-expr");
+    		jsonResponse.put("dep-name", constraintName);
+    		jsonResponse.put("dep-expr", constraintText);
     	} catch(JSONException e) {
     		sLog.error("Error parsing JSON for addConstraint request");
     			jsonResponse.put("status", "ERROR");
@@ -248,7 +294,7 @@ public class ConstraintRestResource {
     		return Response.status(Status.BAD_REQUEST).entity(
     				jsonResponse.toString()).build();
     	}
-    	if(constraintExists(pTemplateId, pConstraintName)) {
+    	if(constraintExists(pTemplateId, constraintName)) {
     		jsonResponse.put("status", "ERROR");
     		jsonResponse.put("code", "CONSTRAINT_NAME_EXISTS");
     		jsonResponse.put("error", "A constraint with the specified name "
@@ -259,11 +305,35 @@ public class ConstraintRestResource {
     				jsonResponse.toString()).build();
     	}
 
+    	// Use the ANTLR parser to check that a valid expression has been 
+    	// provided. If it hasn't return the parser error
+    	ANTLRInputStream input = new ANTLRInputStream(constraintText);
+		TempssConstraintsLexer lexer = new TempssConstraintsLexer(input);
+		TokenStream tokens = new CommonTokenStream(lexer);
+		TempssConstraintsParser parser = new TempssConstraintsParser(tokens);
+		parser.removeErrorListeners();
+		parser.addErrorListener(new SyntaxErrorListener());
+		// Now that the parser is set up, trigger parsing of the expression, 
+		// catch any error and return this to the client. If no exception is 
+		// raised then we can add the constraint to the DB.
+		ParseTree tree = null;
+		try {
+			tree = parser.constraint_expr();
+			sLog.debug("Tree: " + tree);
+		} catch(ParseCancellationException e) {
+			sLog.error("Error parsing the constraint: " + e.getMessage());
+			jsonResponse.put("status", "ERROR");
+			jsonResponse.put("code", "CONSTRAINT_PARSE_ERROR");
+			jsonResponse.put("error", "Your depedency expression has an error: " + e.getMessage());
+		return Response.status(Status.BAD_REQUEST).entity(
+				jsonResponse.toString()).build();
+		}
+    	
     	// We can now add the data into the database.
     	ParamConstraint constraint = new ParamConstraint();
-    	constraint.setName(pConstraintName);
+    	constraint.setName(constraintName);
     	constraint.setTemplateId(pTemplateId);
-    	constraint.setExpression(pConstraintText);
+    	constraint.setExpression(constraintText);
     	int id = constraintDao.add(constraint);
     	if(id > 0) {
     		sLog.debug("Constraint record added with ID: " + id);

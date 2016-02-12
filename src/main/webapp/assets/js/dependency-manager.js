@@ -62,7 +62,7 @@ function templateListItemClicked(e) {
 	$("#dm-loading").show();
 	$.ajax({
         method:   'get',
-        url:      '/tempss-service/api/constraints/template/' + templateId,
+        url: '/tempss-service/api/constraints/template/' + templateId + '/raw',
         dataType: 'json',
         success:  function(data) {
         	var depInfoHtml = '';
@@ -185,6 +185,9 @@ function submitAddDependencyForm(e) {
             	}
         		if(rj.code == "CONSTRAINT_NAME_EXISTS") {
         			$('#dep-name-error').html(rj.error);
+        		}
+        		else if(rj.code == "CONSTRAINT_PARSE_ERROR") {
+        			$('#dep-expr-error').html(rj.error);
         		}
         	}
         	

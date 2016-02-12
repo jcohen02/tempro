@@ -242,15 +242,23 @@ public class ConstraintRestResource {
     				jsonResponse.toString()).build();
     	}
     	
-    	// Check that the template exists and that it contains a constraint of
-    	// the specified name. If this is not null, we'll get an error 
-    	// response back which we return
-    	Response r = checkForTemplateAndConstraintErrors(pTemplateId, 
-    			pConstraintName, jsonResponse);
-    	if(r != null) {
-    		return r;
+    	// Check that the template exists and that it doesn't contain a 
+    	// constraint of the specified name. 
+    	if(!templateExists(pTemplateId, jsonResponse)) {
+    		return Response.status(Status.BAD_REQUEST).entity(
+    				jsonResponse.toString()).build();
     	}
-		
+    	if(constraintExists(pTemplateId, pConstraintName)) {
+    		jsonResponse.put("status", "ERROR");
+    		jsonResponse.put("code", "CONSTRAINT_NAME_EXISTS");
+    		jsonResponse.put("error", "A constraint with the specified name "
+    				+ "already exists for this template.");
+    		sLog.debug("Response text to return to client: " 
+    				+ jsonResponse.toString());
+    		return Response.status(Status.CONFLICT).entity(
+    				jsonResponse.toString()).build();
+    	}
+
     	// We can now add the data into the database.
     	ParamConstraint constraint = new ParamConstraint();
     	constraint.setName(pConstraintName);
@@ -300,14 +308,20 @@ public class ConstraintRestResource {
         	}
 
         	// Check that the template exists and that it contains a constraint of
-        	// the specified name. If this is not null, then we know the template
-        	// exists.
-        	// TODO: Refactor check for existence of template and constraint
-        	Response r = checkForTemplateAndConstraintErrors(pTemplateId, 
-        			constraintName, jsonResponse);
-        	if(r == null) {
-        		// return an error
-        		return Response.status(Status.BAD_REQUEST).entity("").build(); 		
+        	// the specified name. 
+        	if(!templateExists(pTemplateId, jsonResponse)) {
+        		return Response.status(Status.BAD_REQUEST).entity(
+        				jsonResponse.toString()).build();
+        	}
+        	if(!constraintExists(pTemplateId, constraintName)) {
+        		jsonResponse.put("status", "ERROR");
+        		jsonResponse.put("code", "CONSTRAINT_NOT_FOUND");
+        		jsonResponse.put("error", "A constraint with the specified name "
+        				+ "has not been found for this template.");
+        		sLog.debug("Response text to return to client: " 
+        				+ jsonResponse.toString());
+        		return Response.status(Status.NOT_FOUND).entity(
+        				jsonResponse.toString()).build();
         	}
     		
         	// Now we delete the constraint
@@ -317,31 +331,45 @@ public class ConstraintRestResource {
     		return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
     
-    private Response checkForTemplateAndConstraintErrors(String pTemplateId,
-    		String pConstraintName, JSONObject pResponse) 
-    				throws JSONException {
+    /**
+     * Check if the specified template exists. If it doesn't, update the 
+     * provided json object with error details.
+     * 
+     * @param pTemplateId The id of the template to check for
+     * @param pResponse The response object to update
+     * @return Returns true if the template exists, false if not.
+     * @throws JSONException if an error occurred updating the json object.
+     */
+    private boolean templateExists(String pTemplateId,
+    		JSONObject pResponse) throws JSONException {
     	// Check if the specified template exists
     	if(!templateDao.exists(pTemplateId)) {
     		pResponse.put("status", "ERROR");
     		pResponse.put("code", "TEMPLATE_DOES_NOT_EXIST");
     		pResponse.put("error", "The specified template does not "
     							+ "exist.");
-    		return Response.status(Status.BAD_REQUEST).entity(
-    				pResponse.toString()).build();
+    		return false;
     	}
-    	
+    	return true;
+    }
+
+    /**
+     * Check if the specified constraint exists on the specified template. If 
+     * it doesn't, an error response is provided that can be sent directly 
+     * back to the caller.
+     * 
+     * @param pTemplateId The id of the template to check for the constraint
+     * @param pConstraintName The name of the constraint to check for
+     * @return The updated response object if errors occurred, null otherwise
+     * @throws JSONException if an error occurred updating the json object.
+     */
+    private boolean constraintExists(String pTemplateId,  
+    		String pConstraintName) throws JSONException {
     	// Check if a constraint with this name already exists for this template
     	if(constraintDao.findByName(pTemplateId, pConstraintName) != null) {
-    		pResponse.put("status", "ERROR");
-    		pResponse.put("code", "CONSTRAINT_NAME_EXISTS");
-    		pResponse.put("error", "A constraint with the specified name "
-    				+ "already exists for this template.");
-    		sLog.debug("Response text to return to client: " + pResponse.toString());
-			return Response.status(Status.CONFLICT).entity(
-					pResponse.toString()).build();
+    		return true;
 		}
-    	
-    	return null;
+    	return false;
     }
 
     

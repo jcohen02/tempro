@@ -8,12 +8,6 @@
   <name>TemPSS Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
 	<dependency>
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
@@ -103,6 +97,28 @@
   		<artifactId>antlr4</artifactId>
   		<version>4.5.1-1</version>
   	</dependency>
+  	<!--
+	<dependency>
+		<groupId>jpl</groupId>
+		<artifactId>jpl</artifactId>
+		<version>3.1.4-alpha</version>
+	</dependency>
+	-->
+	<!--
+	<dependency>
+		<groupId>org.jpl7</groupId>
+		<artifactId>jpl</artifactId>
+		<version>1.0</version>
+		<scope>system</scope>
+		     <systemPath>/opt/local/lib/swipl-7.2.3/lib/jpl.jar</systemPath>
+		<systemPath>/Users/jhc02/Temp/Prolog/swipl/packages/jpl/jpl.jar</systemPath>
+	</dependency>
+	-->
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.12</version>
+	</dependency>
   </dependencies>
   <build>
     <finalName>tempss-service</finalName>
@@ -127,6 +143,10 @@
           <include>log4j.xml</include>
           <include>application.properties</include>
         </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/prolog</directory>
+        <targetPath>uk/ac/ic/libhpc2/tempss</targetPath>
       </resource>
     </resources>    
     <plugins>

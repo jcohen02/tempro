@@ -235,8 +235,8 @@ function confirmDeleteConstraint(e) {
 			+ template +'>');
 	
 	var dataObj = new Object();
-	dataObj['name'] = cname
-	dataObj['template'] = template
+	dataObj['name'] = cname;
+	dataObj['template'] = template;
 	
 	var rootObj = new Object();
 	rootObj['constraint'] = dataObj;
@@ -285,7 +285,7 @@ function loadConstraints(templateId, templateTreeRoot) {
         	for(var i = 0; i < data.length; i++) {
         		var c = data[i];
         		var src = c.source;
-        		var srcVal = c.sourceValue;
+        		//var srcVal = c.sourceValue;
         		var dest = c.destination;
         		var srcNode = '';
         		for(var j = 0; j < src.length; j++) {
@@ -313,9 +313,58 @@ function loadConstraints(templateId, templateTreeRoot) {
         			srcSelector += 'span[data-fqname="' + src[j].replace(/\s+/g, '') + '"] ';
         		}
         		log('Selector for source element: ' + srcSelector);
+        		// The location for the link icon depdends on the type of node
+        		// we're working with. For option nodes that expand, the icon
+        		// can't be appended to the node block because it will move 
+        		// when the option is selected and expands. For anything with 
+        		// a unit displayed, it needs to go after this, etc.
         		var srcEl = $(templateTreeRoot).find(srcSelector);
-        		srcEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node has a dependency on ' + targetNode + '"></i>');
         		
+        		// Now find out what type of element we're dealing with
+        		var srcUlType = srcEl.parent().children('ul:first-of-type');
+        		var srcInputType = srcEl.parent().children('input:first-of-type');
+        		var srcSelectType = srcEl.parent().children('select:first-of-type');
+        		
+        		if(srcInputType.length > 0) {
+            		// Add constraint checking event and class to input element
+        			var srcInputEl = srcEl.parent().children("input");
+            		srcEl.addClass("constraint");
+            		srcInputEl.on("change", function(e) {
+            			updateConstraints(e, templateId, c.name, srcNode, 
+            					srcInputEl.val(), targetNode, "");
+            		});
+            		// We have an input field so place the link icon at the end
+            		// Add a constraint class to the element.
+        			srcEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node has a dependency on ' + targetNode + '"></i>');
+        		}
+        		else if((srcUlType.length > 0) && (srcSelectType.length > 0)){
+            		// Add constraint checking event and class to select element
+        			var srcSelectEl = srcEl.parent().children("select");
+            		srcEl.addClass("constraint");
+            		srcSelectEl.on("change", function(e) {
+            			updateConstraints(e, templateId, c.name, srcNode, 
+            					srcSelectEl.val(), targetNode, "");
+            		});
+            		
+        			// We have a choice node which expands
+        			srcEl.parent().children('ul:first-of-type').before('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node has a dependency on ' + targetNode + '"></i>');
+        		}
+        		else {
+            		// Add constraint checking event and class to select element
+        			var srcSelectEl = srcEl.parent().children("select");
+            		srcEl.addClass("constraint");
+            		srcSelectEl.on("change", function(e) {
+            			updateConstraints(e, templateId, c.name, srcNode, 
+            					srcSelectEl.val(), targetNode, "");
+            		});
+            		
+        			// We have another node type, most likely a select that
+        			// doesn't expand. For now this uses the same approach as 
+        			// a standard input box.
+        			srcEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node has a dependency on ' + targetNode + '"></i>');
+        		}
+        		
+        		// Now prepare the destination selector
         		var destSelector = '';
         		for(var j = 0; j < dest.length; j++) {
         			if(j > 0) {
@@ -325,13 +374,147 @@ function loadConstraints(templateId, templateTreeRoot) {
         		}
         		log('Selector for destination element: ' + destSelector);
         		var destEl = $(templateTreeRoot).find(destSelector);
-        		destEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node is dependent on the value of ' + srcNode + '"></i>');
+        		
+        		var destUlType = destEl.parent().children('ul:first-of-type');
+        		var destInputType = destEl.parent().children('input:first-of-type');
+        		var destSelectType = destEl.parent().children('select:first-of-type');        		
+        		
+        		if(destInputType.length > 0) {
+            		// Add constraint checking event and class to input element
+        			var destInputEl = destEl.parent().children("input");
+            		destEl.addClass("constraint");
+            		destInputEl.on("change", function(e) {
+            			updateConstraints(e, templateId, c.name, srcNode, "", 
+            					targetNode, destInputEl.val());
+            		});
+        			// We have an input field so place the link icon at the end
+        			destEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node is dependent on the value of ' + srcNode + '"></i>');
+        		}
+        		else if((destUlType.length > 0) && (destSelectType.length > 0)){
+            		// Add constraint checking event and class to select element
+        			var destSelectEl = destEl.parent().children("select");
+            		destEl.addClass("constraint");
+            		destSelectEl.on("change", function(e) {
+            			updateConstraints(e, templateId, c.name, srcNode, "", 
+            					targetNode, destSelectEl.val());
+            		});
+        			// We have a choice node which expands
+        			destEl.parent().children('ul:first-of-type').before('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node is dependent on the value of ' + srcNode + '"></i>');
+        		}
+        		else {
+            		// Add constraint checking event and class to select element
+        			var destSelectEl = destEl.parent().children("select");
+            		destEl.addClass("constraint");
+            		destSelectEl.on("change", function(e) {
+            			updateConstraints(e, templateId, c.name, srcNode, "", 
+            					targetNode, destSelectEl.val());
+            		});
+
+        			
+        			// We have another node type, most likely a select that
+        			// doesn't expand. For now this uses the same approach as 
+        			// a standard input box.
+        			destEl.parent().append('<i class="glyphicon glyphicon-link dep-icon" data-toggle="tooltip" data-placement="right" title="This node is dependent on the value of ' + srcNode + '"></i>');
+        		}
+        		
         	}
 			$("#template-tree-loading").hide(0);
         },
         error: function(data) {
         	log('Error getting constraint information:' + JSON.stringify(data));
         	$("#template-tree-loading").hide(0);
+        }
+    });
+}
+
+function updateConstraints(e, templateId, constraintId, 
+		                   srcNode, srcValue, targetNode, targetValue) {
+	var targetEl = $(e.currentTarget);
+	log("Update constraints called for src node <" + srcNode + 
+			"> and target node <" + targetNode + ">");
+	log("Called with source value <" + srcValue + 
+			"> and target value <" + targetValue + ">");
+	
+	// If the default base value of a select is selected, (i.e. "Select from 
+	// list") or there is nothing in an input field, re-instate all optional
+	// values in that box.
+	// TODO: Can we use this approach to update the target element too?
+	// TODO: How do we handle multi-parameter dependencies using this approach?
+	// Make an AJAX request to get the options for the source and target
+	// nodes.
+	$('#constraints-loading').show();
+	
+	// Prepare data to send to the remote service
+	var dataObj = new Object();
+	dataObj['source'] = srcNode;
+	dataObj['sourceValue'] = srcValue;
+	dataObj['target'] = targetNode;
+	dataObj['targetValue'] = targetValue;
+	var dataJson = JSON.stringify(dataObj);	
+	
+	$.ajax({
+        method:   'POST',
+        url:      '/tempss-service/api/constraints/template/' + templateId +
+        		  '/' + constraintId + '/values',
+        contentType: 'application/json',
+        data: dataJson,
+        dataType: 'json',
+        success:  function(data) {
+        	if(data.status == 'OK') {
+        		log('Constraint data received successfully: ' + JSON.stringify(data));
+        		// Extract the possible target values given the source value
+        		// provided.
+        		// First check that source and target match our curent source
+        		// and target nodes
+        		var src = data.source;
+        		var target = data.target;
+        		var dest = data.targetList;
+        		if((src == srcNode) && (target == targetNode)) {
+        			var dataSourceValue = data.sourceValue;
+        			if(dataSourceValue == srcValue) {
+        				log('A source value applying to a constraint has ' +
+        						'been selected. Applying constraint...');
+        				var dataTargetValues = data.targetValues;
+        				// Build a selector for the target node and select it
+        				var destSelector = '';
+                		for(var j = 0; j < dest.length; j++) {
+                			if(j > 0) {
+                				destSelector += '~ ul ';
+                			}
+                			destSelector += 'span[data-fqname="' + dest[j].replace(/\s+/g, '') + '"] ';
+                		}
+                		log('Selector for destination element: ' + destSelector);
+                		var destEl = $(templateTreeRoot).find(destSelector);
+        				// Now iterate through all the options in the target 
+        				// value list and disbale them if they're not in 
+        				// the dataTargetValues list.
+        				var targetOptions = destEl.children('option');
+        				targetOptions.each(function() {
+        					if($.inArray($(this).value, dataTargetValues) < 0) {
+        						$(this).attr("disabled", "disabled");
+        					}
+        				});
+        			}
+        			else {
+        				log('No constraint to apply. Source value is not ' + 
+        						'applicable for this constraint.');
+        			}
+        		}
+        		else {
+        			log('ERROR: Source or target node doesn\'t match when ' +
+        					'checking constraint values.');
+        		}
+        	}
+        	else if(data.status == 'ERROR') {
+        		log('A ' + data.code + ' error occurred handling the request' +
+        				': ' + data.error);
+        	}
+        	$('#constraints-loading').hide();
+        },
+        error: function(data) {
+        	log('Error getting updated constraint values: ' + JSON.stringify(data));
+        	
+        	$('#constraints-loading').hide();
         }
     });
 }

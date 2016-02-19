@@ -62,7 +62,7 @@
 		</ul>
 		
 		<div class="tab-content">
-    	<div role="tabpanel" class="tab-pane" id="profile-editor">
+    	<div role="tabpanel" class="tab-pane active" id="profile-editor">
 		<!-- <div class="col-md-9" id="template-tree">  -->
 			<div class="row">
 				<div class="col-md-12">
@@ -81,6 +81,12 @@
 					    <span id="tree-expand" class="glyphicon glyphicon-plus-sign
 					              text-info tree-control-btn" 
 					          data-toggle="tooltip" title="Expand all nodes in tree"></span>
+					    <div class="loading" id="constraints-loading" 
+					         style="float:right; clear: both; display:none;
+					                padding-bottom: 10px;">
+					      <img src="../assets/img/loading.gif"/>
+				      	  <span>Updating tree values...</span>
+					    </div>
 					    <h4>Profile editor: <span id="editing-profile-name"></span></h4>
 					    
 					    <div id="template-container">
@@ -101,7 +107,7 @@
 				</div>
 			</div>
 		</div>
-		<div role="tabpanel" class="tab-pane active" id="dependency-manager">
+		<div role="tabpanel" class="tab-pane" id="dependency-manager">
 		<div class="well" style="padding-bottom: 50px;">
 		  <div class="row">
 		    <div class="col-md-12">

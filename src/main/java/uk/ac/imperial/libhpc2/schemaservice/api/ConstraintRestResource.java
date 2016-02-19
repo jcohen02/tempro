@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Imperial College London
+* Copyright (c) 2015, Imperial College London
  * Copyright (c) 2015, The University of Edinburgh
  * All rights reserved.
  *
@@ -348,6 +348,98 @@ public class ConstraintRestResource {
 		return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
 
+    /**
+     * This method is posted updated values when a tree value is changed that
+     * is linked to a constraint. It calculates new values for the other end
+     * of the constraint and returns them.
+     * 
+     * @param pTemplateId The template that the constraint is linked to.
+     * @param pConstraintId The ID of the constraint for the above template.
+     * @param pRequestBody The JSON data sent from the client.
+     * @param pRequest The HTTP request object containing request details.
+     * @return
+     */
+    @POST
+    @Path("template/{templateId}/{constraintId}/values")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces("application/json")
+    public Response constraintValuesUpdated(
+    		@PathParam("templateId") String pTemplateId,
+    		@PathParam("constraintId") String pConstraintId,
+    		@RequestBody String pRequestBody,
+            @Context HttpServletRequest pRequest) throws JSONException {
+    	
+    	JSONObject jsonResponse = new JSONObject();
+    	
+    	String sourceNode = null;
+    	String targetNode = null;
+    	String sourceValue = null;
+    	String targetValue = null;
+    	try {
+			JSONObject data = new JSONObject(pRequestBody);
+			sourceNode = data.getString("source");
+			targetNode = data.getString("target");
+			sourceValue = data.getString("sourceValue");
+			targetValue = data.getString("targetValue");
+		} catch (JSONException e) {
+			sLog.error("Error parsing JSON for constraintValuesUpdated request");
+			jsonResponse.put("status", "ERROR");
+			jsonResponse.put("code", "INVALID_JSON");
+			jsonResponse.put("error", "JSON parse error: " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(
+				jsonResponse.toString()).build();
+		}
+    	
+    	sLog.debug("Handling constraint checking request for template <{}> " +
+    			"and constraint <{}> -- source param <{}> with value <{}> " +
+    			"and target value <{}> with param <{}>", pTemplateId, 
+    			pConstraintId, sourceNode, sourceValue, targetNode, targetValue);
+    	
+    	// Lookup the target constraint and process the rules based on the
+    	// source value provided to get possible target values
+    	ParamConstraint pc = constraintDao.findByName(pTemplateId, pConstraintId);
+    	TempssNektarConstraint c = null;
+    	try {
+			c = new TempssNektarConstraint(pc.getExpression());
+			
+			String[] destVals = c.getDestinationPropertyValues();
+			JSONArray destValsJson = new JSONArray();
+			for(String item : destVals) {
+				destValsJson.put(item);
+			}
+			
+			String[] targetNodeList = c.getDestinationProperty();
+			JSONArray targetNodeListJson = new JSONArray();
+			for(String item : targetNodeList) {
+				targetNodeListJson.put(item);
+			}
+			
+			sLog.debug("Source property value: " + c.getSourcePropertyValue());
+			sLog.debug("Destination property values: " + destValsJson.toString());
+			sLog.debug("Source property: " + c.getSourcePropertyAsString());
+			sLog.debug("Destination property: " + c.getDestinationPropertyAsString());
+			
+			jsonResponse.put("source", c.getSourcePropertyAsString());
+			jsonResponse.put("sourceValue", c.getSourcePropertyValue());
+			jsonResponse.put("target", c.getDestinationPropertyAsString());
+			jsonResponse.put("targetValues", destValsJson);
+			jsonResponse.put("targetList", targetNodeListJson);
+			
+		} catch (ConstraintException e) {
+			sLog.error("Error parsing JSON for constraintValuesUpdated request");
+			jsonResponse.put("status", "ERROR");
+			jsonResponse.put("code", "CONSTRAINT_PARSE_ERROR");
+			jsonResponse.put("error", "Unable to parse constraint: " 
+					+ e.getMessage());
+		}
+
+    	if(!jsonResponse.has("status")) {
+    		jsonResponse.put("status", "OK");
+    	}
+    	
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
     @DELETE
     @Path("template/{templateId}")
     @Consumes(MediaType.APPLICATION_JSON)

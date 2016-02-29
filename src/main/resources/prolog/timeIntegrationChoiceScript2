@@ -1,0 +1,56 @@
+#!/usr/bin/env swipl
+
+:- initialization main.
+
+get_choices(Argv, ArgLength) :-
+        ArgLength > 0,
+        write('Argv: '), write_ln(Argv),
+        
+        handle_args(Argv, [X, Y, Z]),
+        
+        write('X: '), write_ln(X),
+        write('Y: '), write_ln(Y),
+        write('Z: '), write_ln(Z),
+                
+        ( must_be(string, X), atom_string(X, First);
+          must_be(string, Y), atom_string(Y, Second);
+          must_be(string, Z), atom_number(Z, Third)),
+        
+        write('First: '), write_ln(First),
+        write('Second: '), write_ln(Second),
+        write('Third: '), write_ln(Third),
+        
+        findall((First, Second, Third), timeIntegrationChoice(First, Second, Third), Result),
+        write(Result), write('\n').
+
+get_choices(_Argv, ArgLength) :-
+		ArgLength < 1,
+        write_ln('NORESULT').
+
+handle_args(Argv, [ X, Y, Z ]) :-
+		write('Handle args: '), write_ln(Argv),
+		[ Arg | Rest ] = Argv,
+		write('Handling arg: '), write_ln(Arg),
+		split_string(Arg, "=", "", [ Key | ValueList ]),
+		ValueList = [ Value | _Empty ],
+		write('Key: '), write(Key), write('     Value: '), write_ln(Value),
+		write('Handling arg: '), write_ln(Arg),
+		
+		(Key = "Method", write_ln('WE HAVE A METHOD'), X = Value;
+		 Key = "Model", write_ln('WE HAVE A MODEL'), Y = Value;
+		 Key = "Checkpointing", write_ln('WE HAVE CHECKPOINTING'), Z = Value ),
+		
+		handle_args(Rest, [ X, Y, Z ]).
+		
+handle_args([], [ _X, _Y, _Z ]) :-
+		write_ln('Handle args empty list...').
+		
+main :-
+        consult(timeintegration2),
+        current_prolog_flag(argv, Argv),
+        write('Argv before get_choices: '), write_ln(Argv),
+        length(Argv, ArgLength),
+        catch(get_choices(Argv, ArgLength), E, (print_message(error, E), fail)),
+        halt.
+main :-
+        halt(1).

@@ -670,6 +670,43 @@ http://en.wikipedia.org/wiki/Monodomain_model </libhpc:documentation>
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Add custom admin type that adds CellModelCheckpointing -->
+  <xs:complexType name="CardiacAdmin">
+    <xs:sequence>
+      <xs:element name="IO_CheckSteps" type="xs:positiveInteger">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>The solution can be dumped out at regular intervals. This parameter specifies the number of time steps for this interval.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IO_InfoSteps" type="xs:positiveInteger">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify the interval in time steps between each print out of the current solution time.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CellModelCheckpointing">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Carry out checkpoints on the cell model at a fixed interval.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Off"/>
+            <xs:enumeration value="On"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
   <!-- Comment from John: please keep separate into method domain, 
   system domain, processor domain.    -->
   <xs:element name="CardiacElectrophysiology">
@@ -792,7 +829,7 @@ supported, the monodomain model and the bidomain model.</libhpc:documentation>
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="Admin" type ="Admin">
+        <xs:element name="Admin" type ="CardiacAdmin">
           <xs:annotation>
             <xs:appinfo>
               <libhpc:documentation>This section contains parameters that specify administrative details.</libhpc:documentation>
@@ -802,5 +839,8 @@ supported, the monodomain model and the bidomain model.</libhpc:documentation>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  
+  
+  
 </xs:schema>
 

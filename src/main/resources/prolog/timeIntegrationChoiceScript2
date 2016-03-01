@@ -12,16 +12,15 @@ get_choices(Argv, ArgLength) :-
         write('Y: '), write_ln(Y),
         write('Z: '), write_ln(Z),
                 
-        ( must_be(string, X), atom_string(X, First);
-          must_be(string, Y), atom_string(Y, Second);
-          must_be(string, Z), atom_number(Z, Third)),
+        catch(atom_number(Z, ZNum), E, (print_message(silent, E), true)),
         
-        write('First: '), write_ln(First),
-        write('Second: '), write_ln(Second),
-        write('Third: '), write_ln(Third),
         
-        findall((First, Second, Third), timeIntegrationChoice(First, Second, Third), Result),
-        write(Result), write('\n').
+        %write('First: '), write_ln(First),
+        %write('Second: '), write_ln(Second),
+        %write('Third: '), write_ln(Third),
+        
+        findall((X, Y, ZNum), timeIntegrationChoice(X, Y, ZNum), Result),
+        write('{ "RESULT":"'), write(Result), write_ln('"}').
 
 get_choices(_Argv, ArgLength) :-
 		ArgLength < 1,

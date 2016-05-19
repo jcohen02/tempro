@@ -62,7 +62,7 @@ function templateListItemClicked(e) {
 	$("#dm-loading").show();
 	$.ajax({
         method:   'get',
-        url: '/tempss-service/api/constraints/template/' + templateId + '/raw',
+        url: '/tempss/api/constraints/template/' + templateId + '/raw',
         dataType: 'json',
         success:  function(data) {
         	var depInfoHtml = '';
@@ -162,7 +162,7 @@ function submitAddDependencyForm(e) {
 	var templateId = $('#dm-template-list .list-group-item.active').data('template');
 	$.ajax({
         method:   'POST',
-        url:      '/tempss-service/api/constraints/template/' + templateId,
+        url:      '/tempss/api/constraints/template/' + templateId,
         contentType: 'application/json',
         data: formDataJson,
         dataType: 'json',
@@ -245,7 +245,7 @@ function confirmDeleteConstraint(e) {
 	// is successful, close the modal.
 	$.ajax({
         method:   'DELETE',
-        url:      '/tempss-service/api/constraints/template/' + template,
+        url:      '/tempss/api/constraints/template/' + template,
         contentType: 'application/json',
         data: dataJson,
         dataType: 'json',
@@ -275,7 +275,7 @@ function confirmDeleteConstraint(e) {
 function loadConstraints(templateId, templateTreeRoot) {
 	$.ajax({
         method:   'GET',
-        url: '/tempss-service/api/constraints/template/' + templateId + '/parsed',
+        url: '/tempss/api/constraints/template/' + templateId + '/parsed',
         contentType: 'application/json',
         dataType: 'json',
         success:  function(data) {
@@ -454,7 +454,7 @@ function updateConstraints(e, templateId, constraintId,
 	
 	$.ajax({
         method:   'POST',
-        url:      '/tempss-service/api/constraints/template/' + templateId +
+        url:      '/tempss/api/constraints/template/' + templateId +
         		  '/' + constraintId + '/values',
         contentType: 'application/json',
         data: dataJson,

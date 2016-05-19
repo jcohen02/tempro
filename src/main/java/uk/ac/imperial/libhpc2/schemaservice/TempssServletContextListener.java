@@ -153,7 +153,16 @@ public class TempssServletContextListener implements ServletContextListener {
                 String name = props.getProperty(comp+".name");
                 String schema = props.getProperty(comp+".schema");
                 String transform = props.getProperty(comp+".transform");
-                TempssObject obj = new TempssObject(comp, name, schema, transform);
+                
+                
+                // See if we have a property specifying whether to include 
+                // files in transformed output, if so include it, otherwise
+                // leave it and the default is used.
+                String includeFiles = props.getProperty(comp+".includefiles", "true");
+                boolean includeFilesBool = Boolean.parseBoolean(includeFiles);
+                
+                
+                TempssObject obj = new TempssObject(comp, name, schema, transform, includeFilesBool);
                 sLog.info("Found and registered new template object: \n" + obj.toString());
                 componentMap.put(comp, obj);
             }

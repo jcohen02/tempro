@@ -586,7 +586,7 @@ function getProfileXml(treeElement) {
 // Process the job profile data currently in the template tree
 // identified by treeRootNode. Send this data to the TemPSS REST
 // API and return the JSON response to the caller.
-function processJobProfile(treeRootNode, templateId) {
+function processJobProfile(treeRootNode, templateId, includeFiles) {
 	
     var profileXml = "";
     //var rootNode = $("[role='tree']").children("li");
@@ -608,6 +608,10 @@ function processJobProfile(treeRootNode, templateId) {
 
     // Add the xml string
     formData.append('xmlupload', profileXml);
+    
+    // Specify whether we want to replace filenames in the XML content with the
+    // the content of the files themselves
+    formData.append('includeFiles', includeFiles);
 
     // Add a field to tell the server what component this is.
     // The component name has to match the name of the root node in the tree!

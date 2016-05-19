@@ -55,12 +55,22 @@ public class TempssObject {
     private String _name;
     private String _schema;
     private String _transform;
+    private boolean _includeFileDataInTransform = true;
 
     public TempssObject(String id, String name, String schema, String transform) {
         this._id = id;
         this._name = name;
         this._schema = schema;
         this._transform = transform;
+    }
+    
+    public TempssObject(String id, String name, String schema, String transform,
+    		boolean includeFileDataInTransform) {
+        this._id = id;
+        this._name = name;
+        this._schema = schema;
+        this._transform = transform;
+        this._includeFileDataInTransform = includeFileDataInTransform;
     }
     
     public TempssObject(TempssObject pObj) {
@@ -94,14 +104,25 @@ public class TempssObject {
     public void setTransform(String transform) {
         this._transform = transform;
     }
+    
+    public boolean getIncludeFileDataInTransform() {
+        return _includeFileDataInTransform;
+    }
+    public void setIncludeFileDataInTransform(boolean includeFileDataInTransform) {
+        this._includeFileDataInTransform = includeFileDataInTransform;
+    }
+    
 
     @Override
     public String toString() {
+    	String includeFileStr = new Boolean(getIncludeFileDataInTransform()).toString();
+    	
         StringBuilder s = new StringBuilder();
         s.append("TemPSS Template: " + getId());
         s.append("\n\tName: " + getName());
         s.append("\n\tSchema: " + getSchema());
         s.append("\n\tTransform: " + getTransform());
+        s.append("\n\tIncludeFileDataInTransform: " + includeFileStr);
         return s.toString();
     }
 }

@@ -167,6 +167,8 @@ public class ProfileRestResource {
         // Get the profile file data and list of all additional files provided as input
         List<FormDataBodyPart> profileField = multipartData.getFields("xmlupload");
         List<FormDataBodyPart> fileFields = multipartData.getFields("xmlupload_file");
+        FormDataBodyPart includeFilesData = multipartData.getField("includeFiles");
+        boolean includeFiles = includeFilesData.getValueAs(Boolean.class).booleanValue();
 		
         sLog.info("<" + profileField.size() + "> profile elements have been uploaded " +
                   "to the profile converter, only the first will be used (additional files " +
@@ -199,11 +201,13 @@ public class ProfileRestResource {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("{\"status\":\"ERROR\",\"message\":\"Error converting profile stream to string for processing.\"}").build();
         }
         String completeXml = profileXml;
+        
         // If the base XML contains filename placeholders for other
         // files that have been uploaded, then we need to get these files
         // from the multipart request and put their content into the baseXml
-        // in place of the filename to create the completeXml.
-        if((fileFields != null) && (fileFields.size() > 0)) {
+        // in place of the filename to create the completeXml (if includeFiles
+        // is set to true).
+        if((fileFields != null) && (fileFields.size() > 0) && includeFiles) {
             for(int i = 0; i < fileFields.size(); i++) {
                 try {
                     FormDataBodyPart fileData = fileFields.get(i);

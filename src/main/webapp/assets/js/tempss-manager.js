@@ -445,7 +445,12 @@ function clearProfileContentInTemplate() {
 function tempssProcessProfile() {
 	var treeRootNode = $("ul[role='tree']").children("li");
 	var templateId = $('input[name=componentname]').val();
-	processJobProfile(treeRootNode, templateId);
+	var includeFiles = $('input[name=includefiles]').val();
+	var includeFilesBool = true;
+	if(includeFiles.toUpperCase() == 'FALSE') {
+		includeFilesBool = false;
+	}
+	processJobProfile(treeRootNode, templateId, includeFilesBool);
 }
 
 // Function to attach click handlers to all the clickable nodes

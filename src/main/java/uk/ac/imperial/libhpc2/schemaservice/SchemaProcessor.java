@@ -115,6 +115,7 @@ public class SchemaProcessor {
         String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
         String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();
+        Boolean includeFiles = new Boolean(pComponentMetadata.getIncludeFileDataInTransform());
 
         // Construct full path to file
         String schemaPathAndName = schemaPath + schemaName;
@@ -248,6 +249,11 @@ public class SchemaProcessor {
         // add a hidden field with the component name.  Therefore do this now:
         String htmlToReturn = outputHTML + "<input type=\"hidden\" name=\"componentname\" value = \"" + pComponentMetadata.getId() + "\"\\>";
 
+        // An additional hidden field is added to allow us to determine whether
+        // the content of files set in a tree should be included in the 
+        // transformed output or whether just the filenames should be included.
+        htmlToReturn += "<input type=\"hidden\" name=\"includefiles\" value = \"" + includeFiles.toString() + "\"\\>";
+        
         return htmlToReturn;
     }
 

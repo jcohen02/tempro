@@ -109,6 +109,82 @@ function extractEntriesFromFile(event, path) {
 
 }
 
+/*
+    Jun 2016: This code has been updated from the origin extractEntriesFromFile
+    implementation to address various issues with handling boundary condition 
+    data that were causing issues previously. For now, this is a version of the
+    function to be tested with the compressibleflow solver only.
+    
+    The base "BoundaryCondition" node that appeared as a sibling to Geometry
+    in the tree has been removed and instead, when we read this file, we simply 
+    check that it has GEOMETRY, BOUDNARYREGIONS and BOUNDARYCONDITIONS elements.
+    If it doesn't we reject the file and the Geometry node is set to invalid.
+    
+    When the profile tree is processed, it will not contain any 
+    BoundaryCondition elements and we instead simply copy the boundary 
+    condition and boundary region blocks from the geometry file. 
+
+    // OLD COMMENT
+    // Rather than call a third party XPath xml parser, I am converting the 
+    // XPath into the form understood by jquery. This is not ideal, and we may 
+    // replace it later.
+*/
+function extractEntriesFromFileCompressible(event, path) {
+
+  // Need to use the javascript file reader to read in the xml. This allows us to set an onload handler
+  // so we only try to read the xml once it's actually loaded.
+  var selectedFile = event.target.files[0];
+  var reader = new FileReader();
+  reader.onload = function (event) {
+      var fileXml = event.target.result;
+
+      var xmlDoc = $.parseXML(fileXml);
+      var $xml = $(xmlDoc); // The $ of $xml just reminds us it is a jquery object
+
+      log('Path is: ' + path);
+      
+      // Instead of the previous configuration which went through the file 
+      // content and pulled out boundary condition details, here we simply 
+      // check that there are GEOMETRY, BOUNDARYCONDITIONS and BOUNDARYREGIONS 
+      // sections within the file.
+      var pathsToCheck = ['GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION',
+                          'GeometryAndBoundaryConditions/BOUNDARYREGIONS',
+                          'GeometryAndBoundaryConditions/GEOMETRY/COMPOSITE'];
+      
+      var parseError = false;
+      for(var i = 0; i < pathsToCheck.length; i++) {
+    	  var baseXPath = pathsToCheck[i];
+    	  baseXPath = baseXPath.replace(" ", "");
+          // replace [@attribute='X'] with [attribute='X']
+          baseXPath = baseXPath.replace("[@", "[");
+          var jqueryStyleBaseXPath = baseXPath.split("/").join(" > ");
+          
+          var numElements = $xml.find(jqueryStyleBaseXPath).length;
+          log('Found <' + numElements + '> elements for path <' + baseXPath + '>.');
+          
+          if(numElements < 1) {
+        	  log('Error: A required section in the geometry file is not present');
+        	  parseError = true;
+          }
+      }
+      
+      var inputNode = $('input[path="' + path + '"]');
+      var node = inputNode.closest("ul"); 
+      if(parseError) {
+    	  inputNode.attr('fileparsed','false');
+          validateEntries(inputNode, 'xs:file', '{"xs:filetype": ["XML"]}');
+      }
+      else {
+    	  inputNode.attr('fileparsed','true');
+    	  validateEntries(inputNode, 'xs:file', '{"xs:filetype": ["XML"]}');
+      }
+      
+      
+  };
+  reader.readAsText(selectedFile);
+
+}
+
 // Some leaves on the tree may have no inputs.
 // This is when the leaf itself is shows the result of a choice.
 // These leaves should be set to valid at the outset.
@@ -215,7 +291,14 @@ function validateEntries(caller, validationtype, restrictions_json) {
                 break;
             case "xs:file":
                 // Any string filename will do for now, but extension will be checked below.
-                if (caller.val().length > 0) {
+            	// If the loaded file did not parse successfully, then we'll
+            	// have a fileParsed parameter on the input node that has value false.
+            	if((caller.attr('fileparsed') != undefined) && (caller.attr('fileparsed') == 'false')) {
+            		caller.closest("ul").removeClass('valid');
+            		caller.closest("ul").attr('class', 'invalid').trigger('nodeInvalid',caller.closest("ul"));
+            	}
+            	else {
+                	caller.closest("ul").removeClass('invalid');
                     caller.closest("ul").attr('class', 'valid').trigger('nodeValid',caller.closest("ul"));
                 }
                 break;

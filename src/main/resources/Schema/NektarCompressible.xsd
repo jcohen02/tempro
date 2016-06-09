@@ -295,11 +295,21 @@ WallViscous: Wall (Navier-Stokes)
       <xs:element name="Geometry" type="fileName">
         <xs:annotation>
           <xs:appinfo>
-            <libhpc:documentation>The geometry on which the problem is being solved.</libhpc:documentation>
+            <libhpc:documentation>A geometry file containing the geometry and boundary conditions on which the problem is being solved.
+
+This file should have a &lt;GeometryAndBoundaryConditions&gt; root element containing three blocks with the geomtry and boundary condition data.
+
+The three child elements that must be present are &lt;GEOMETRY&gt;, &lt;BOUNDARYCONDITIONS&gt; and &lt;BOUNDARYREGIONS&gt;
+
+The file will be parsed to check for these elements. The GEOMETRY must contain a Nektar++ XML mesh representation and COMPOSITES and the BOUNDARYCONDITIONS must contain REGION elements.
+
+A red x denotes that the file was not successfully parsed and the tree will not be become valid until a valid geometry file is loaded. 
+            </libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <!--
       <xs:element name="BoundaryCondition" type="boundary" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
@@ -315,6 +325,7 @@ These parameters auto-populate from the geometry file, and may be over-ridden fo
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+       -->
     </xs:sequence>
   </xs:complexType>
 

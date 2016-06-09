@@ -19,6 +19,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <!--xsl:template match="xs:element[@type]" mode="findChildNodes"-->
   <xsl:template match="xs:element" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="rootNode" />
     <xsl:param name="node" select="@name"/>
     <xsl:param name="type" select="@type"/>
     <xsl:param name="this_path" select="concat($path,concat('.',$node))"/>
@@ -92,13 +93,16 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:if test="@type">
           <xsl:apply-templates select="/xs:schema/xs:complexType[@name=$type]" mode="findChildNodes">
             <xsl:with-param name="path" select="$this_path"/>
+            <xsl:with-param name="rootNode" select="$rootNode"/>
           </xsl:apply-templates>
           <xsl:apply-templates select="/xs:schema/xs:simpleType[@name=$type]" mode="findChildNodes">
             <xsl:with-param name="path" select="$this_path"/>
+            <xsl:with-param name="rootNode" select="$rootNode"/>
           </xsl:apply-templates>
         </xsl:if>
         <xsl:apply-templates mode="findChildNodes">
           <xsl:with-param name="path" select="$this_path"/>
+          <xsl:with-param name="rootNode" select="$rootNode"/>
         </xsl:apply-templates>
         <xsl:text> </xsl:text><xsl:value-of select="$units" disable-output-escaping="yes"/>
       </li>
@@ -107,12 +111,22 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="xs:extension[@base='xs:string']/xs:attribute[@name='fileType']" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="rootNode" />
     <span>
+      <!-- If we're dealing with the CompressibleFlow solver then we use 
+           a different function for processing the file entries. -->
       <input type="file">
         <xsl:attribute name="onchange">
           <xsl:text>validateEntries($(this), 'xs:file', '{"xs:filetype": ["</xsl:text>
           <xsl:value-of select="@fixed"/>
-          <xsl:text>"]}');extractEntriesFromFile(event, '</xsl:text>
+          <xsl:choose>
+            <xsl:when test="$rootNode = 'CompressibleFlowSolver'">
+              <xsl:text>"]}');extractEntriesFromFileCompressible(event, '</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>"]}');extractEntriesFromFile(event, '</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
           <xsl:value-of select="$path"/>
           <xsl:text>')</xsl:text>
         </xsl:attribute>
@@ -245,6 +259,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="xs:choice" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="rootNode" />
     <select class="choice" onchange="selectChoiceItem(event);">
       <xsl:attribute name="choice-path">
         <xsl:value-of select="$path" />
@@ -265,21 +280,26 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </ul>
     <xsl:apply-templates mode="findChildNodes">
       <xsl:with-param name="path" select="$path"/>
+      <xsl:with-param name="rootNode" select="$rootNode"/>
     </xsl:apply-templates>
   </xsl:template>
 
   <xsl:template match="xs:complexType" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="rootNode" />
     <xsl:apply-templates mode="findChildNodes">
       <xsl:with-param name="path" select="$path"/>
+      <xsl:with-param name="rootNode" select="$rootNode"/>
     </xsl:apply-templates>
   </xsl:template>
 
 
   <xsl:template match="xs:sequence" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="rootNode" />
     <xsl:apply-templates mode="findChildNodes">
       <xsl:with-param name="path" select="$path"/>
+      <xsl:with-param name="rootNode" select="$rootNode"/>
     </xsl:apply-templates>
   </xsl:template>
 
@@ -359,6 +379,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 </span>
                 <xsl:apply-templates mode="findChildNodes">
                   <xsl:with-param name="path" select="$node"/>
+                  <xsl:with-param name="rootNode" select="$node"/>
                 </xsl:apply-templates>
               </li>
             </ul>

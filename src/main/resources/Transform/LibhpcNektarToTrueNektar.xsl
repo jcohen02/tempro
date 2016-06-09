@@ -435,6 +435,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </REGION>
   </xsl:template>
 
+  <!-- The setup for the compressible flow solver has been modified to test a  
+       new approach. We now look only at the geometry file and don't allow 
+       customisation of the boundary conditions in the TemPSS tree. We 
+       therefore need only to copy the relevant sections out of the boundary
+       conditions file which is done directly in the CompressibleFlowSolver
+       block. This template is therefore currently redundant. 
+  -->
   <xsl:template match="REGION" mode ="GetCompressibleBoundaryConditions">
     <xsl:variable name="comment" select="@COMMENT" />
     <REGION>
@@ -529,9 +536,15 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                   </I>
               </SOLVERINFO>
               <xsl:copy-of select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/BOUNDARYREGIONS"/>
+              <!-- The rebuilding of the boundary conditions has been replaced 
+                   with a direct copy from the provided geometry file. -->
+              <!--
               <BOUNDARYCONDITIONS>
                   <xsl:apply-templates select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/BOUNDARYCONDITIONS/REGION" mode ="GetCompressibleBoundaryConditions"/>
               </BOUNDARYCONDITIONS>
+              -->
+              <xsl:copy-of select="ProblemSpecification/GeometryAndBoundaryConditions/Geometry/GeometryAndBoundaryConditions/BOUNDARYCONDITIONS"/>
+              
               <FUNCTION NAME="InitialConditions">
                   <E VAR="rho"    VALUE="rhoInf"/>
                   <E VAR="rhou"   VALUE="rhoInf * uInf"   />

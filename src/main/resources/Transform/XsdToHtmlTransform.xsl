@@ -57,7 +57,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:value-of select="$badge_type"/>
           </xsl:attribute>
           <xsl:attribute name="data-fqname">
-            <xsl:value-of select="$node"/>
+            <xsl:value-of select="$this_path"/>
           </xsl:attribute>
           <xsl:attribute name="title">
             <xsl:value-of select="$documentation"/>

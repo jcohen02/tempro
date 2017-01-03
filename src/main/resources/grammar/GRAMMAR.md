@@ -33,3 +33,20 @@ For example, consider the `CellModelType` parameter shown in the image below:
 The property name for this parameter would be written `Physics -> CellModel -> CellModelType`.
 
 An `<option_value>` can be either a single string value, e.g. `FitzhughNagumo` or a list of string values wrapped in square brackets, e.g. `['CourtemancheRamirezNattel98', 'FitzhughNagumo', 'TenTusscher']`
+
+####Example
+
+As an example, consider the following constraint specification:
+
+_"For a solver, CardiacElectrophysiology, there is a Model property that is part of the Physics sub-tree. When Model is set to Bidomain, the Numerical Algorithm -> TimeIntegration -> TimeIntegrationMethod property must be set to one of the following three values: IMEXOrder1, IMEXOrder2, IMEXOrder3._
+
+In the TemPSS constraints DSL, this would be written as follows:
+
+```
+CONSTRAINT 
+			SOLVER CardiacElectrophysiology 
+			PROPERTY Physics -> Model OPTION Bidomain 
+					REQUIRES PROPERTY Numerical Algorithm -> Time Integration -> TimeIntegrationMethod
+						OPTION ['IMEXOrder1','IMEXOrder2','IMEXOrder3']
+```
+

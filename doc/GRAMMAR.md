@@ -1,0 +1,52 @@
+#TemPSS Dependency Grammar
+
+The `TempssConstraints.g4` file in this directory is a simple ANTLR v4 grammar for parsing TemPSS constraint statements for Nektar++ solver parameter constraints.
+
+These statements allow us to define dependencies across nodes in a TemPSS template tree for a Nektar++ solver.
+
+##Constraint Grammar Structure
+
+Constraint specifications begin with the `CONSTRAINT` keyword. This is followed by a `SOLVER` keyword defining the solver that the constraint relates to. The constraint itself then follows as a pair of `PROPERTY` expressions.
+
+The structure is as follows:
+
+```
+CONSTRAINT solver_expression 
+           property_expression 
+           REQUIRES 
+           property_expression
+
+solver_expression :- SOLVER <solver_name>
+
+property_expression :- PROPERTY <property_name>
+                       OPTION <option_value>
+```
+
+`<solver_name>` can be one of `IncNavierStokes`, `CardiacElectrophysiology` or `CompressibleFlow`.
+
+`<property_name>` is the name of the target property in the template written as a path from the first-level node with each node separated by `->`.
+
+For example, consider the `CellModelType` parameter shown in the image below:
+
+![Example profile tree](ProfileProperties.png)
+
+The property name for this parameter would be written `Physics -> CellModel -> CellModelType`.
+
+An `<option_value>` can be either a single string value, e.g. `FitzhughNagumo` or a list of string values wrapped in square brackets, e.g. `['CourtemancheRamirezNattel98', 'FitzhughNagumo', 'TenTusscher']`
+
+####Example
+
+As an example, consider the following constraint specification:
+
+_"For a solver, CardiacElectrophysiology, there is a Model property that is part of the Physics sub-tree. When Model is set to Bidomain, the Numerical Algorithm -> TimeIntegration -> TimeIntegrationMethod property must be set to one of the following three values: IMEXOrder1, IMEXOrder2, IMEXOrder3._
+
+In the TemPSS constraints DSL, this would be written as follows:
+
+```
+CONSTRAINT 
+			SOLVER CardiacElectrophysiology 
+			PROPERTY Physics -> Model OPTION Bidomain 
+					REQUIRES PROPERTY Numerical Algorithm -> Time Integration -> TimeIntegrationMethod
+						OPTION ['IMEXOrder1','IMEXOrder2','IMEXOrder3']
+```
+

@@ -15,6 +15,7 @@ PA: surely not necessary for an xsd? Lets delete this line.
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            targetNamespace="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
            elementFormDefault="qualified">
 
   
@@ -34,4 +35,22 @@ PA: surely not necessary for an xsd? Lets delete this line.
   </xs:element>
   <!-- Allows to provide an xpath using the refersToFile dataXPath as root to the data we need to map from our file-->
   <xs:element name="locationInFile" type="xs:string"/>
+  <!-- Defines a value list containing a list of value elements -->
+  <xs:complexType name="values">
+      <xs:sequence>
+        <xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+  </xs:complexType>
+  <!-- Specifies dependency information between one value and another. -->
+  <xs:element name="constraint">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="targetParam" type="xs:string" minOccurs="1"/>
+        <xs:choice>
+          <xs:element name="valuesAllowed" type="libhpc:values"/>
+          <xs:element name="valuesExcluded" type="libhpc:values"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

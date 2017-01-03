@@ -250,6 +250,21 @@ This is not supported correctly by libhpc at present.</libhpc:documentation>
   </xs:complexType>
 
   <xs:complexType name="Model">
+    <xs:annotation>
+      <xs:appinfo>
+      <!-- 
+        <libhpc:constraint>
+          <libhpc:localChoiceValue>Bidomain</libhpc:localChoiceValue>
+          <libhpc:targetParam>/NumericalAlgorithm/TimeIntegration/TimeIntegrationMethod</libhpc:targetParam>
+          <libhpc:valuesAllowed>
+            <libhpc:value>IMEXOrder1</libhpc:value>
+            <libhpc:value>IMEXOrder2</libhpc:value>
+            <libhpc:value>IMEXOrder3</libhpc:value>
+          </libhpc:valuesAllowed>
+        </libhpc:constraint>
+         -->
+      </xs:appinfo>
+    </xs:annotation>
     <xs:choice>
       <xs:element name="Monodomain" type="Monodomain">
         <xs:annotation>

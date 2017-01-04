@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0"
-xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+           xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
            xmlns:xalan="http://xml.apache.org/xslt"
            xmlns:saxon="http://saxon.sf.net/"
+           xmlns:str="xalan://java.lang.String"
            exclude-result-prefixes="xs"
 >
 
@@ -91,11 +92,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       <xsl:element name="li">
         <xsl:attribute name="class">parent_li</xsl:attribute>
         <xsl:attribute name="role">treeitem</xsl:attribute>
+        <!-- 
         <xsl:if test="xs:annotation/xs:appinfo/libhpc:documentation">
           <xsl:attribute name="data-documentation">
             <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
           </xsl:attribute>
         </xsl:if>
+         -->
         <xsl:attribute name="data-fqname">
           <xsl:value-of select="$nodeName"/>
         </xsl:attribute>
@@ -188,6 +191,15 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:with-param name="path" select="$this_path"/>
         </xsl:apply-templates>
         <xsl:text> </xsl:text>
+        <xsl:variable name="constraint">
+          <xsl:if test="xs:annotation/xs:appinfo/libhpc:constraint">
+            <xsl:variable name="context">xs:annotation/xs:appinfo/libhpc:constraint</xsl:variable>
+            <xsl:call-template name="processConstraint">
+              <xsl:with-param name="path" select="$this_path"/>
+              <xsl:with-param name="context" select="$context"/>
+            </xsl:call-template> 
+          </xsl:if>
+        </xsl:variable>
         <xsl:value-of select="$units" disable-output-escaping="yes"/>
         <xsl:if test="$editable_units">
           <xsl:element name="input">
@@ -306,6 +318,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </option>
       </xsl:for-each>
     </select>
+    
   </xsl:template>
 
 
@@ -398,11 +411,102 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   </xsl:template>
 
   <xsl:template match="libhpc:documentation" mode="findChildNodes"/>
+  <xsl:template match="libhpc:constraint" mode="findChildNodes"/>
   <xsl:template match="libhpc:alias" mode="findChildNodes"/>
   <xsl:template match="libhpc:units" mode="findChildNodes"/>
   <xsl:template match="libhpc:editableUnits" mode="findChildNodes"/>
   <xsl:template match="libhpc:locationInFile" mode="findChildNodes"/>
   <xsl:template match="libhpc:refersToFile" mode="findChildNodes"/>
+
+  <xsl:template name="processConstraint" match="libhpc:constraint" mode="handleConstraint">
+    <xsl:param name="path" />
+    <xsl:param name="context" />
+    <xsl:variable name="null"/>
+    <xsl:variable name="sourceValues">
+      <xsl:text>"source":[</xsl:text>
+      <xsl:for-each select="libhpc:sourceValue/libhpc:value">        
+        <xsl:choose>
+          <xsl:when test="position() = 1">
+            <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>,"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each>
+      <xsl:text>]</xsl:text>
+    </xsl:variable>
+
+    <xsl:variable name="targetRaw">
+      <xsl:value-of select="libhpc:targetParam"/>
+    </xsl:variable>
+
+    <xsl:variable name="target">
+      <xsl:text>"target":"</xsl:text><xsl:value-of select="libhpc:targetParam"/><xsl:text>"</xsl:text>
+    </xsl:variable>
+
+    <xsl:variable name="allowed">
+      <xsl:if test="libhpc:valuesAllowed">
+        <xsl:text>"allowed":[</xsl:text>
+        <xsl:for-each select="libhpc:valuesAllowed/libhpc:value">        
+          <xsl:choose>
+            <xsl:when test="position() = 1">
+              <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>,"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each>
+        <xsl:text>]</xsl:text>
+      </xsl:if>
+    </xsl:variable>
+    
+    <xsl:variable name="disallowed">
+      <xsl:if test="libhpc:valuesDisallowed">
+        <xsl:text>"disallowed":[</xsl:text>
+        <xsl:for-each select="libhpc:valuesDisallowed/libhpc:value">        
+          <xsl:choose>
+            <xsl:when test="position() = 1">
+              <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>,"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each>
+        <xsl:text>]</xsl:text>
+      </xsl:if>
+    </xsl:variable>
+    
+    <xsl:element name="i">
+      <xsl:attribute name="class">glyphicon glyphicon-link constraint-icon</xsl:attribute>
+      <xsl:attribute name="rel">tooltip</xsl:attribute>
+      <xsl:attribute name="data-constraint">true</xsl:attribute>
+      <xsl:attribute name="data-toggle">tooltip</xsl:attribute>
+      <xsl:attribute name="data-placement">right</xsl:attribute>
+      <xsl:attribute name="title">
+        <xsl:text>There is a constraint between this parameter and </xsl:text>
+        <xsl:value-of select="str:replaceAll(str:new($targetRaw),'\.',' -> ')"/>
+      </xsl:attribute>
+      
+      <!-- Prepare JSON containing constraint info to pass to client -->
+      <xsl:attribute name="data-constraint-info">
+        <xsl:text>{</xsl:text>
+        
+        <xsl:value-of select="$sourceValues"></xsl:value-of><xsl:text>, </xsl:text>
+        <xsl:value-of select="$target"></xsl:value-of>
+        <xsl:if test="$allowed != $null">
+          <xsl:text>, </xsl:text><xsl:value-of select="$allowed"/>
+        </xsl:if>
+        <xsl:if test="$disallowed != $null">
+          <xsl:text>, </xsl:text><xsl:value-of select="$disallowed"/>
+        </xsl:if>
+        <xsl:text>}</xsl:text>
+      </xsl:attribute>
+      <xsl:attribute name="style">padding-left: 10px;</xsl:attribute>
+    </xsl:element> <!-- </i> -->
+  </xsl:template>
 
   <xsl:template match="*">
     <xsl:message terminate="no">
@@ -441,4 +545,5 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           </div>
         </div>
   </xsl:template>
+
 </xsl:stylesheet>

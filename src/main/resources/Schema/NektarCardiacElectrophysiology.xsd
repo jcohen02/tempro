@@ -700,8 +700,9 @@ supported, the monodomain model and the bidomain model.</libhpc:documentation>
 			        <libhpc:constraint>
 			          <libhpc:sourceValue>
 			            <libhpc:value>Bidomain</libhpc:value>
+			            <libhpc:value>Monodomain</libhpc:value>
 			          </libhpc:sourceValue>
-			          <libhpc:targetParam>/NumericalAlgorithm/TimeIntegration/TimeIntegrationMethod</libhpc:targetParam>
+			          <libhpc:targetParam>CardiacElectrophysiology.NumericalAlgorithm.TimeIntegration.TimeIntegrationMethod</libhpc:targetParam>
 			          <libhpc:valuesAllowed>
 			            <libhpc:value>IMEXOrder1</libhpc:value>
 			            <libhpc:value>IMEXOrder2</libhpc:value>

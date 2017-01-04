@@ -489,8 +489,11 @@
 		hideTreeExpandCollapseButtons(true);
 		
 		// Enable tooltips (for save button)
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip()
+        
+        // Enable dynamically added tooltips for constraint links
+        $('#template-container').tooltip({
+        	selector: ".constraint-icon"
         });
 		
         $('#load-profile-btn-modal').on('click', function(e) {

@@ -968,18 +968,31 @@ function constraintLinkClicked(e) {
 	// finding each node from the root down and checking if they're visible. 
 	// If not, we make the node visible. Finally we flash the target element.
 	var linkedNodePathElements = linkedNodePath.split('.');
-	var $node = null;
+	var $linkedNode = null;
 	for(var i=0; i < linkedNodePathElements.length; i++) {
 		if(i == 0) {
-			$node = $('#template-container span[data-fqname="' 
+			$linkedNode = $('#template-container span[data-fqname="' 
 					+ linkedNodePathElements[i] + '"]').closest('li.parent_li');
 		}
 		else {
-			$node = $node.find('li.parent_li[data-fqname="' 
+			$linkedNode = $linkedNode.find('li.parent_li[data-fqname="' 
 							+ linkedNodePathElements[i] + '"]');
 		}
-		// TODO: CHECK IF THE NODE IS VISIBLE...
+		if(!$linkedNode.is(':visible')) {
+			$linkedNode.show(200);
+		}
 	}
+	
+	var $icon1 = $linkedNode.children('i.constraint-icon');
+	var $icon2 = $node;
+	
+	$icon1.addClass('glow-node');
+	$icon2.addClass('glow-node');
+	
+	setTimeout(function() {
+		$icon1.removeClass('glow-node');
+		$icon2.removeClass('glow-node');
+	}, 3000);
 }
 
 // Utility function for displaying log messages

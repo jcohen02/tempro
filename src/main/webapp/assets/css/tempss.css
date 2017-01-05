@@ -119,6 +119,17 @@ body {
 	cursor: pointer;
 }
 
+/* Styling for constraint related content */
+
 .constraint-icon {
 	cursor: pointer;
+}
+
+.glow-node {
+    animation: 0.5s ease 0s alternate none infinite running glow;
+}
+
+@keyframes glow {
+100% {
+    text-shadow: 0 0 8px blue;
 }

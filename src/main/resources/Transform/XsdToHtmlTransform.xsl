@@ -6,6 +6,8 @@
            xmlns:xalan="http://xml.apache.org/xslt"
            xmlns:saxon="http://saxon.sf.net/"
            xmlns:str="xalan://java.lang.String"
+           xmlns:dyn="http://exslt.org/dynamic"
+           extension-element-prefixes="dyn"
            exclude-result-prefixes="xs"
 >
 
@@ -179,27 +181,36 @@
             </xsl:if>
           </input>
         </xsl:if>
+        <xsl:variable name="context">xs:annotation/xs:appinfo/libhpc:constraint</xsl:variable>
+        <xsl:variable name="constraintData">
+          <xsl:choose>
+            <xsl:when test="xs:annotation/xs:appinfo/libhpc:constraint">
+              <xsl:message>CONSTRAINT FOUND</xsl:message>
+              <xsl:call-template name="processConstraint">
+                <xsl:with-param name="path" select="$this_path"/>
+                <xsl:with-param name="context" select="$context"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>-</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
         <xsl:if test="@type">
           <xsl:apply-templates select="/xs:schema/xs:complexType[@name=$type]" mode="findChildNodes">
             <xsl:with-param name="path" select="$this_path"/>
+            <xsl:with-param name="constraintData" select="$constraintData"/>
           </xsl:apply-templates>
           <xsl:apply-templates select="/xs:schema/xs:simpleType[@name=$type]" mode="findChildNodes">
             <xsl:with-param name="path" select="$this_path"/>
+            <xsl:with-param name="constraintData" select="$constraintData"/>
           </xsl:apply-templates>
         </xsl:if>
         <xsl:apply-templates mode="findChildNodes">
           <xsl:with-param name="path" select="$this_path"/>
+          <xsl:with-param name="constraintData" select="$constraintData"/>
         </xsl:apply-templates>
         <xsl:text> </xsl:text>
-        <xsl:variable name="constraint">
-          <xsl:if test="xs:annotation/xs:appinfo/libhpc:constraint">
-            <xsl:variable name="context">xs:annotation/xs:appinfo/libhpc:constraint</xsl:variable>
-            <xsl:call-template name="processConstraint">
-              <xsl:with-param name="path" select="$this_path"/>
-              <xsl:with-param name="context" select="$context"/>
-            </xsl:call-template> 
-          </xsl:if>
-        </xsl:variable>
         <xsl:value-of select="$units" disable-output-escaping="yes"/>
         <xsl:if test="$editable_units">
           <xsl:element name="input">
@@ -364,6 +375,7 @@
 
   <xsl:template match="xs:choice" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="constraintData" />
     <select class="choice" onchange="selectChoiceItem(event);">
       <xsl:attribute name="choice-path">
         <xsl:value-of select="$path" />
@@ -383,6 +395,10 @@
         </option>
       </xsl:for-each>
     </select>
+    <xsl:choose>
+      <xsl:when test="$constraintData = '-'"></xsl:when>
+      <xsl:otherwise><xsl:copy-of select="$constraintData"/></xsl:otherwise>
+    </xsl:choose>
     <!-- Necessary so hide / show behaviour is correct-->
     <ul role="group" choice-id="Select from list">
       <xsl:attribute name="path">
@@ -397,8 +413,10 @@
 
   <xsl:template match="xs:complexType" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="constraintData" />
     <xsl:apply-templates mode="findChildNodes">
       <xsl:with-param name="path" select="$path"/>
+      <xsl:with-param name="constraintData" select="$constraintData"/>
     </xsl:apply-templates>
   </xsl:template>
 
@@ -418,13 +436,13 @@
   <xsl:template match="libhpc:locationInFile" mode="findChildNodes"/>
   <xsl:template match="libhpc:refersToFile" mode="findChildNodes"/>
 
-  <xsl:template name="processConstraint" match="libhpc:constraint" mode="handleConstraint">
+  <xsl:template name="processConstraint2" match="libhpc:constraint" mode="handleConstraint">
     <xsl:param name="path" />
     <xsl:param name="context" />
     <xsl:variable name="null"/>
     <xsl:variable name="sourceValues">
       <xsl:text>"source":[</xsl:text>
-      <xsl:for-each select="libhpc:sourceValue/libhpc:value">        
+      <xsl:for-each select="$context/libhpc:sourceValue/libhpc:value">        
         <xsl:choose>
           <xsl:when test="position() = 1">
             <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
@@ -438,17 +456,17 @@
     </xsl:variable>
 
     <xsl:variable name="targetRaw">
-      <xsl:value-of select="libhpc:targetParam"/>
+      <xsl:value-of select="$context/libhpc:targetParam"/>
     </xsl:variable>
 
     <xsl:variable name="target">
-      <xsl:text>"target":"</xsl:text><xsl:value-of select="libhpc:targetParam"/><xsl:text>"</xsl:text>
+      <xsl:text>"target":"</xsl:text><xsl:value-of select="$context/libhpc:targetParam"/><xsl:text>"</xsl:text>
     </xsl:variable>
 
     <xsl:variable name="allowed">
-      <xsl:if test="libhpc:valuesAllowed">
+      <xsl:if test="$context/libhpc:valuesAllowed">
         <xsl:text>"allowed":[</xsl:text>
-        <xsl:for-each select="libhpc:valuesAllowed/libhpc:value">        
+        <xsl:for-each select="$context/libhpc:valuesAllowed/libhpc:value">        
           <xsl:choose>
             <xsl:when test="position() = 1">
               <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
@@ -463,9 +481,100 @@
     </xsl:variable>
     
     <xsl:variable name="disallowed">
-      <xsl:if test="libhpc:valuesDisallowed">
+      <xsl:if test="$context/libhpc:valuesDisallowed">
         <xsl:text>"disallowed":[</xsl:text>
-        <xsl:for-each select="libhpc:valuesDisallowed/libhpc:value">        
+        <xsl:for-each select="$context/libhpc:valuesDisallowed/libhpc:value">        
+          <xsl:choose>
+            <xsl:when test="position() = 1">
+              <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>,"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each>
+        <xsl:text>]</xsl:text>
+      </xsl:if>
+    </xsl:variable>
+    
+    <xsl:element name="i">
+      <xsl:attribute name="class">glyphicon glyphicon-link constraint-icon</xsl:attribute>
+      <xsl:attribute name="rel">tooltip</xsl:attribute>
+      <xsl:attribute name="data-constraint">true</xsl:attribute>
+      <xsl:attribute name="data-toggle">tooltip</xsl:attribute>
+      <xsl:attribute name="data-placement">right</xsl:attribute>
+      <xsl:attribute name="title">
+        <xsl:text>There is a constraint between this parameter and </xsl:text>
+        <xsl:value-of select="str:replaceAll(str:new($targetRaw),'\.',' -> ')"/>
+      </xsl:attribute>
+      
+      <!-- Prepare JSON containing constraint info to pass to client -->
+      <xsl:attribute name="data-constraint-info">
+        <xsl:text>{</xsl:text>
+        
+        <xsl:value-of select="$sourceValues"></xsl:value-of><xsl:text>, </xsl:text>
+        <xsl:value-of select="$target"></xsl:value-of>
+        <xsl:if test="$allowed != $null">
+          <xsl:text>, </xsl:text><xsl:value-of select="$allowed"/>
+        </xsl:if>
+        <xsl:if test="$disallowed != $null">
+          <xsl:text>, </xsl:text><xsl:value-of select="$disallowed"/>
+        </xsl:if>
+        <xsl:text>}</xsl:text>
+      </xsl:attribute>
+      <xsl:attribute name="style">padding-left: 10px;</xsl:attribute>
+    </xsl:element> <!-- </i> -->
+  </xsl:template>
+  
+  <xsl:template name="processConstraint">
+    <xsl:param name="path" />
+    <xsl:param name="context" />
+    <xsl:param name="null" />
+    <xsl:variable name="sourceValues">
+      <xsl:text>"source":[</xsl:text>
+      <xsl:for-each select="dyn:evaluate(concat($context,'/libhpc:sourceValue/libhpc:value'))">
+        <xsl:message>VALUE: <xsl:value-of select="text()"/></xsl:message>
+        <xsl:choose>
+          <xsl:when test="position() = 1">
+            <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>,"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each>
+      <xsl:text>]</xsl:text>
+    </xsl:variable>
+
+    <xsl:variable name="targetRaw">
+      <xsl:value-of select="dyn:evaluate(concat($context, '/libhpc:targetParam'))"/>
+    </xsl:variable>
+
+    <xsl:variable name="target">
+      <xsl:text>"target":"</xsl:text><xsl:value-of select="dyn:evaluate(concat($context, '/libhpc:targetParam'))"/><xsl:text>"</xsl:text>
+    </xsl:variable>
+
+    <xsl:variable name="allowed">
+      <xsl:if test="dyn:evaluate(concat($context, '/libhpc:valuesAllowed'))">
+        <xsl:text>"allowed":[</xsl:text>
+        <xsl:for-each select="dyn:evaluate(concat($context, '/libhpc:valuesAllowed/libhpc:value'))">        
+          <xsl:choose>
+            <xsl:when test="position() = 1">
+              <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>,"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each>
+        <xsl:text>]</xsl:text>
+      </xsl:if>
+    </xsl:variable>
+    
+    <xsl:variable name="disallowed">
+      <xsl:if test="dyn:evaluate(concat($context, '/libhpc:valuesDisallowed'))">
+        <xsl:text>"disallowed":[</xsl:text>
+        <xsl:for-each select="dyn:evaluate(concat($context, '/libhpc:valuesDisallowed/libhpc:value'))">        
           <xsl:choose>
             <xsl:when test="position() = 1">
               <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>

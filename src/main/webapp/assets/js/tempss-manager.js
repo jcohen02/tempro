@@ -162,6 +162,9 @@ function displayTemplate(templateID, templateText) {
             setEditingProfileName("");
 
             $("#template-tree-loading").hide(0);
+            
+            preProcessConstraints();
+            
             dfd.resolve();
         },
         // Error callback function
@@ -843,6 +846,140 @@ function displayLoginForm(modalSource) {
             }
         }]
     });
+}
+
+/**
+ * This function looks for constraints in a template tree and adds a link icon
+ * to the corresponding target node in a constraint relationship. 
+ * 
+ * TODO: Also build dynamic functions to constrain the selectable values for 
+ *       relationships we're working with a choice node at one or both ends.  
+ */
+function preProcessConstraints() {
+	log('Pre-processing constraints...');
+	$('i[data-constraint="true"]').each(function() {
+		var $el = $(this);
+		// This should be JSON data and should be converted automatically to 
+		// an object when accessed here
+		var constraintData = $el.data('constraint-info');
+		// Check that the constraint data contains the required parameters, if
+		// not then we can't proceed with constraint processing.
+		if(!( ('source' in constraintData) && ('target' in constraintData) )) {
+			log('One or more required parameters are missing for this ' +
+				'constraint. Unable to process constraint.');
+			return;
+		}
+		
+		// The target property should be a dot-separated path to the target node
+		var targetElPath = constraintData['target'];
+		var targetElItems = targetElPath.split('.');
+		var rootNodeName = targetElItems[0];
+		// Check the root node exists
+		var base = $('span[data-fqname="' + rootNodeName + '"]').parent();
+		
+		function findTarget(ctx, target) {
+			var newCtx = ctx.find('li[data-fqname="' + target[0] + '"]');
+			if(target.length == 1) {
+				return newCtx;
+			}
+			
+			target.splice(0,1);
+			return findTarget(newCtx, target)
+		};
+		
+		function buildPath($node, path, rootName) {
+			if(!$node[0].hasAttribute('data-fqname')) {
+				// If we're at the root node then we need to check for a next  
+				// level span element containing the fqname, otherwise we
+				// continue back up the tree.
+				if($node.children('span[data-fqname]').length > 0) {
+					$node = $node.children('span[data-fqname]');
+				}
+				else {
+					$node = $node.closest('li[data-fqname]');
+				}
+			}
+			if($node.length == 0) {
+				log('Error building the node path at node ' + JSON.stringify($node));
+				return '';
+			}
+			var name = $node.attr('data-fqname');
+			
+			if(name == rootName) {
+				return name + path;
+			}
+			
+			// Otherwise we need to get the next li element up the tree to pass
+			// to the next iteration.
+			var $newNode = $node.parent().closest('li.parent_li'); 
+			return buildPath($newNode, '.' + name + path, rootName);
+		}
+		
+		targetElItems.splice(0,1);
+		var targetEl = findTarget(base, targetElItems);
+		
+		// Prepare the source node's full node path.
+		var sourcePath = buildPath($el, '', rootNodeName);
+		var sourcePathMod = sourcePath.replace(/\./g, ' -> ');
+		
+		log("Found the target element: " + JSON.stringify(targetEl));
+		log("Length of targetEl: " + targetEl.length);
+		
+		if(targetEl.length > 0) {
+			var iEl = '<i class="glyphicon glyphicon-link constraint-icon" ' + 
+				      '   rel="tooltip" data-constraint="target" ' + 
+				      '   data-source-path="' + sourcePath + '" ' +
+			          '   data-toggle="tooltip" data-placement="right" ' +
+			          '   title="There is a constraint between this parameter' +
+			          '          and ' + sourcePathMod + '. This is ' +
+			          '          the target parameter in the constraint ' +
+			          '          relationship." ' +
+			          '   style="padding-left: 10px;"></i>'
+			var inputEl = $(targetEl[0]).find('select, input');
+			inputEl.after(iEl);
+		}
+	});
+}
+
+function constraintLinkClicked(e) {
+	// Get the clicked node and check whether its a source or target element
+	var $node = $(e.currentTarget);
+	if(!$node[0].hasAttribute('data-constraint')) {
+		log("ERROR: This doesn't appear to be a valid constraint node.");
+		return;
+	}
+	
+	var linkedNodePath = ''; 
+	if($node.attr('data-constraint') == 'true') {
+		log('Processing constraint link click - we have a source node...');
+		var constraintInfo = $node.data('constraint-info');
+		linkedNodePath = constraintInfo.target;
+	}
+	else if($node.attr('data-constraint') == 'target') {
+		log('Processing constraint link click - we have a target node...');
+		linkedNodePath = $node.attr('data-source-path');
+	}
+	if(linkedNodePath == '') {
+		log('Unable to process constraint link click...');
+		return;
+	}
+	
+	// Given the linked node path, we can now run through the path elements
+	// finding each node from the root down and checking if they're visible. 
+	// If not, we make the node visible. Finally we flash the target element.
+	var linkedNodePathElements = linkedNodePath.split('.');
+	var $node = null;
+	for(var i=0; i < linkedNodePathElements.length; i++) {
+		if(i == 0) {
+			$node = $('#template-container span[data-fqname="' 
+					+ linkedNodePathElements[i] + '"]').closest('li.parent_li');
+		}
+		else {
+			$node = $node.find('li.parent_li[data-fqname="' 
+							+ linkedNodePathElements[i] + '"]');
+		}
+		// TODO: CHECK IF THE NODE IS VISIBLE...
+	}
 }
 
 // Utility function for displaying log messages

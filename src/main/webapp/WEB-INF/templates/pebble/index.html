@@ -514,6 +514,12 @@
         	$('#profile-err-modal-text').html("");
         });
         
+        // When a constraint link icon is clicked show the node at the other
+        // end of the constraint.
+        $('#template-container').on('click', '.constraint-icon', function(e) {
+        	constraintLinkClicked(e);
+        });
+        
 	});
 </script>
 {% endblock script %}

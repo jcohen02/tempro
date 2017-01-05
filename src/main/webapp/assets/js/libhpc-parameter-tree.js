@@ -1261,6 +1261,8 @@ function selectChoiceItem(event) {
     $selectedUL.siblings("ul").attr('chosen', 'false');
 
     $selectedUL.validateNodeAndParents();
+    
+    validateSelectConstraints($selectElement);
 }
 
 
@@ -1365,6 +1367,54 @@ function _processProfile(profileXml, templateId) {
         	}
         }
     });
+}
+
+/**
+ * Process and validate constraints for a changed select box.
+ * 
+ * Here we check if the select element passed in is involved in a constraint 
+ * relationship and if so, we check whether the selected value constrains other 
+ * selections. If it does, we lookup the target node of the relationship and 
+ * modify its options. If we had to change a selected option on the target node 
+ * we display a dialog to tell the user. 
+ */
+function validateSelectConstraints($selectEl) {
+	var $constraintEl = $selectEl.nextAll('.constraint-icon');
+	if($constraintEl.length == 0) {
+		log('This selection element does not have any associated constraints.');
+		return;
+	}
+	
+	// Now handle the constraint data
+	var type = $constraintEl.attr('data-constraint');
+	if(type != 'true') {
+		log("This is either the target node of a constraint or an unknown " +
+				"node type - this can be ignored.");
+		return;
+	}
+	
+	// Get the constraint information and see if the select value is listed
+	// as one of the relevant source values.
+	var constraintData = $constraintEl.data('constraint-info');
+	var sourceVals = constraintData.source;
+	if(sourceVals.indexOf($selectEl.find(':selected').val()) < 0) {
+		log('The selected value is not involved in any constraints.');
+		return;
+	}
+	
+	log('We need to handle some value constraints...');
+	// Find the target node and see if it is a select or just a standard input
+	function findTarget(ctx, target) {
+		var newCtx = ctx.find('li[data-fqname="' + target[0] + '"]');
+		if(target.length == 1) {
+			return newCtx;
+		}
+		
+		target.splice(0,1);
+		return findTarget(newCtx, target)
+	};
+	// TODO: FIXME: Need to find the context element correctly - refer to tempss-manager...
+	var $targetEl = findTarget(ctx, constraintData.target)
 }
 
 /*

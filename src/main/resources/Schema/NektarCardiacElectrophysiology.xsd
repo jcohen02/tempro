@@ -699,7 +699,6 @@ Nektar++ user guide: http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
 supported, the monodomain model and the bidomain model.</libhpc:documentation>
 			        <libhpc:constraint>
 			          <libhpc:sourceValue>
-			            <libhpc:value>Bidomain</libhpc:value>
 			            <libhpc:value>Monodomain</libhpc:value>
 			          </libhpc:sourceValue>
 			          <libhpc:targetParam>CardiacElectrophysiology.NumericalAlgorithm.TimeIntegration.TimeIntegrationMethod</libhpc:targetParam>

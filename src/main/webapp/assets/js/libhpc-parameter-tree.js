@@ -1370,6 +1370,33 @@ function _processProfile(profileXml, templateId) {
 }
 
 /**
+ * A recursive function to find a target node in a constraint relationship.
+ * This function takes the dot-separated tree path to the node and descends 
+ * through the tree to find the target node.
+ * @param $ctx The li.parent_li node representing the base node to search from.
+ * @param target A String or Array - Either the dot-separated tree path to the 
+ *        target node, excluding the name of the source node that $ctx relates 
+ *        to (provided as a string) OR a list of strings representing the 
+ *        path elements (obtained via split('.') called on the string version)
+ * @returns The li.parent_li jQuery node for the target template element.
+ */
+function _findTarget($ctx, target) {
+	// If we've been given a string of dot-separated values representing the 
+	// path, convert this to a list of path elements.
+	if( Object.prototype.toString.call(target) === '[object String]' ) {
+		target = target.split('.');
+	}
+	
+	var $newCtx = $ctx.find('li[data-fqname="' + target[0] + '"]');
+	if(target.length == 1) {
+		return $newCtx;
+	}
+	
+	target.splice(0,1);
+	return _findTarget($newCtx, target)
+};
+
+/**
  * Process and validate constraints for a changed select box.
  * 
  * Here we check if the select element passed in is involved in a constraint 
@@ -1396,6 +1423,27 @@ function validateSelectConstraints($selectEl) {
 	// Get the constraint information and see if the select value is listed
 	// as one of the relevant source values.
 	var constraintData = $constraintEl.data('constraint-info');
+	
+	var targetSplit = constraintData.target.split('.');
+	var $baseNode = $('span[data-fqname="' + targetSplit[0] + '"]').parent();
+	targetSplit.splice(0,1);
+	var $targetEl = _findTarget($baseNode, targetSplit)
+	var $targetInputNode = $targetEl.children('select,input');
+	if($targetInputNode.length == 0) {
+		log('ERROR: The specified target input node could not be found.');
+		return;
+	}
+	else if($targetInputNode.length > 1) {
+		log('WARNING: More than one target node has been found...');
+		$targetInputNode = $($targetInputNode[0]);	
+	}
+
+	// If we have a select node, re-enable all values to begin with
+	if($targetInputNode.prop('tagName').toUpperCase() == 'SELECT') {
+		$targetInputNode.find('option').removeAttr('disabled');
+	}
+
+	// Now check if we need to apply any constraints
 	var sourceVals = constraintData.source;
 	if(sourceVals.indexOf($selectEl.find(':selected').val()) < 0) {
 		log('The selected value is not involved in any constraints.');
@@ -1403,18 +1451,49 @@ function validateSelectConstraints($selectEl) {
 	}
 	
 	log('We need to handle some value constraints...');
-	// Find the target node and see if it is a select or just a standard input
-	function findTarget(ctx, target) {
-		var newCtx = ctx.find('li[data-fqname="' + target[0] + '"]');
-		if(target.length == 1) {
-			return newCtx;
+	
+	// Now handle the processing of values in a select node...
+	if($targetInputNode.prop('tagName').toUpperCase() == 'SELECT') {
+		log('Handling a select target...');
+		
+		// Get the valid or invalid target values. If we have an 'allowed' tag
+		// in the constraint data, assume all other values are not allowed. If 
+		// we have a disallowed tag, assume all other values are allowed.
+		var values = [];
+		var allowed = true;
+		if('allowed' in constraintData) {
+			values = constraintData.allowed; 
+		}
+		else if('disallowed' in constraintData) {
+			values = constraintData.disallowed;
+			allowed = false;
 		}
 		
-		target.splice(0,1);
-		return findTarget(newCtx, target)
-	};
-	// TODO: FIXME: Need to find the context element correctly - refer to tempss-manager...
-	var $targetEl = findTarget(ctx, constraintData.target)
+		var elModified = false;
+		$targetInputNode.find('option').each(function() {
+			var $el = $(this);
+			if($el[0].index == 0) {
+				return;
+			}
+			if(values.indexOf($el.val()) >= 0) {
+				if(!allowed) {
+					$el.attr('disabled', 'disabled');
+					if($el.is(':selected')) {
+						$el[0].selectedIndex = 0;
+					}
+				}
+			}
+			else {
+				if(allowed) {
+					$el.attr('disabled', 'disabled');
+				}
+			}
+		});
+	}
+	else if($targetInputNode.prop('tagName').toUpperCase() == 'INPUT') {
+		log('Handling an input target...');
+		// TODO: Complete the implementation of input type target handling
+	}
 }
 
 /*

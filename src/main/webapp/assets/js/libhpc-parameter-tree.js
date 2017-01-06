@@ -1288,9 +1288,10 @@ function selectChoiceItem(event, previous) {
 	
 	$('#template-container').on('focus','select.choice', function(e) {
 		prevValue = this.value
+		
 	}).on('change', 'select.choice', function(e) {
 		selectChoiceItem(e, prevValue);
-		prevValue = '';
+		prevValue = this.value;
 	});
 }())
 
@@ -1434,6 +1435,7 @@ function _findTarget($ctx, target) {
  * we display a dialog to tell the user. 
  */
 function validateSelectConstraints($selectEl, prevValue, e) {
+	
 	// Create a deferred object that we'll use to return a promise
 	var dfd = $.Deferred();
 	var promise = dfd.promise();

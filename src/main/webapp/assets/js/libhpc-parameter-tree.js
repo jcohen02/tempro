@@ -1231,8 +1231,12 @@ function validateEntries($caller, validationType, restrictionsJSON) {
     $caller.validateParentNodes();
 }
 
-
-function selectChoiceItem(event) {
+// NOTE that selectChoiceItem was previously called directly from the onchange
+// attribute but this is now called by the IIFE below to preserve the previous
+// value of the select in case the user cancels the change.
+function selectChoiceItem(event, previous) {
+	previous = typeof previous != undefined ? previous : '';
+	
     var $selectElement = $(event.target);
 
     // Get the parent UL from which we restrict selection of the branch
@@ -1249,22 +1253,46 @@ function selectChoiceItem(event) {
     // Selected branch
     var $selectedUL = $parentUL.find('ul[path="' + fullPath + '"]');
 
-    // Expand the selected branch in the tree
-    $selectedUL.show('fast');
-    // Keep a record this choice was made to aid xml generation
-    $selectedUL.attr('chosen', 'true');
-    $selectedUL.children().show('fast');
-    $selectedUL.children().children().show('fast');
-    $selectedUL.children().children().children().show('fast');
-    // Hide the none-selected branches
-    $selectedUL.siblings("ul").hide();
-    $selectedUL.siblings("ul").attr('chosen', 'false');
-
-    $selectedUL.validateNodeAndParents();
+    // Undertake constraint validation here. We need to do this before nodes are
+    // expanded in case the user opts to cancel the change do to parameter 
+    // incompatibilities.
+    var promise = validateSelectConstraints($selectElement, previous, event);
     
-    validateSelectConstraints($selectElement);
+    promise.then(
+    	// Promise fulfilled - success handler
+    	function(result) {
+    		// Expand the selected branch in the tree
+    	    $selectedUL.show('fast');
+    	    // Keep a record this choice was made to aid xml generation
+    	    $selectedUL.attr('chosen', 'true');
+    	    $selectedUL.children().show('fast');
+    	    $selectedUL.children().children().show('fast');
+    	    $selectedUL.children().children().children().show('fast');
+    	    // Hide the none-selected branches
+    	    $selectedUL.siblings("ul").hide();
+    	    $selectedUL.siblings("ul").attr('chosen', 'false');
+
+    	    $selectedUL.validateNodeAndParents();
+    	    
+    	    log('Value selection completed successfully');
+    	},
+    	// Promise rejected - error handler
+    	function(result) {
+    		log('User cancelled value selection.');
+    	}
+    );
 }
 
+(function() {
+	var prevValue;
+	
+	$('#template-container').on('focus','select.choice', function(e) {
+		prevValue = this.value
+	}).on('change', 'select.choice', function(e) {
+		selectChoiceItem(e, prevValue);
+		prevValue = '';
+	});
+}())
 
 // Added this for API clarity, retained original
 // loadlibrary function to retain compatibility
@@ -1405,11 +1433,16 @@ function _findTarget($ctx, target) {
  * modify its options. If we had to change a selected option on the target node 
  * we display a dialog to tell the user. 
  */
-function validateSelectConstraints($selectEl) {
+function validateSelectConstraints($selectEl, prevValue, e) {
+	// Create a deferred object that we'll use to return a promise
+	var dfd = $.Deferred();
+	var promise = dfd.promise();
+	
 	var $constraintEl = $selectEl.nextAll('.constraint-icon');
 	if($constraintEl.length == 0) {
 		log('This selection element does not have any associated constraints.');
-		return;
+		dfd.resolve();
+		return promise;
 	}
 	
 	// Now handle the constraint data
@@ -1417,7 +1450,8 @@ function validateSelectConstraints($selectEl) {
 	if(type != 'true') {
 		log("This is either the target node of a constraint or an unknown " +
 				"node type - this can be ignored.");
-		return;
+		dfd.resolve();
+		return promise;
 	}
 	
 	// Get the constraint information and see if the select value is listed
@@ -1427,30 +1461,31 @@ function validateSelectConstraints($selectEl) {
 	var targetSplit = constraintData.target.split('.');
 	var $baseNode = $('span[data-fqname="' + targetSplit[0] + '"]').parent();
 	targetSplit.splice(0,1);
-	var $targetEl = _findTarget($baseNode, targetSplit)
+	var $targetEl = _findTarget($baseNode, targetSplit);
 	var $targetInputNode = $targetEl.children('select,input');
 	if($targetInputNode.length == 0) {
 		log('ERROR: The specified target input node could not be found.');
-		return;
+		dfd.resolve();
+		return promise;
 	}
 	else if($targetInputNode.length > 1) {
 		log('WARNING: More than one target node has been found...');
 		$targetInputNode = $($targetInputNode[0]);	
 	}
 
-	// If we have a select node, re-enable all values to begin with
-	if($targetInputNode.prop('tagName').toUpperCase() == 'SELECT') {
-		$targetInputNode.find('option').removeAttr('disabled');
-	}
-
 	// Now check if we need to apply any constraints
 	var sourceVals = constraintData.source;
 	if(sourceVals.indexOf($selectEl.find(':selected').val()) < 0) {
 		log('The selected value is not involved in any constraints.');
-		return;
+		// If the target node is a select, remove disabled tags from any values
+		if($targetInputNode.prop('tagName').toUpperCase() == 'SELECT') {
+			$targetInputNode.find('option').removeAttr('disabled');
+		}
+		dfd.resolve();
+		return promise;
 	}
 	
-	log('We need to handle some value constraints...');
+	log('We need to handle some value constraints...'); 
 	
 	// Now handle the processing of values in a select node...
 	if($targetInputNode.prop('tagName').toUpperCase() == 'SELECT') {
@@ -1469,31 +1504,98 @@ function validateSelectConstraints($selectEl) {
 			allowed = false;
 		}
 		
-		var elModified = false;
-		$targetInputNode.find('option').each(function() {
-			var $el = $(this);
-			if($el[0].index == 0) {
-				return;
-			}
-			if(values.indexOf($el.val()) >= 0) {
-				if(!allowed) {
-					$el.attr('disabled', 'disabled');
-					if($el.is(':selected')) {
-						$el[0].selectedIndex = 0;
+		// Before we make any changes or apply any constraints, check if there are
+		// any value incompatibilities, if so, we display a message to the user and
+		// give them a chance to cancel the change if they don't want to proceed.
+		var selectedVal = $targetInputNode.find('option:selected').val();
+		var modRequired = false;
+		
+		if($targetInputNode.find('option:selected')[0].index == 0) {
+			log('Ignoring placeholder first value.');
+		}
+		else if(allowed && (values.indexOf(selectedVal) < 0)) {
+			modRequired = true;
+			log('Target value not in allowed values. Check with user...');
+		}
+		else if( (!allowed) && (values.indexOf(selectedVal) >= 0)) {
+			modRequired = true;
+			log('Target value in disallowed values. Check with user...');
+		}
+		
+		if(modRequired) {
+			var targetDisplay = constraintData.target.replace(/\./g,' -> ');
+			BootstrapDialog.show({
+				title: 'Value constraint conflict',
+				message: '<p class="text-primary">This value [<strong>' + 
+				         $selectEl.val() + '</strong>] selected for ' +
+				         'parameter [<strong>' + 
+				         $selectEl.parent().data('fqname') + '</strong>] ' + 
+				         'conflicts with the existing value selected for [' +
+				         '<strong>' + targetDisplay + '</strong>] ' + 
+				         'due to value constraints specified for this node.' +
+				         '</p><br/><p class="text-warning">If you continue, ' +
+				         'the value for parameter [<strong>' + 
+				         targetDisplay + '</strong>] will ' +
+				         'be reset and you will need to make a valid ' + 
+				         'selection from the available options.</p>',
+				type: BootstrapDialog.TYPE_WARNING,
+				buttons: [{
+					label: 'Cancel',
+					cssClass: 'btn-danger',
+					action: function(dialog) {
+						e.preventDefault();
+						$selectEl.val(prevValue);
+						dialog.close();
+						dfd.reject();
+						
 					}
-				}
-			}
-			else {
-				if(allowed) {
-					$el.attr('disabled', 'disabled');
-				}
-			}
-		});
+				}, {
+					label: 'Continue',
+					cssClass: 'btn-primary',
+					action: function(dialog) {
+						_finaliseValidateSelectConstraints($targetInputNode, 
+								values, allowed);
+						dialog.close();
+						dfd.resolve();
+						
+					}
+				}]
+			});
+		}
+		else {
+			_finaliseValidateSelectConstraints($targetInputNode, values, allowed);
+			dfd.resolve();
+		}
 	}
-	else if($targetInputNode.prop('tagName').toUpperCase() == 'INPUT') {
-		log('Handling an input target...');
-		// TODO: Complete the implementation of input type target handling
-	}
+	return promise;
+}
+
+function _finaliseValidateSelectConstraints($targetInputNode, values, allowed) {
+	// Now remove disabled tags from any values in the target element. 
+	// These will be re-added as necessary as we process the values below.
+	$targetInputNode.find('option').removeAttr('disabled');
+	$targetInputNode.find('option').each(function() {
+		var $el = $(this);
+		if($el[0].index == 0) {
+			return;
+		}
+		if(values.indexOf($el.val()) >= 0) {
+			if(!allowed) {
+				if($el.is(':selected')) {
+					$el.parent()[0].selectedIndex = 0;
+				}
+				$el.attr('disabled', 'disabled');
+			}
+		}
+		else {
+			if(allowed) {
+				if($el.is(':selected')) {
+					$el.parent()[0].selectedIndex = 0;
+				}
+				$el.attr('disabled', 'disabled');
+			}
+		}
+	});
 }
 
 /*

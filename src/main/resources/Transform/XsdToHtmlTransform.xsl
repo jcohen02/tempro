@@ -376,7 +376,8 @@
   <xsl:template match="xs:choice" mode="findChildNodes">
     <xsl:param name="path" />
     <xsl:param name="constraintData" />
-    <select class="choice" onchange="selectChoiceItem(event);">
+    <!-- <select class="choice" onchange="selectChoiceItem(event);">  -->
+    <select class="choice">
       <xsl:attribute name="choice-path">
         <xsl:value-of select="$path" />
       </xsl:attribute>

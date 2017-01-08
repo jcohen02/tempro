@@ -185,11 +185,13 @@
         <xsl:variable name="constraintData">
           <xsl:choose>
             <xsl:when test="xs:annotation/xs:appinfo/libhpc:constraint">
-              <xsl:message>CONSTRAINT FOUND</xsl:message>
-              <xsl:call-template name="processConstraint">
-                <xsl:with-param name="path" select="$this_path"/>
-                <xsl:with-param name="context" select="$context"/>
-              </xsl:call-template>
+              <xsl:for-each select="xs:annotation/xs:appinfo/libhpc:constraint">
+                <xsl:message>CONSTRAINT FOUND</xsl:message>
+                <xsl:call-template name="processConstraint">
+                  <xsl:with-param name="path" select="$this_path"/>
+                  <xsl:with-param name="context" select="$context"/>
+                </xsl:call-template>
+              </xsl:for-each>
             </xsl:when>
             <xsl:otherwise>
               <xsl:text>-</xsl:text>
@@ -531,9 +533,10 @@
     <xsl:param name="path" />
     <xsl:param name="context" />
     <xsl:param name="null" />
+    <xsl:message>PROCESSING CONSTRAINT: PATH: <xsl:value-of select="$path"/> CONTEXT: <xsl:value-of select="$context"/> TARGET PARAM: <xsl:value-of select="libhpc:targetParam"/> </xsl:message>
     <xsl:variable name="sourceValues">
       <xsl:text>"source":[</xsl:text>
-      <xsl:for-each select="dyn:evaluate(concat($context,'/libhpc:sourceValue/libhpc:value'))">
+      <xsl:for-each select="libhpc:sourceValue/libhpc:value">
         <xsl:message>VALUE: <xsl:value-of select="text()"/></xsl:message>
         <xsl:choose>
           <xsl:when test="position() = 1">
@@ -548,17 +551,17 @@
     </xsl:variable>
 
     <xsl:variable name="targetRaw">
-      <xsl:value-of select="dyn:evaluate(concat($context, '/libhpc:targetParam'))"/>
+      <xsl:value-of select="libhpc:targetParam"/>
     </xsl:variable>
 
     <xsl:variable name="target">
-      <xsl:text>"target":"</xsl:text><xsl:value-of select="dyn:evaluate(concat($context, '/libhpc:targetParam'))"/><xsl:text>"</xsl:text>
+      <xsl:text>"target":"</xsl:text><xsl:value-of select="libhpc:targetParam"/><xsl:text>"</xsl:text>
     </xsl:variable>
 
     <xsl:variable name="allowed">
-      <xsl:if test="dyn:evaluate(concat($context, '/libhpc:valuesAllowed'))">
+      <xsl:if test="libhpc:valuesAllowed">
         <xsl:text>"allowed":[</xsl:text>
-        <xsl:for-each select="dyn:evaluate(concat($context, '/libhpc:valuesAllowed/libhpc:value'))">        
+        <xsl:for-each select="libhpc:valuesAllowed/libhpc:value">        
           <xsl:choose>
             <xsl:when test="position() = 1">
               <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>
@@ -573,9 +576,9 @@
     </xsl:variable>
     
     <xsl:variable name="disallowed">
-      <xsl:if test="dyn:evaluate(concat($context, '/libhpc:valuesDisallowed'))">
+      <xsl:if test="libhpc:valuesDisallowed">
         <xsl:text>"disallowed":[</xsl:text>
-        <xsl:for-each select="dyn:evaluate(concat($context, '/libhpc:valuesDisallowed/libhpc:value'))">        
+        <xsl:for-each select="libhpc:valuesDisallowed/libhpc:value">        
           <xsl:choose>
             <xsl:when test="position() = 1">
               <xsl:text>"</xsl:text><xsl:value-of select="text()"/><xsl:text>"</xsl:text>

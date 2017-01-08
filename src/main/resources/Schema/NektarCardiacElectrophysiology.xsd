@@ -708,6 +708,15 @@ supported, the monodomain model and the bidomain model.</libhpc:documentation>
 			            <libhpc:value>IMEXOrder3</libhpc:value>
 			          </libhpc:valuesAllowed>
 			        </libhpc:constraint>
+			        <libhpc:constraint>
+			          <libhpc:sourceValue>
+			            <libhpc:value>Bidomain</libhpc:value>
+			          </libhpc:sourceValue>
+			          <libhpc:targetParam>CardiacElectrophysiology.ProblemSpecification.InitialConditions</libhpc:targetParam>
+			          <libhpc:targetParamInstances>
+			            <libhpc:instancesRequired>2</libhpc:instancesRequired>
+			          </libhpc:targetParamInstances>
+			        </libhpc:constraint>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
@@ -736,7 +745,7 @@ supported, the monodomain model and the bidomain model.</libhpc:documentation>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="InitialConditions">
+              <xs:element name="InitialConditions" minOccurs="1" maxOccurs="2">
                 <xs:annotation>
                   <xs:appinfo>
                     <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- <xsl:stylesheet xmlns:xsl="http://www.w3.org/TR/WD-xsl"> -->
 <!-- Types available from the tempss schema: 
      positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
 <IncompressibleNavierStokes xmlns="http://www.libhpc.imperial.ac.uk"
@@ -10,7 +11,6 @@
     incompressible Navier-Stokes equation. Nektar++ user guide: 
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
-
   <Physics>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
@@ -62,15 +62,36 @@
         assign one of your boundary conditions to each region as required. 
       </libhpc:documentation>
     </BoundaryDetails>
-    <SolutionMethod type="xs:string" inputType="choice">
+
+    <SolutionMethod paramType="choice">
       <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
         VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
         DirectSolver: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/DirectSolver
       </libhpc:documentation>
-      <tempss:item>VelocityCorrectionScheme</tempss:item>
-      <tempss:item>DirectSolver</tempss:item>
+      <VelocityCorrectionScheme paramType="choice">
+        <choice value="SteadyStokes"></choice>
+        <SteadyStokes>
+        </SteadyStokes>
+        <UnsteadyStoke>
+        </UnsteadyStoke>
+        <UnsteadyNavierStokes>
+        </UnsteadyNavierStokes>
+        <UnsteadyLinearisedNavierStokes>
+        </UnsteadyLinearisedNavierStokes>
+      </VelocityCorrectionScheme>
+      <DirectSolver paramType="choice">
+        <SteadyOseen type="choice">
+        </SteadyOseen>
+        <SteadyLinearisedNavierStokes>
+        </SteadyLinearisedNavierStokes>
+        <UnsteadyLinearisedNavierStokes>
+        </UnsteadyLinearisedNavierStokes>
+      </DirectSolver>
     </SolutionMethod>
-    <AdvectionForm type="xs:string" inputType="choice">
+<!--     <xsl:if test="VelocityCorrectionScheme">
+      This worked perfectly fine.
+    </xsl:if> -->
+<!--     <AdvectionForm type="xs:string" inputType="choice">
       <libhpc:documentation>
         Sets the form in which the advection term is treated. See 
         http://www.nektar.info/wiki/3.4/UserGuide/Tutorial/IncNavierStokesSolver
@@ -81,26 +102,26 @@
       <tempss:item>Adjoint</tempss:item>
       <tempss:item>SkewSymmetric</tempss:item>
       <tempss:item>NoAdvection</tempss:item>
-    </AdvectionForm>
-    <InitialConditions optional="true">
+    </AdvectionForm> -->
+<!--     <InitialConditions optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
       <Variable repeatable="true">
         <VariableName type="xs:string"/>
         <Type paramType="choice">
           <Expression type="xs:string">
-      	    <libhpc:documentation>
-      	      Provide an expression describing the initial condition for this variable.
-      	    </libhpc:documentation>
-      	  </Expression>
-      	  <File type="fileName" inputType="file">
-      	    <libhpc:documentation>
-      	      Provide a field file containing details of the initial condition for this variable.
-      	    </libhpc:documentation>
-      	  </File>
+            <libhpc:documentation>
+              Provide an expression describing the initial condition for this variable.
+            </libhpc:documentation>
+          </Expression>
+          <File type="fileName" inputType="file">
+            <libhpc:documentation>
+              Provide a field file containing details of the initial condition for this variable.
+            </libhpc:documentation>
+          </File>
         </Type>
       </Variable>
-    </InitialConditions>
-    <Expansion>
+    </InitialConditions> -->
+<!--     <Expansion>
       <libhpc:documentation>Specify details of how the solution function 
       will be approximated.</libhpc:documentation>
       <PolynomialOrder type="xs:positiveInteger">
@@ -134,18 +155,19 @@
         <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
         <tempss:item>CHEBYSHEV</tempss:item>
       </BasisType>
-    </Expansion>
-    <FinalTime type="positiveDouble" units="ms">
+    </Expansion> -->
+<!--     <FinalTime type="positiveDouble" units="ms">
       <libhpc:documentation>The time over which the simulation occurs.
       </libhpc:documentation>
     </FinalTime>
     <TimeStep type="positiveDouble" units="ms">
       <libhpc:documentation>Length of time step</libhpc:documentation>
-    </TimeStep>
+    </TimeStep> -->
   </ProblemSpecification>
 
+
   <NumericalAlgorithm>
-    <libhpc:documentation>
+  <!--   <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
     </libhpc:documentation>
@@ -347,8 +369,9 @@
       </libhpc:documentation>
       <tempss:item>Uniform</tempss:item>
       <tempss:item>NonUniform</tempss:item>
-    </WeightPartitions>
+    </WeightPartitions> -->
   </NumericalAlgorithm>
+
 
   <Admin>
     <libhpc:documentation>

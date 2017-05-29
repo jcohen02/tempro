@@ -88,7 +88,7 @@
   <xsl:template match="ProblemSpecification" mode ="NavierStokesSolverInfo">
     <I PROPERTY="SolverType">
       <xsl:attribute name="VALUE">
-        <xsl:value-of select="SolutionMethod" />
+        <xsl:value-of select="SolverType" />
       </xsl:attribute>
     </I>
     <I PROPERTY="EQTYPE">

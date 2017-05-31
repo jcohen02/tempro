@@ -184,6 +184,8 @@
       </I>
     </xsl:if>
 
+
+
   </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">
@@ -251,6 +253,10 @@
           <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
         </E>
       </EXPANSIONS>
+
+      <FUNCTION>
+        <xsl:apply-templates select="AdditionalParameters" mode ="Function"/>
+      </FUNCTION>
 
     </NEKTAR>
   </xsl:template>

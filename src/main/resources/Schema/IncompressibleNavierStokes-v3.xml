@@ -330,7 +330,6 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
-     -->
    <SpectralhpDealiasing type="OnOffType">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 
@@ -362,8 +361,8 @@
       <tempss:item>NonUniform - Boundary</tempss:item>
       <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
-   <!--  
-    <Functions>
+     -->
+<!--     <Functions optional="true">
       <Variable repeatable="true">
         <FunctionName type="xs:string"/>
         <Values repeatable="true">
@@ -374,7 +373,13 @@
           </Type> 
         </Values>
       </Variable>
-    </Functions>
+    </Functions> -->
+    <Function optional="true">
+      <Variable repeatable="true">
+        <FunctionName type="xs:string"/>
+      </Variable>
+    </Function>
+   <!--  
     <OptimizationParameters optional="true">
     </OptimizationParameters> -->
   </AdditionalParameters>

@@ -330,6 +330,7 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
+     -->
    <SpectralhpDealiasing type="OnOffType">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 
@@ -352,13 +353,14 @@
         </libhpc:documentation>
       </SVVCutoffRatio>
     </SpectralVanishingViscosity>
-     -->
     <WeightPartitions type="xs:string" inputType="choice">
       <libhpc:documentation>If using a hybrid mesh of more than one element type 
         , this should be set to NonUniform to give better parallel partitions.
       </libhpc:documentation>
       <tempss:item>Uniform</tempss:item>
-      <tempss:item>NonUniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
    <!--  
     <Functions>

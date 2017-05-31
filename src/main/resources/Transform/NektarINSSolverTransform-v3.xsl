@@ -171,6 +171,19 @@
       <I PROPERTY="SpectralVanishingViscosity" VALUE="True" />
     </xsl:if>
 
+    <xsl:if test="WeightPartitions">
+      <I PROPERTY="WeightPartitions"> 
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="WeightPartitions = 'Uniform'">Uniform</xsl:when>
+            <xsl:when test="WeightPartitions = 'NonUniform - DoF'">DOF</xsl:when>
+            <xsl:when test="WeightPartitions = 'NonUniform - Boundary'">BOUNDARY</xsl:when>
+            <xsl:when test="WeightPartitions = 'NonUniform - Both'">BOTH</xsl:when>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+
   </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">

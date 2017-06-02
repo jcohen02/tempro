@@ -183,15 +183,39 @@
         </xsl:attribute>
       </I>
     </xsl:if>
-
-
-
   </xsl:template>
+
+  <xsl:template match="Function" mode ="AddFunctions">
+    <xsl:message>Processing function...</xsl:message>
+    <FUNCTION>
+      <xsl:attribute name="NAME">
+        <xsl:value-of select="Name"/>
+      </xsl:attribute>
+      <xsl:apply-templates select="Variable" mode ="AddFunctions"/>
+    </FUNCTION> 
+  </xsl:template>
+
+  <xsl:template match="Variable" mode ="AddFunctions">
+        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
+        <xsl:apply-templates select="Expression" mode ="AddNames"/>
+  </xsl:template>
+
+  <xsl:template match="Expression" mode ="AddNames">
+    <xsl:if test="ExpressionVar">
+      <E>
+        <xsl:attribute name="VAR">
+          <xsl:value-of select="ExpressionVar"/>
+        </xsl:attribute>
+        <xsl:text>Value=&quot;</xsl:text><xsl:value-of select="ExpressionName"/><xsl:text>&quot;</xsl:text>
+      </E>
+    </xsl:if>    
+  </xsl:template>
+
 
   <xsl:template match="Variable" mode ="InitialConditionVars">
     <xsl:if test="VariableName">
       <xsl:message>Processing initial condition variables!</xsl:message>
-      <E> 
+      <I> 
         <xsl:attribute name="VAR">
           <xsl:value-of select="VariableName"/>
         </xsl:attribute>
@@ -205,7 +229,7 @@
             <xsl:message>Unable to set the value for this variable, it uses an unsupported type.</xsl:message>
           </xsl:otherwise>
         </xsl:choose>
-      </E>
+      </I>
     </xsl:if>    
   </xsl:template>
 
@@ -227,8 +251,7 @@
           <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="SolverInfo"/>
         </SOLVERINFO>
-        
-      
+            
         <VARIABLES>
           <V ID="0">u</V>
           <V ID="1">v</V>
@@ -236,15 +259,14 @@
         </VARIABLES>
         
         <xsl:apply-templates select="DomainSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
-                
+
+        <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
+
         <FUNCTION NAME="InitialConditions">
           <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="InitialConditionVars"/>
         </FUNCTION>
 
       </CONDITIONS>
-
-      <!-- Copy in the geometry -->
-      <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>
 
       <EXPANSIONS>
         <E>
@@ -254,9 +276,12 @@
         </E>
       </EXPANSIONS>
 
-      <FUNCTION>
-        <xsl:apply-templates select="AdditionalParameters" mode ="Function"/>
+<!--       <FUNCTION>
+        <xsl:apply-templates select="AdditionalParameters" mode ="Functions"/>
       </FUNCTION>
+ -->
+      <!-- Copy in the geometry -->
+      <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>
 
     </NEKTAR>
   </xsl:template>

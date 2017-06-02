@@ -362,23 +362,18 @@
       <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
      -->
-<!--     <Functions optional="true">
+
+    <Function repeatable="true" optional="true">
+      <Name type="xs:string"/>
       <Variable repeatable="true">
-        <FunctionName type="xs:string"/>
-        <Values repeatable="true">
-          <VariableName type="xs:string"/>
-          <Type paramType="choice">
-            <Expression type="xs:string"/>
-            <Variable type="positiveDouble"/>
-          </Type> 
-        </Values>
-      </Variable>
-    </Functions> -->
-    <Function optional="true">
-      <Variable repeatable="true">
-        <FunctionName type="xs:string"/>
+        <Name type="xs:string"/>
+        <Expression repeatable="true">
+          <ExpressionVar type="xs:string" />
+          <ExpressionName type="xs:string"/>
+        </Expression>
       </Variable>
     </Function>
+    
    <!--  
     <OptimizationParameters optional="true">
     </OptimizationParameters> -->

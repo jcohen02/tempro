@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
+<IncompressibleNavierStokes xmlns="http://www.libhpc.imperial.ac.uk"
+                            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+                            xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
+  <AdditionalParameters>
+    <libhpc:documentation>This section contains the parameters that define the 
+      physics of the problem or, equivalently, the PDE coefficients. When 
+      running a specific problem through the solver, the incompressible 
+      Navier-Stokes equation should be re-scaled so that the only parameter 
+      is the kinematic velocity. For this reason, units are not displayed, 
+      since they depend onthere-scaling of the original problem.
+    </libhpc:documentation>
+
+    <Function repeatable="true" optional="true">
+      <Name type="xs:string"/>
+      <Variable repeatable="true">
+        <Name type="xs:string"/>
+        <Expression repeatable="true">
+          <ExpressionVar type="xs:string" />
+          <ExpressionName type="xs:string"/>
+        </Expression>
+      </Variable>
+    </Function>
+
+  </AdditionalParameters>
+</IncompressibleNavierStokes>

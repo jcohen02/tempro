@@ -42,7 +42,7 @@
     </KinematicViscosity>
   </Physics>
 
-  <ProblemSpecification>
+ <!--  <ProblemSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -364,6 +364,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </Admin>
+  </Admin> -->
                           
 </IncompressibleNavierStokes>

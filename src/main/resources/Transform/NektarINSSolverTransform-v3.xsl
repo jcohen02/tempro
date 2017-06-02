@@ -53,13 +53,13 @@
         <xsl:value-of select="Equation" />
       </xsl:attribute>
     </I>
-    <xsl:when test="AdvectionForm">
+    <xsl:if test="AdvectionForm">
       <I PROPERTY="AdvectionForm">
         <xsl:attribute name="VALUE">
           <xsl:value-of select="AdvectionForm" />
         </xsl:attribute>
       </I>
-    </xsl:when>
+    </xsl:if>
   </xsl:template>
 
 

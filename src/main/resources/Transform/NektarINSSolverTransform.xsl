@@ -53,6 +53,13 @@
         <xsl:value-of select="Equation" />
       </xsl:attribute>
     </I>
+    <xsl:if test="Driver">
+      <I PROPERTY="Driver">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="Equation" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
     <xsl:if test="AdvectionForm">
       <I PROPERTY="AdvectionForm">
         <xsl:attribute name="VALUE">
@@ -78,11 +85,13 @@
         </xsl:choose>
       </xsl:attribute>
     </I>
-    <I PROPERTY="DiffusionAdvancement">
-      <xsl:attribute name="VALUE">
-        <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
-      </xsl:attribute>
-    </I>
+    <xsl:if test="TimeIntegration/DiffusionAdvancement">
+      <I PROPERTY="DiffusionAdvancement">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
     <I PROPERTY="TimeIntegrationMethod">
       <xsl:attribute name="VALUE">
         <xsl:value-of select="TimeIntegration/TimeIntegrationMethod" />

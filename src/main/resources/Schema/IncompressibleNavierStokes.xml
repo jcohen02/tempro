@@ -54,6 +54,14 @@
       <tempss:item>UnsteadyNavierStokes</tempss:item>
     </Equation>
 
+    <Driver type="xs:string"  inputType="choice" optional="true">
+      <tempss:item>Standard</tempss:item>
+      <tempss:item>Adaptive</tempss:item>
+      <tempss:item>Arnoldi</tempss:item>
+      <tempss:item>ModifiedArnoldi</tempss:item>
+      <tempss:item>SteadyState</tempss:item>
+    </Driver>
+
     <AdvectionForm type="xs:string" inputType="choice" optional="true">
       <libhpc:documentation>
         Sets the form in which the advection term is treated. See 
@@ -159,7 +167,7 @@
         <tempss:item>BackwardEuler</tempss:item>
         <tempss:item>ClassicalRungeKutta4</tempss:item>
       </TimeIntegrationMethod>
-      <DiffusionAdvancement type="xs:string"  inputType="choice">
+      <DiffusionAdvancement type="xs:string"  inputType="choice" optional="true">
         <libhpc:documentation>
           Specifies whether diffusion is handled implicitly or explicitly in 
           the time integration scheme. 

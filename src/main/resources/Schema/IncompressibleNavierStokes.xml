@@ -19,58 +19,42 @@
       is the kinematic velocity. For this reason, units are not displayed, 
       since they depend onthere-scaling of the original problem.
     </libhpc:documentation>
-    <ReynoldsNumber type="positiveDouble">
-      <libhpc:documentation>(Reynolds number)
-      </libhpc:documentation>
-    </ReynoldsNumber>
-    <KinematicViscosity>
-      <libhpc:documentation>(kinematic viscosity) = 1 / (Reynolds number)
-      </libhpc:documentation>
-        <Type paramType="choice">
-          <Expression type="xs:string">
-            <libhpc:documentation>
-              Can input Kinvis as an expression.
-            </libhpc:documentation>
-          </Expression>
-          <Variable type="positiveDouble">
-            <libhpc:documentation>
-              Possible to input Kinvis as a value.
-            </libhpc:documentation>
-          </Variable>
-        </Type> 
-      <!-- </Variable> -->
-    </KinematicViscosity>
+    <ReynoldsNumber type="positiveDouble"/>
+    <KinematicViscosity type="xs:string"/>
   </Physics>
 
- <!--  <ProblemSpecification>
+  <ProblemSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
-    <Geometry type="geometryFileName" inputType="file">
-      <libhpc:documentation>
-        The geometry on which the problem is being solved . Provide a Nektar 
-        XML (with root NEKTAR element) containing a GEOMETRY element that will 
-        be parsed to identify boundary regions.
-      </libhpc:documentation>
-    </Geometry>
-    <BoundaryDetails type="BoundaryDetails">
-      <libhpc:documentation>
-        Here you can set up your boundary conditions and name them. When you 
-        add a geometry file, this will be parsed to identify and build the 
-        boundary regions which will appear here automatically. You can then 
-        assign one of your boundary conditions to each region as required. 
-      </libhpc:documentation>
-    </BoundaryDetails>
-    <SolutionMethod type="xs:string" inputType="choice">
+    <SolverType type="xs:string" inputType="choice">
       <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
         VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
         DirectSolver: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/DirectSolver
       </libhpc:documentation>
+      <tempss:item>CoupledLinearNS</tempss:item>
       <tempss:item>VelocityCorrectionScheme</tempss:item>
-      <tempss:item>DirectSolver</tempss:item>
-    </SolutionMethod>
-    <AdvectionForm type="xs:string" inputType="choice">
+      <tempss:item>VCSWeakPressure</tempss:item>
+    </SolverType>
+    <Equation type="xs:string"  inputType="choice">
+      <libhpc:documentation>
+        SteadyStokes
+        SteadyOseen
+        UnsteadyStokes
+        SteadyLinearisedNavierStokes
+        UnsteadyLinearisedNavierStokes
+        UnsteadyNavierStokes
+      </libhpc:documentation>
+      <tempss:item>SteadyStokes</tempss:item>
+      <tempss:item>SteadyOseen</tempss:item>
+      <tempss:item>UnsteadyStokes</tempss:item>
+      <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
+      <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
+      <tempss:item>UnsteadyNavierStokes</tempss:item>
+    </Equation>
+
+    <AdvectionForm type="xs:string" inputType="choice" optional="true">
       <libhpc:documentation>
         Sets the form in which the advection term is treated. See 
         http://www.nektar.info/wiki/3.4/UserGuide/Tutorial/IncNavierStokesSolver
@@ -82,24 +66,8 @@
       <tempss:item>SkewSymmetric</tempss:item>
       <tempss:item>NoAdvection</tempss:item>
     </AdvectionForm>
-    <InitialConditions optional="true">
-      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
-      <Variable repeatable="true">
-        <VariableName type="xs:string"/>
-        <Type paramType="choice">
-          <Expression type="xs:string">
-      	    <libhpc:documentation>
-      	      Provide an expression describing the initial condition for this variable.
-      	    </libhpc:documentation>
-      	  </Expression>
-      	  <File type="fileName" inputType="file">
-      	    <libhpc:documentation>
-      	      Provide a field file containing details of the initial condition for this variable.
-      	    </libhpc:documentation>
-      	  </File>
-        </Type>
-      </Variable>
-    </InitialConditions>
+    <CFL type="xs:string" optional="true"/>
+
     <Expansion>
       <libhpc:documentation>Specify details of how the solution function 
       will be approximated.</libhpc:documentation>
@@ -135,20 +103,6 @@
         <tempss:item>CHEBYSHEV</tempss:item>
       </BasisType>
     </Expansion>
-    <FinalTime type="positiveDouble" units="ms">
-      <libhpc:documentation>The time over which the simulation occurs.
-      </libhpc:documentation>
-    </FinalTime>
-    <TimeStep type="positiveDouble" units="ms">
-      <libhpc:documentation>Length of time step</libhpc:documentation>
-    </TimeStep>
-  </ProblemSpecification>
-
-  <NumericalAlgorithm>
-    <libhpc:documentation>
-      This section contains all the parameters that specify the numerical 
-      algorithm for solving the problem.
-    </libhpc:documentation>
     <Projection type="xs:string"  inputType="choice">
       <libhpc:documentation>
         ContinuousGalerkin: enforces continuity of solution across element boundaries
@@ -196,6 +150,7 @@
             "DIRKOrder1"            Diagonally Implicit Runge-Kutta scheme of order 1
             "ClassicalRungeKutta4"  4th order Runge Kutta scheme
         </libhpc:documentation>
+        <tempss:item>NotProvided</tempss:item>
         <tempss:item>IMEXOrder1</tempss:item>
         <tempss:item>IMEXOrder2</tempss:item>
         <tempss:item>IMEXOrder3</tempss:item>
@@ -212,7 +167,50 @@
         <tempss:item>Implicit</tempss:item>
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
-    </TimeIntegration>
+    </TimeIntegration>    
+  </ProblemSpecification>
+  
+  <DomainSpecification>
+    <Geometry type="geometryFileName" inputType="file">
+      <libhpc:documentation>
+        The geometry on which the problem is being solved . Provide a Nektar 
+        XML (with root NEKTAR element) containing a GEOMETRY element that will 
+        be parsed to identify boundary regions.
+      </libhpc:documentation>
+    </Geometry>
+    <BoundaryDetails type="BoundaryDetails">
+      <libhpc:documentation>
+        Here you can set up your boundary conditions and name them. When you 
+        add a geometry file, this will be parsed to identify and build the 
+        boundary regions which will appear here automatically. You can then 
+        assign one of your boundary conditions to each region as required. 
+      </libhpc:documentation>
+    </BoundaryDetails>
+    <InitialConditions optional="true">
+      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+      <Variable repeatable="true">
+        <VariableName type="xs:string"/>
+        <Type paramType="choice">
+          <Expression type="xs:string">
+            <libhpc:documentation>
+              Provide an expression describing the initial condition for this variable.
+            </libhpc:documentation>
+          </Expression>
+          <File type="fileName" inputType="file">
+            <libhpc:documentation>
+              Provide a field file containing details of the initial condition for this variable.
+            </libhpc:documentation>
+          </File>
+        </Type>
+      </Variable>
+    </InitialConditions>
+  </DomainSpecification>
+
+  <AdditionalParameters>
+    <libhpc:documentation>
+      This section contains all the parameters that specify the numerical 
+      algorithm for solving the problem.
+    </libhpc:documentation>
     <GlobalSysSolution optional="true">
       <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
       <MatrixInversion repeatable="true">
@@ -319,7 +317,7 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
-    <SpectralhpDealiasing type="OnOffType">
+   <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 
         integration of the nonlinear convective terms.
@@ -341,29 +339,56 @@
         </libhpc:documentation>
       </SVVCutoffRatio>
     </SpectralVanishingViscosity>
-    <WeightPartitions type="xs:string" inputType="choice">
+    <WeightPartitions type="xs:string" inputType="choice" optional="true">
       <libhpc:documentation>If using a hybrid mesh of more than one element type 
         , this should be set to NonUniform to give better parallel partitions.
       </libhpc:documentation>
       <tempss:item>Uniform</tempss:item>
-      <tempss:item>NonUniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
-  </NumericalAlgorithm>
 
-  <Admin>
+    <Function repeatable="true" optional="true">
+      <Name type="xs:string"/>
+      <Variable repeatable="true">
+        <Name type="xs:string"/>
+        <Expression repeatable="true">
+          <ExpressionVar type="xs:string" />
+          <ExpressionName type="xs:string"/>
+        </Expression>
+      </Variable>
+    </Function>
+
+    <Filter repeatable="true" optional="true">
+      <Type type="xs:string"/>
+      <Variable repeatable="true">
+        <Param repeatable="true">
+          <ParamName type="xs:string" />
+          <ParamValue type="xs:string"/>
+        </Param>
+      </Variable>
+    </Filter>
+
+  </AdditionalParameters>
+
+  <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
-    <IO_CheckSteps type="xs:positiveInteger">
+      <FinalTime type="xs:string" units="ms" optional="true"/>
+      <TimeStep type="xs:string" units="ms" optional="true"/>
+      <NumSteps type="xs:string" optional="true"/>
+    <IO_CheckSteps type="xs:string">
       <libhpc:documentation>
         The solution can be dumped out at regular intervals. This parameter 
         specifies the number of time steps for this interval.
       </libhpc:documentation>
     </IO_CheckSteps>
-    <IO_InfoSteps type="xs:positiveInteger">
+    <IO_InfoSteps type="xs:string">
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </Admin> -->
-                          
+  </DurationIO>
+
 </IncompressibleNavierStokes>

@@ -51,7 +51,7 @@
     <xsl:attribute name="COMPOSITE"><xsl:value-of select="normalize-space(Geometry/NEKTAR/GEOMETRY/DOMAIN)"/></xsl:attribute>
   </xsl:template>
 
-    <xsl:template match="ProblemSpecification" mode ="Parameters">
+  <xsl:template match="ProblemSpecification" mode ="Parameters">
     <P>TimeStep = <xsl:value-of select="TimeStep"/></P>
     <xsl:if test="TimeStep='0'">    
     <P>CFL = <xsl:value-of select="CFL"/></P>

@@ -33,6 +33,14 @@
     <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
     <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
   </xsl:template>
+  
+  <xsl:template match="ProblemSpecification" mode ="Parameters">
+    <xsl:choose>
+      <xsl:when test="CFL">
+        <P>CFL = <xsl:value-of select="CFL"/></P>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
 
   <xsl:template match="ProblemSpecification" mode ="NavierStokesSolverInfo">
     <I PROPERTY="SolverType">
@@ -45,17 +53,15 @@
         <xsl:value-of select="Equation" />
       </xsl:attribute>
     </I>
-    <I PROPERTY="AdvectionForm">
-      <xsl:attribute name="VALUE">
-        <xsl:value-of select="AdvectionForm" />
-      </xsl:attribute>
-    </I>
-    <xsl:choose>
-      <xsl:when test="CFL">
-        <P>CFL = <xsl:value-of select="CFL"/></P>
-      </xsl:when>
-    </xsl:choose>
+    <xsl:when test="AdvectionForm">
+      <I PROPERTY="AdvectionForm">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="AdvectionForm" />
+        </xsl:attribute>
+      </I>
+    </xsl:when>
   </xsl:template>
+
 
   <xsl:template match="ProblemSpecification" mode ="Expansion">
     <!-- We assume the composites required for the expansion match the domain -->
@@ -211,6 +217,31 @@
     </xsl:if>    
   </xsl:template>
 
+  <xsl:template match="Filter" mode ="AddFilters">
+    <xsl:message>Processing Filter...</xsl:message>
+    <FILTER>
+      <xsl:attribute name="TYPE">
+        <xsl:value-of select="Type"/>
+      </xsl:attribute>
+      <xsl:apply-templates select="Variable" mode ="AddFilters"/>
+    </FILTER> 
+  </xsl:template>
+
+  <xsl:template match="Variable" mode ="AddFilters">
+        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
+        <xsl:apply-templates select="Param" mode ="AddTypes"/>
+  </xsl:template>
+
+  <xsl:template match="Param" mode ="AddTypes">
+    <xsl:if test="ParamName">
+      <PARAM>
+        <xsl:attribute name="NAME">
+          <xsl:value-of select="ParamName"/>
+        </xsl:attribute>
+        <xsl:text>Value=&quot;</xsl:text><xsl:value-of select="ParamValue"/><xsl:text>&quot;</xsl:text>
+      </PARAM>
+    </xsl:if>    
+  </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">
     <xsl:if test="VariableName">
@@ -248,8 +279,8 @@
 
         <SOLVERINFO>
           <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesSolverInfo"/>
-          <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="SolverInfo"/>
+          <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
         </SOLVERINFO>
             
         <VARIABLES>
@@ -262,6 +293,8 @@
 
         <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
 
+        <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
+
         <FUNCTION NAME="InitialConditions">
           <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="InitialConditionVars"/>
         </FUNCTION>
@@ -270,7 +303,7 @@
 
       <EXPANSIONS>
         <E>
-          <xsl:apply-templates select="ProblemSpecification" mode ="CompositeNavierStokes"/>
+          <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="Expansion"/>
           <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
         </E>

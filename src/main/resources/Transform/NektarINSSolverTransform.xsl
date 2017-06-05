@@ -229,7 +229,7 @@
     </E>
   </xsl:template>
 
-  <xsl:template match="CustomParameter" mode ="AddFunctions">
+  <xsl:template match="CustomParameter" mode ="AddParameter">
     <P><xsl:value-of select="Name"/> = <xsl:value-of select="Value"/></P>
   </xsl:template>
 
@@ -250,12 +250,14 @@
 
   <xsl:template match="Expression" mode ="AddNames">
     <xsl:if test="ExpressionVar">
-      <E>
-        <xsl:attribute name="VAR">
-          <xsl:value-of select="ExpressionVar"/>
-        </xsl:attribute>
-        <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
-      </E>
+      <EXPRESSIONS>
+        <E>
+          <xsl:attribute name="VAR">
+            <xsl:value-of select="ExpressionVar"/>
+          </xsl:attribute>
+          <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
+        </E>
+      </EXPRESSIONS>
     </xsl:if>    
   </xsl:template>
 
@@ -310,29 +312,37 @@
   <xsl:template match="/IncompressibleNavierStokes">
     <xsl:apply-templates select="DomainSpecification/Geometry" mode ="ErrorChecks"/>
     <NEKTAR>
+      <EXPANSIONS>
+        <E>
+          <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
+          <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
+        </E>
+      </EXPANSIONS>
       
       <CONDITIONS>
-        <PARAMETERS>
-          <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
-          <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
-          <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
-          <xsl:apply-templates select="AdditionalParameters" mode ="AddFunctions"/>
-          <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
-        </PARAMETERS>
-
         <SOLVERINFO>
           <xsl:apply-templates select="NumericalSpecification" mode ="NavierStokesSolverInfo"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="SolverInfo"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
         </SOLVERINFO>
+
+        <PARAMETERS>
+          <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
+          <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
+          <xsl:apply-templates select="AdditionalParameters/Functions" mode ="AddFunctions"/>
+          <xsl:apply-templates select="AdditionalParameters/CustomParameter" mode ="AddParameter"/>
+          <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
+        </PARAMETERS>
             
-        <xsl:apply-templates select="AdditionalParameters" mode ="AddExpression"/>
+        <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
         
         <xsl:apply-templates select="DomainSpecification" mode ="Variables"/>
         
         <xsl:apply-templates select="DomainSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
 
-        <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
+        <!-- <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/> -->
 
         <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
 
@@ -341,15 +351,6 @@
         </FUNCTION>
 
       </CONDITIONS>
-
-      <EXPANSIONS>
-        <E>
-          <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
-          <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
-          <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
-        </E>
-      </EXPANSIONS>
-
 
       <!-- Copy in the geometry -->
       <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>

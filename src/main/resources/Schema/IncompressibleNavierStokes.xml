@@ -58,9 +58,9 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </DomainSpecification> -->
-
-  <!-- <ProblemSpecification>
+  </DomainSpecification>
+ -->
+<!--   <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -213,17 +213,24 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>    
-  </ProblemSpecification> -->
-
+  </NumericalSpecification>
+ -->
   <AdditionalParameters>
-    <CustomParameter repeatable="true" optional="true">
-      <Name type="xs:string"/>
-      <Value type="xs:string"/>
-    </CustomParameter>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
     </libhpc:documentation>
+
+    <CustomExpression repeatable="true" optional="true">
+      <Name type="xs:string"/>
+      <Value type="xs:string"/>
+    </CustomExpression>
+
+    <CustomParameter repeatable="true" optional="true">
+      <Name type="xs:string"/>
+      <Value type="xs:string"/>
+    </CustomParameter>
+
     <GlobalSysSolution optional="true">
       <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
       <MatrixInversion repeatable="true">
@@ -330,6 +337,7 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
+
    <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 
@@ -402,6 +410,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO> -->
-
+  </DurationIO>
+ -->
 </IncompressibleNavierStokes>

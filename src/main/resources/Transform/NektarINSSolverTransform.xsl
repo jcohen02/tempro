@@ -52,7 +52,7 @@
     </VARIABLES>
   </xsl:template>
     
-  <xsl:template match="ProblemSpecification" mode ="Parameters">
+  <xsl:template match="NumericalSpecification" mode ="Parameters">
     <xsl:choose>
       <xsl:when test="CFL">
         <P>CFL = <xsl:value-of select="CFL"/></P>
@@ -60,7 +60,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="ProblemSpecification" mode ="NavierStokesSolverInfo">
+  <xsl:template match="NumericalSpecification" mode ="NavierStokesSolverInfo">
     <I PROPERTY="SolverType">
       <xsl:attribute name="VALUE">
         <xsl:value-of select="SolverType" />
@@ -88,13 +88,13 @@
   </xsl:template>
 
 
-  <xsl:template match="ProblemSpecification" mode ="Expansion">
+  <xsl:template match="NumericalSpecification" mode ="Expansion">
     <!-- We assume the composites required for the expansion match the domain -->
     <xsl:attribute name="NUMMODES"><xsl:value-of select="Expansion/PolynomialOrder + 1"/></xsl:attribute>
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
   </xsl:template>
 
-  <xsl:template match="ProblemSpecification" mode ="SolverInfo">
+  <xsl:template match="NumericalSpecification" mode ="SolverInfo">
     <I PROPERTY="Projection">
       <xsl:attribute name="VALUE">
         <xsl:choose>
@@ -218,16 +218,20 @@
     </xsl:if>
   </xsl:template>
 
-<!--   <xsl:template match="DomainSpecification" mode ="NavierStokesParameters">
-    <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
-    <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
-  </xsl:template> -->
+  <xsl:template match="CustomExpression" mode ="AddExpression">
+    <E>
+      <xsl:attribute name="NAME">
+        <xsl:value-of select="Name"/>
+      </xsl:attribute>
+      <xsl:attribute name="VALUE">
+        <xsl:value-of select="Value"/>
+      </xsl:attribute>
+    </E>
+  </xsl:template>
 
   <xsl:template match="CustomParameter" mode ="AddFunctions">
     <P><xsl:value-of select="Name"/> = <xsl:value-of select="Value"/></P>
   </xsl:template>
-
-
 
   <xsl:template match="Function" mode ="AddFunctions">
     <xsl:message>Processing function...</xsl:message>
@@ -310,18 +314,20 @@
       <CONDITIONS>
         <PARAMETERS>
           <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
-          <xsl:apply-templates select="ProblemSpecification" mode ="Parameters"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="AddFunctions"/>
           <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
         </PARAMETERS>
 
         <SOLVERINFO>
-          <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesSolverInfo"/>
-          <xsl:apply-templates select="ProblemSpecification" mode ="SolverInfo"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="NavierStokesSolverInfo"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="SolverInfo"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
         </SOLVERINFO>
             
+        <xsl:apply-templates select="AdditionalParameters" mode ="AddExpression"/>
+        
         <xsl:apply-templates select="DomainSpecification" mode ="Variables"/>
         
         <xsl:apply-templates select="DomainSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
@@ -339,15 +345,12 @@
       <EXPANSIONS>
         <E>
           <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
-          <xsl:apply-templates select="ProblemSpecification" mode ="Expansion"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
           <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
         </E>
       </EXPANSIONS>
 
-<!--       <FUNCTION>
-        <xsl:apply-templates select="AdditionalParameters" mode ="Functions"/>
-      </FUNCTION>
- -->
+
       <!-- Copy in the geometry -->
       <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>
 

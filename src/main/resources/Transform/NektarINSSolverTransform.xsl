@@ -29,11 +29,29 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="Physics" mode ="NavierStokesParameters">
+  <xsl:template match="DomainSpecification" mode ="NavierStokesParameters">
     <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
     <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
   </xsl:template>
-  
+
+  <xsl:template match="DomainSpecification" mode ="Variables">
+    <VARIABLES> 
+        <xsl:choose>
+          <xsl:when test="Dimensions = '2D'">
+            <V ID="0">u</V>
+            <V ID="1">v</V>
+            <V ID="2">p</V>
+          </xsl:when>
+          <xsl:when test="Dimensions = '3D'">
+            <V ID="0">u</V>
+            <V ID="1">v</V>
+            <V ID="2">w</V>
+            <V ID="3">p</V>
+          </xsl:when>
+        </xsl:choose>
+    </VARIABLES>
+  </xsl:template>
+    
   <xsl:template match="ProblemSpecification" mode ="Parameters">
     <xsl:choose>
       <xsl:when test="CFL">
@@ -200,6 +218,17 @@
     </xsl:if>
   </xsl:template>
 
+<!--   <xsl:template match="DomainSpecification" mode ="NavierStokesParameters">
+    <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
+    <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
+  </xsl:template> -->
+
+  <xsl:template match="CustomParameter" mode ="AddFunctions">
+    <P><xsl:value-of select="Name"/> = <xsl:value-of select="Value"/></P>
+  </xsl:template>
+
+
+
   <xsl:template match="Function" mode ="AddFunctions">
     <xsl:message>Processing function...</xsl:message>
     <FUNCTION>
@@ -221,7 +250,7 @@
         <xsl:attribute name="VAR">
           <xsl:value-of select="ExpressionVar"/>
         </xsl:attribute>
-        <xsl:text>Value=&quot;</xsl:text><xsl:value-of select="ExpressionName"/><xsl:text>&quot;</xsl:text>
+        <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
       </E>
     </xsl:if>    
   </xsl:template>
@@ -280,9 +309,10 @@
       
       <CONDITIONS>
         <PARAMETERS>
-          <xsl:apply-templates select="Physics" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
+          <xsl:apply-templates select="AdditionalParameters" mode ="AddFunctions"/>
           <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
         </PARAMETERS>
 
@@ -292,11 +322,7 @@
           <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
         </SOLVERINFO>
             
-        <VARIABLES>
-          <V ID="0">u</V>
-          <V ID="1">v</V>
-          <V ID="2">p</V>
-        </VARIABLES>
+        <xsl:apply-templates select="DomainSpecification" mode ="Variables"/>
         
         <xsl:apply-templates select="DomainSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
 

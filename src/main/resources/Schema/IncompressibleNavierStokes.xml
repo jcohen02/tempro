@@ -10,8 +10,12 @@
     incompressible Navier-Stokes equation. Nektar++ user guide: 
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
-
-  <Physics>
+  
+<!--   <DomainSpecification>
+    <Dimensions type="xs:string" inputType="choice">
+      <tempss:item>2D</tempss:item>
+      <tempss:item>3D</tempss:item>
+    </Dimensions>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -21,9 +25,42 @@
     </libhpc:documentation>
     <ReynoldsNumber type="positiveDouble"/>
     <KinematicViscosity type="xs:string"/>
-  </Physics>
+    <Geometry type="geometryFileName" inputType="file">
+      <libhpc:documentation>
+        The geometry on which the problem is being solved . Provide a Nektar 
+        XML (with root NEKTAR element) containing a GEOMETRY element that will 
+        be parsed to identify boundary regions.
+      </libhpc:documentation>
+    </Geometry>
+    <BoundaryDetails type="BoundaryDetails">
+      <libhpc:documentation>
+        Here you can set up your boundary conditions and name them. When you 
+        add a geometry file, this will be parsed to identify and build the 
+        boundary regions which will appear here automatically. You can then 
+        assign one of your boundary conditions to each region as required. 
+      </libhpc:documentation>
+    </BoundaryDetails>
+    <InitialConditions optional="true">
+      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+      <Variable repeatable="true">
+        <VariableName type="xs:string"/>
+        <Type paramType="choice">
+          <Expression type="xs:string">
+            <libhpc:documentation>
+              Provide an expression describing the initial condition for this variable.
+            </libhpc:documentation>
+          </Expression>
+          <File type="fileName" inputType="file">
+            <libhpc:documentation>
+              Provide a field file containing details of the initial condition for this variable.
+            </libhpc:documentation>
+          </File>
+        </Type>
+      </Variable>
+    </InitialConditions>
+  </DomainSpecification> -->
 
-  <ProblemSpecification>
+  <!-- <ProblemSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -176,45 +213,13 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>    
-  </ProblemSpecification>
-  
-  <DomainSpecification>
-    <Geometry type="geometryFileName" inputType="file">
-      <libhpc:documentation>
-        The geometry on which the problem is being solved . Provide a Nektar 
-        XML (with root NEKTAR element) containing a GEOMETRY element that will 
-        be parsed to identify boundary regions.
-      </libhpc:documentation>
-    </Geometry>
-    <BoundaryDetails type="BoundaryDetails">
-      <libhpc:documentation>
-        Here you can set up your boundary conditions and name them. When you 
-        add a geometry file, this will be parsed to identify and build the 
-        boundary regions which will appear here automatically. You can then 
-        assign one of your boundary conditions to each region as required. 
-      </libhpc:documentation>
-    </BoundaryDetails>
-    <InitialConditions optional="true">
-      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
-      <Variable repeatable="true">
-        <VariableName type="xs:string"/>
-        <Type paramType="choice">
-          <Expression type="xs:string">
-            <libhpc:documentation>
-              Provide an expression describing the initial condition for this variable.
-            </libhpc:documentation>
-          </Expression>
-          <File type="fileName" inputType="file">
-            <libhpc:documentation>
-              Provide a field file containing details of the initial condition for this variable.
-            </libhpc:documentation>
-          </File>
-        </Type>
-      </Variable>
-    </InitialConditions>
-  </DomainSpecification>
+  </ProblemSpecification> -->
 
   <AdditionalParameters>
+    <CustomParameter repeatable="true" optional="true">
+      <Name type="xs:string"/>
+      <Value type="xs:string"/>
+    </CustomParameter>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
@@ -380,7 +385,7 @@
 
   </AdditionalParameters>
 
-  <DurationIO>
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -397,6 +402,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO>
+  </DurationIO> -->
 
 </IncompressibleNavierStokes>

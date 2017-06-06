@@ -88,6 +88,16 @@
         <D>
           <xsl:attribute name="VAR"><xsl:value-of select="VariableName"/></xsl:attribute>
           <xsl:choose>
+  	        <xsl:when test="ConditionValue/Expression">
+  	          <xsl:attribute name="VALUE">
+  	            <xsl:value-of select="ConditionValue/Expression"/>
+  	          </xsl:attribute>
+  	        </xsl:when>
+  	        <xsl:otherwise>
+  	          <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>
+  	        </xsl:otherwise>
+  	      </xsl:choose>
+          <xsl:choose>
             <xsl:when test="UserDefinedType">
               <xsl:if test="UserDefinedType = 'HighOrderPressure - INS Only'">
                 <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
@@ -97,22 +107,22 @@
               </xsl:if>
             </xsl:when>
           </xsl:choose>
-          <xsl:choose>
-	        <xsl:when test="ConditionValue/Expression">
-	          <xsl:attribute name="VALUE">
-	            <xsl:value-of select="ConditionValue/Expression"/>
-	          </xsl:attribute>
-	        </xsl:when>
-	        <xsl:otherwise>
-	          <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>
-	        </xsl:otherwise>
-	      </xsl:choose>
         </D>
       </xsl:when>
       <xsl:when test="ConditionType = 'Neumann (N)'">
         <N>
           <xsl:attribute name="VAR"><xsl:value-of select="VariableName"/></xsl:attribute>
           <xsl:choose>
+            <xsl:when test="ConditionValue/Expression">
+              <xsl:attribute name="VALUE">
+                <xsl:value-of select="ConditionValue/Expression"/>
+              </xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>
+            </xsl:otherwise>
+          </xsl:choose>
+          <xsl:choose>
             <xsl:when test="UserDefinedType">
               <xsl:if test="UserDefinedType = 'HighOrderPressure - INS Only'">
                 <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
@@ -122,17 +132,32 @@
               </xsl:if>
             </xsl:when>
           </xsl:choose>
-          <xsl:choose>
-	        <xsl:when test="ConditionValue/Expression">
-	          <xsl:attribute name="VALUE">
-	            <xsl:value-of select="ConditionValue/Expression"/>
-	          </xsl:attribute>
-	        </xsl:when>
-	        <xsl:otherwise>
-	          <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>
-	        </xsl:otherwise>
-	      </xsl:choose>
         </N>
+      </xsl:when>
+      <xsl:when test="ConditionType = 'Periodic (P)'">
+        <P>
+          <xsl:attribute name="VAR"><xsl:value-of select="VariableName"/></xsl:attribute>
+          <xsl:choose>
+            <xsl:when test="ConditionValue/Expression">
+              <xsl:attribute name="VALUE">
+                [<xsl:value-of select="ConditionValue/Expression"/>]
+              </xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>
+            </xsl:otherwise>
+          </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="UserDefinedType">
+              <xsl:if test="UserDefinedType = 'HighOrderPressure - INS Only'">
+                <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
+              </xsl:if>
+              <xsl:if test="UserDefinedType = 'TimeDependent'">
+                <xsl:attribute name="USERDEFINEDTYPE">T</xsl:attribute>
+              </xsl:if>
+            </xsl:when>
+          </xsl:choose>
+        </P>
       </xsl:when>
     </xsl:choose>
   </xsl:template>

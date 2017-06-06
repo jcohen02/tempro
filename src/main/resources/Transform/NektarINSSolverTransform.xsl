@@ -74,7 +74,7 @@
     <xsl:if test="Driver">
       <I PROPERTY="Driver">
         <xsl:attribute name="VALUE">
-          <xsl:value-of select="Equation" />
+          <xsl:value-of select="Driver" />
         </xsl:attribute>
       </I>
     </xsl:if>

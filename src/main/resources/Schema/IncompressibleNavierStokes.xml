@@ -10,7 +10,7 @@
     incompressible Navier-Stokes equation. Nektar++ user guide: 
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
-  <!-- 
+  
   <DomainSpecification>
     <Dimensions type="xs:string" inputType="choice">
       <tempss:item>2D</tempss:item>
@@ -59,8 +59,8 @@
       </Variable>
     </InitialConditions>
   </DomainSpecification>
- -->
- <!--  <NumericalSpecification>
+
+  <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -213,7 +213,7 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>    
-  </NumericalSpecification> -->
+  </NumericalSpecification>
 
   <AdditionalParameters>
     <libhpc:documentation>
@@ -230,142 +230,6 @@
       <Name type="xs:string"/>
       <Value type="xs:string"/>
     </CustomParameter>
-
-<!--     <GlobalSysSolution optional="true">
-      <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
-      <MatrixInversion repeatable="true">
-        <Field type="xs:string">
-          <libhpc:documentation>The variable name for the field that this matrix inversion applies to.</libhpc:documentation>
-        </Field>
-        <InversionType paramType="choice">
-          <libhpc:documentation>The inversion type for this field.</libhpc:documentation>
-          <Direct>
-            <libhpc:documentation>Invert the matrix directly</libhpc:documentation>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-            </SubStructuring>
-          </Direct>
-          <Iterative>
-            <libhpc:documentation>
-              Invert the matrix iteratively using the conjugate gradient 
-              approach. Uses repeated matrix multiplication to converge to a 
-              solution to the matrix inverse problem rather than directly 
-              inverting the matrix.
-            </libhpc:documentation>
-            <SubStructuring type="xs:string" inputType="choice">
-              <libhpc:documentation>
-                Substructuring allows the matrix to be reorganised into a form 
-                that is easier to invert.
-                  Full: the degrees of freedom from all elements are put 
-                    together into one big matrix.
-                  StaticCondensation: Using linear algebra, the matrix is 
-                    restructured so that all the degrees of freedom on element  
-                    boundaries come first. This gives a dense matrix in the top  
-                    left hand corner, and a series of block matrices elsewhere. 
-                    Then the Schur complement method is used to invert the matrix.
-              </libhpc:documentation>
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-            </SubStructuring>
-            <Preconditioner type="xs:string"  inputType="choice">
-              <libhpc:documentation>
-                The preconditioner uses linear algebra to bring the matrix 
-                into a form for which the conjugate gradient iterative 
-                algorithm converges faster. A perfect preconditioner would be 
-                the inverse of the matrix!
-                
-                LowEnergy: use for 3D elements with high polynomial order
-                BlockDiagonal: use for 2D elements with high polynomial order
-                Diagonal: use for anything else
-                LowEnergyWithLinearSpace: available for use on the pressure in 
-                                          3D flow simulation (rarely used)
-              </libhpc:documentation>
-              <tempss:item>LowEnergy</tempss:item>
-              <tempss:item>Diagonal</tempss:item>
-              <tempss:item>BlockDiagonal</tempss:item>
-              <tempss:item>LowEnergyWithLinearSpace</tempss:item>
-            </Preconditioner>
-            <SuccessiveRHS type="positiveIncDouble">
-              <libhpc:documentation>
-                When SuccessiveRHS is set to true, a number of previous 
-                solutions to the linear solver are used to extrapolate an 
-                initial guess for the current solve.
-              </libhpc:documentation>
-            </SuccessiveRHS>
-            <IterativeSolverTolerance type="positiveDouble">
-              <libhpc:documentation>Required tolerance in solution when 
-              solving iteratively</libhpc:documentation>
-            </IterativeSolverTolerance>
-          </Iterative>
-          <Xxt>
-            <libhpc:documentation>Invert the matrix using Xxt</libhpc:documentation>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <libhpc:documentation>
-                Substructuring allows the matrix to be reorganised into a form 
-                that is easier to invert.
-                  Full: the degrees of freedom from all elements are put 
-                    together into one big matrix.
-                  StaticCondensation: Using linear algebra, the matrix is 
-                    restructured so that all the degrees of freedom on element  
-                    boundaries come first. This gives a dense matrix in the top  
-                    left hand corner, and a series of block matrices elsewhere. 
-                    Then the Schur complement method is used to invert the matrix.
-              </libhpc:documentation>
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-            </SubStructuring>
-          </Xxt>
-          <PETSc>
-            <libhpc:documentation>Invert the matrix using PETSc</libhpc:documentation>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <libhpc:documentation>
-                Substructuring allows the matrix to be reorganised into a form 
-                that is easier to invert.
-                  Full: the degrees of freedom from all elements are put 
-                    together into one big matrix.
-                  StaticCondensation: Using linear algebra, the matrix is 
-                    restructured so that all the degrees of freedom on element  
-                    boundaries come first. This gives a dense matrix in the top  
-                    left hand corner, and a series of block matrices elsewhere. 
-                    Then the Schur complement method is used to invert the matrix.
-              </libhpc:documentation>
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-            </SubStructuring>
-            <Preconditioner type="xs:string"  inputType="choice">
-              <libhpc:documentation>
-                The preconditioner uses linear algebra to bring the matrix 
-                into a form for which the conjugate gradient iterative 
-                algorithm converges faster. A perfect preconditioner would be 
-                the inverse of the matrix!
-                
-                LowEnergy: use for 3D elements with high polynomial order
-                BlockDiagonal: use for 2D elements with high polynomial order
-                Diagonal: use for anything else
-                LowEnergyWithLinearSpace: available for use on the pressure in 
-                                          3D flow simulation (rarely used)
-              </libhpc:documentation>
-              <tempss:item>LowEnergy</tempss:item>
-              <tempss:item>Diagonal</tempss:item>
-              <tempss:item>BlockDiagonal</tempss:item>
-              <tempss:item>LowEnergyWithLinearSpace</tempss:item>
-            </Preconditioner>
-            <SuccessiveRHS type="positiveIncDouble">
-              <libhpc:documentation>
-                When SuccessiveRHS is set to true, a number of previous 
-                solutions to the linear solver are used to extrapolate an 
-                initial guess for the current solve.
-              </libhpc:documentation>
-            </SuccessiveRHS>
-            <IterativeSolverTolerance type="positiveDouble">
-              <libhpc:documentation>Required tolerance in solution when 
-              solving iteratively</libhpc:documentation>
-            </IterativeSolverTolerance>
-          </PETSc>
-        </InversionType>
-      </MatrixInversion>
-    </GlobalSysSolution> -->
 
    <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
@@ -480,7 +344,7 @@
 
   </AdditionalParameters>
 
-<!--   <DurationIO>
+  <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -497,6 +361,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO> -->
+  </DurationIO>
 
 </IncompressibleNavierStokes>

@@ -99,6 +99,15 @@
       <tempss:item>SteadyState</tempss:item>
     </Driver>
 
+    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
+      <tempss:item>Direct</tempss:item>
+      <tempss:item>Adjoint</tempss:item>
+      <tempss:item>NonLinear</tempss:item>
+      <tempss:item>TransientGrowth</tempss:item>
+      <tempss:item>SkewSymmetric</tempss:item>
+      <tempss:item>AdaptiveSFD</tempss:item>
+    </EvolutionOperator>
+
     <AdvectionForm type="xs:string" inputType="choice" optional="true">
       <libhpc:documentation>
         Sets the form in which the advection term is treated. See 

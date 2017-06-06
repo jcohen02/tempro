@@ -78,6 +78,13 @@
         </xsl:attribute>
       </I>
     </xsl:if>
+    <xsl:if test="EvolutionOperator">
+      <I PROPERTY="EvolutionOperator">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="EvolutionOperator" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
     <xsl:if test="AdvectionForm">
       <I PROPERTY="AdvectionForm">
         <xsl:attribute name="VALUE">
@@ -173,31 +180,6 @@
   </xsl:template>
 
   <xsl:template match="AdditionalParameters" mode ="SolverInfo">
-<!--     <xsl:if test="GlobalSysSolution">
-      <I PROPERTY="GlobalSysSoln">
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
-            <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
-            <xsl:when test="MatrixInversion/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
-            <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
-            <xsl:when test="MatrixInversion/Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCond</xsl:when>
-            <xsl:when test="MatrixInversion/Xxt/SubStructuring = 'Full'">XxtFull</xsl:when>
-            Options for revised GlobalSysSolution with separate InversionType block
-            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
-            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
-            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
-            <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
-
-            <xsl:otherwise>
-              <xsl:message terminate="yes">
-                Error: unhandled matrix inversion approach -> cannot set GlobalSysSoln
-              </xsl:message>
-            </xsl:otherwise>
-          </xsl:choose>
-        </xsl:attribute>
-      </I>
-    </xsl:if> -->
 
     <xsl:if test="SpectralhpDealiasing">
       <I PROPERTY="SPECTRALHPDEALIASING" VALUE="True" />
@@ -248,20 +230,8 @@
           <xsl:attribute name="Var">
             <xsl:value-of select="Field"/>
           </xsl:attribute>
-          <!-- <xsl:apply-templates select="Expression" mode ="AddSoln"/> -->
           <xsl:apply-templates select="InversionType" mode ="AddSoln"/>
         </V>
-  </xsl:template>
-
-  <xsl:template match="Expression" mode ="AddSoln">
-    <xsl:if test="ExpressionVar">
-      <I>
-        <xsl:attribute name="VAR">
-          <xsl:value-of select="ExpressionVar"/>
-        </xsl:attribute>
-        <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
-      </I>
-    </xsl:if>    
   </xsl:template>
 
   <xsl:template match="InversionType" mode ="AddSoln">
@@ -433,6 +403,8 @@
           <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
         </PARAMETERS>
             
+        <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
+
         <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
         
         <xsl:apply-templates select="DomainSpecification" mode ="Variables"/>
@@ -448,11 +420,10 @@
 
       </CONDITIONS>
 
-      <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
-
       <FILTERS>
         <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
       </FILTERS>
+      
       <!-- Copy in the geometry -->
       <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>
 

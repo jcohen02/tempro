@@ -181,6 +181,8 @@
             <xsl:when test="MatrixInversion/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
             <xsl:when test="MatrixInversion/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
             <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+            <xsl:when test="MatrixInversion/Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCond</xsl:when>
+            <xsl:when test="MatrixInversion/Xxt/SubStructuring = 'Full'">XxtFull</xsl:when>
             <!-- Options for revised GlobalSysSolution with separate InversionType block -->
             <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
             <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
@@ -282,7 +284,7 @@
         <xsl:attribute name="NAME">
           <xsl:value-of select="ParamName"/>
         </xsl:attribute>
-        <xsl:text>Value=&quot;</xsl:text><xsl:value-of select="ParamValue"/><xsl:text>&quot;</xsl:text>
+        <xsl:value-of select="ParamValue"/>
       </PARAM>
     </xsl:if>    
   </xsl:template>
@@ -344,7 +346,6 @@
 
         <!-- <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/> -->
 
-        <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
 
         <FUNCTION NAME="InitialConditions">
           <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="InitialConditionVars"/>
@@ -352,6 +353,9 @@
 
       </CONDITIONS>
 
+      <FILTERS>
+        <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
+      </FILTERS>
       <!-- Copy in the geometry -->
       <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>
 

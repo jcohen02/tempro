@@ -81,7 +81,7 @@
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="BoundaryConditionName" type="xs:string"/>
+            <xs:element name="BoundaryConditionReference" type="xs:string"/>
             <xs:element name="Variable" minOccurs="1" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:sequence>

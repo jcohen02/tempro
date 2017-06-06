@@ -20,7 +20,7 @@
     <REGIONSANDMAPPINGS>
       <xsl:for-each select="BoundaryCondition">
         <xsl:variable name="jcount"><xsl:number/></xsl:variable>
-        <xsl:variable name="bcname" select="BoundaryConditionName"/>
+        <xsl:variable name="bcname" select="BoundaryConditionReference"/>
           <BOUNDARYREGION>
             <!-- 
                  Now we need to look up all the BoundaryRegions within 
@@ -69,7 +69,7 @@
   <xsl:template match="BoundaryCondition" mode="BoundaryConditions">
     <xsl:param name="mappings"/>
     
-    <xsl:variable name="bcname"><xsl:value-of select="BoundaryConditionName"/></xsl:variable>
+    <xsl:variable name="bcname"><xsl:value-of select="BoundaryConditionReference"/></xsl:variable>
     
     <xsl:variable name="icount"><xsl:number/></xsl:variable>
     

@@ -705,7 +705,7 @@ function attachBoundaryConditionHandlers() {
     // element and there is no CSS parent selector), we add a class to identify 
     // these nodes.
     // TEST: Attaching handlers to input nodes instead of main bc node.
-    $('li.parent_li[data-fqname="BoundaryConditionName"]').parent(
+    $('li.parent_li[data-fqname="BoundaryConditionReference"]').parent(
     	).addClass('boundary-condition').on('nodeValid', function(e) {
     		updateBoundaryRegions(e, true);
     	}).on('nodeInvalid', function(e) {
@@ -918,7 +918,7 @@ function updateBoundaryRegions(event, valid) {
 	// a name set. Compile a list of these names and then add them to each 
 	// BoundaryRegion/BoundaryCondition node.
 	var BCNames = [];
-	$('li.parent_li[data-fqname="BoundaryConditionName"] input').each(function() {
+	$('li.parent_li[data-fqname="BoundaryConditionReference"] input').each(function() {
 		if(!$(this).parent().parent().parent().parent().hasClass('disabled')) {
 			var value = $(this).val();
 			if(value != null && value != "") {

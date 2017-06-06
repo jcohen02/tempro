@@ -333,6 +333,35 @@
               <tempss:item>Full</tempss:item>
               <tempss:item>StaticCondensation</tempss:item>
             </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice">
+              <libhpc:documentation>
+                The preconditioner uses linear algebra to bring the matrix 
+                into a form for which the conjugate gradient iterative 
+                algorithm converges faster. A perfect preconditioner would be 
+                the inverse of the matrix!
+                
+                LowEnergy: use for 3D elements with high polynomial order
+                BlockDiagonal: use for 2D elements with high polynomial order
+                Diagonal: use for anything else
+                LowEnergyWithLinearSpace: available for use on the pressure in 
+                                          3D flow simulation (rarely used)
+              </libhpc:documentation>
+              <tempss:item>LowEnergy</tempss:item>
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>BlockDiagonal</tempss:item>
+              <tempss:item>LowEnergyWithLinearSpace</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble">
+              <libhpc:documentation>
+                When SuccessiveRHS is set to true, a number of previous 
+                solutions to the linear solver are used to extrapolate an 
+                initial guess for the current solve.
+              </libhpc:documentation>
+            </SuccessiveRHS>
+            <IterativeSolverTolerance type="positiveDouble">
+              <libhpc:documentation>Required tolerance in solution when 
+              solving iteratively</libhpc:documentation>
+            </IterativeSolverTolerance>
           </PETSc>
         </InversionType>
       </MatrixInversion>
@@ -397,8 +426,8 @@
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
-      <FinalTime type="xs:string" units="ms" optional="true"/>
-      <TimeStep type="xs:string" units="ms" optional="true"/>
+      <FinalTime type="xs:string" optional="true"/>
+      <TimeStep type="xs:string" optional="true"/>
       <NumSteps type="xs:string" optional="true"/>
     <IO_CheckSteps type="xs:string">
       <libhpc:documentation>

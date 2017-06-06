@@ -10,7 +10,7 @@
     incompressible Navier-Stokes equation. Nektar++ user guide: 
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
-  
+  <!-- 
   <DomainSpecification>
     <Dimensions type="xs:string" inputType="choice">
       <tempss:item>2D</tempss:item>
@@ -59,8 +59,8 @@
       </Variable>
     </InitialConditions>
   </DomainSpecification>
-
-  <NumericalSpecification>
+ -->
+ <!--  <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -213,7 +213,7 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>    
-  </NumericalSpecification>
+  </NumericalSpecification> -->
 
   <AdditionalParameters>
     <libhpc:documentation>
@@ -231,7 +231,7 @@
       <Value type="xs:string"/>
     </CustomParameter>
 
-    <GlobalSysSolution optional="true">
+<!--     <GlobalSysSolution optional="true">
       <libhpc:documentation>Parameters controlling how matrix inversion is performed.</libhpc:documentation>
       <MatrixInversion repeatable="true">
         <Field type="xs:string">
@@ -365,7 +365,7 @@
           </PETSc>
         </InversionType>
       </MatrixInversion>
-    </GlobalSysSolution>
+    </GlobalSysSolution> -->
 
    <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
@@ -399,6 +399,64 @@
       <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
 
+    <GlobalSysSolution repeatable="true" optional="true">
+      <MatrixInversion repeatable="true">
+        <Field type="xs:string"/>
+        <InversionType paramType="choice">
+          <Direct>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Direct>
+          <Iterative>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice" optional="true">
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble" optional="true">
+            </SuccessiveRHS>
+            <IterativeSolverTolerance type="positiveDouble">
+            </IterativeSolverTolerance>
+          </Iterative>
+          <Xxt>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+              <tempss:item>MultiLevelStaticCondensation</tempss:item>
+            </SubStructuring>
+          </Xxt>
+          <PETSc>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+              <tempss:item>MultiLevelStaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice" optional="true">
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+            </Preconditioner>
+            <IterativeSolverTolerance type="positiveDouble">
+            </IterativeSolverTolerance>
+          </PETSc>
+        </InversionType>
+      </MatrixInversion>
+    </GlobalSysSolution>
+
     <Function repeatable="true" optional="true">
       <Name type="xs:string"/>
       <Variable repeatable="true">
@@ -422,7 +480,7 @@
 
   </AdditionalParameters>
 
-  <DurationIO>
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -439,6 +497,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO>
+  </DurationIO> -->
 
 </IncompressibleNavierStokes>

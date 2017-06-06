@@ -154,7 +154,7 @@
   </xsl:template>
 
   <xsl:template match="AdditionalParameters" mode ="Parameters">
-    <xsl:if test="TimeIntegration/DiffusionAdvancement!='Explicit'">
+<!--     <xsl:if test="TimeIntegration/DiffusionAdvancement!='Explicit'">
       <xsl:choose>
         <xsl:when test="MatrixInversion/Iterative/IterativeSolverTolerance">
           <P>IterativeSolverTolerance = <xsl:value-of select="MatrixInversion/Iterative/IterativeSolverTolerance"/></P>
@@ -163,7 +163,7 @@
           <P>IterativeSolverTolerance = <xsl:value-of select="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance"/></P>
         </xsl:when>
       </xsl:choose>
-    </xsl:if>
+    </xsl:if> -->
 
     <xsl:if test="SpectralVanishingViscosity">
       <P>SVVDiffCoeff = <xsl:value-of select="SpectralVanishingViscosity/SVVDiffCoeff"/></P>
@@ -173,7 +173,7 @@
   </xsl:template>
 
   <xsl:template match="AdditionalParameters" mode ="SolverInfo">
-    <xsl:if test="GlobalSysSolution">
+<!--     <xsl:if test="GlobalSysSolution">
       <I PROPERTY="GlobalSysSoln">
         <xsl:attribute name="VALUE">
           <xsl:choose>
@@ -183,7 +183,7 @@
             <xsl:when test="MatrixInversion/Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
             <xsl:when test="MatrixInversion/Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCond</xsl:when>
             <xsl:when test="MatrixInversion/Xxt/SubStructuring = 'Full'">XxtFull</xsl:when>
-            <!-- Options for revised GlobalSysSolution with separate InversionType block -->
+            Options for revised GlobalSysSolution with separate InversionType block
             <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
             <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
             <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
@@ -197,7 +197,7 @@
           </xsl:choose>
         </xsl:attribute>
       </I>
-    </xsl:if>
+    </xsl:if> -->
 
     <xsl:if test="SpectralhpDealiasing">
       <I PROPERTY="SPECTRALHPDEALIASING" VALUE="True" />
@@ -233,6 +233,101 @@
 
   <xsl:template match="CustomParameter" mode ="AddParameter">
     <P><xsl:value-of select="Name"/> = <xsl:value-of select="Value"/></P>
+  </xsl:template>
+
+  <xsl:template match="GlobalSysSolution" mode ="GlobalSysSoln">
+    <xsl:message>Processing function...</xsl:message>
+    <GLOBALSYSSOLNINFO>
+      <xsl:apply-templates select="MatrixInversion" mode ="GlobalSysSoln"/>
+    </GLOBALSYSSOLNINFO> 
+  </xsl:template>
+
+  <xsl:template match="MatrixInversion" mode ="GlobalSysSoln">
+        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
+        <V>
+          <xsl:attribute name="Var">
+            <xsl:value-of select="Field"/>
+          </xsl:attribute>
+          <!-- <xsl:apply-templates select="Expression" mode ="AddSoln"/> -->
+          <xsl:apply-templates select="InversionType" mode ="AddSoln"/>
+        </V>
+  </xsl:template>
+
+  <xsl:template match="Expression" mode ="AddSoln">
+    <xsl:if test="ExpressionVar">
+      <I>
+        <xsl:attribute name="VAR">
+          <xsl:value-of select="ExpressionVar"/>
+        </xsl:attribute>
+        <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
+      </I>
+    </xsl:if>    
+  </xsl:template>
+
+  <xsl:template match="InversionType" mode ="AddSoln">
+    <I PROPERTY="GlobalSysSoln">
+      <xsl:attribute name="VALUE">
+        <xsl:choose>
+          <xsl:when test="Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+          <xsl:when test="Direct/SubStructuring = 'StaticCondensation'">DirectStaticCondensation</xsl:when>
+          <xsl:when test="Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
+          <xsl:when test="Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCondensation</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'Full'">XxtFull</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCondensation</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'MultiLevelStaticCondensation'">XxtMultiLevelStaticCondensation</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'Full'">PETScFull</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'StaticCondensation'">PETScStaticCondensation</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'MultiLevelStaticCondensation'">PETScMultiLevelStaticCondensation</xsl:when>
+        </xsl:choose>
+      </xsl:attribute>
+    </I>
+    <xsl:if test="Iterative">
+      <I PROPERTY="Preconditioner">
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="Iterative/Preconditioner = 'Diagonal'">Diagonal</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpace'">FullLinearSpace</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'LowEnergyBlock'">LowEnergyBlock</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'Block'">Block</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpaceWithDiagonal'">FullLinearSpaceWithDiagonal</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpaceWithLowEnergyBlock'">FullLinearSpaceWithLowEnergyBlock</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpaceWithBlock'">FullLinearSpaceWithBlock</xsl:when>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+      <I PROPERTY="IterativeSolverTolerance">
+        <xsl:attribute name="VALUE">
+            <xsl:value-of select="Iterative/IterativeSolverTolerance"/>
+        </xsl:attribute>
+      </I>
+      <xsl:if test="Iterative/SuccessiveRHS">
+        <I PROPERTY="SuccessiveRHS">
+          <xsl:attribute name="VALUE">
+              <xsl:value-of select="Iterative/SuccessiveRHS"/>
+          </xsl:attribute>
+        </I>
+      </xsl:if>
+    </xsl:if>
+    <xsl:if test="PETSc">
+      <I PROPERTY="Preconditioner">
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="PETSc/Preconditioner = 'Diagonal'">Diagonal</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpace'">FullLinearSpace</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'LowEnergyBlock'">LowEnergyBlock</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'Block'">Block</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpaceWithDiagonal'">FullLinearSpaceWithDiagonal</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpaceWithLowEnergyBlock'">FullLinearSpaceWithLowEnergyBlock</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpaceWithBlock'">FullLinearSpaceWithBlock</xsl:when>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+      <I PROPERTY="IterativeSolverTolerance">
+        <xsl:attribute name="VALUE">
+            <xsl:value-of select="PETSc/IterativeSolverTolerance"/>
+        </xsl:attribute>
+      </I>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="Function" mode ="AddFunctions">
@@ -352,6 +447,8 @@
         </FUNCTION>
 
       </CONDITIONS>
+
+      <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
 
       <FILTERS>
         <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>

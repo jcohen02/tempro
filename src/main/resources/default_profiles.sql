@@ -561,7 +561,7 @@ INSERT INTO "profile" VALUES(12,'Incompressible NS With Updated Boundary Conditi
                     <ConditionValue>
                         <Expression>0</Expression>
                     </ConditionValue>
-                    <UserDefinedType>HighOrderPressure - INS Only</UserDefinedType>
+                    <UserDefinedType>HighOrderPressure</UserDefinedType>
                 </Variable>
             </BoundaryCondition>
             <BoundaryCondition>
@@ -586,7 +586,7 @@ INSERT INTO "profile" VALUES(12,'Incompressible NS With Updated Boundary Conditi
                     <ConditionValue>
                         <Expression>0</Expression>
                     </ConditionValue>
-                    <UserDefinedType>HighOrderPressure - INS Only</UserDefinedType>
+                    <UserDefinedType>HighOrderPressure</UserDefinedType>
                 </Variable>
             </BoundaryCondition>
             <BoundaryCondition>

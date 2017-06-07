@@ -12,7 +12,7 @@
   </libhpc:documentation>
   
   <DomainSpecification>
-    <Dimensions type="xs:string" inputType="choice">
+    <!-- <Dimensions type="xs:string" inputType="choice">
       <tempss:item>2D</tempss:item>
       <tempss:item>3D</tempss:item>
     </Dimensions>
@@ -31,7 +31,7 @@
         XML (with root NEKTAR element) containing a GEOMETRY element that will 
         be parsed to identify boundary regions.
       </libhpc:documentation>
-    </Geometry>
+    </Geometry> -->
     <BoundaryDetails type="BoundaryDetails">
       <libhpc:documentation>
         Here you can set up your boundary conditions and name them. When you 
@@ -60,7 +60,7 @@
     </InitialConditions>
   </DomainSpecification>
 
-  <NumericalSpecification>
+  <!-- <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -222,9 +222,9 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>    
-  </NumericalSpecification>
+  </NumericalSpecification> -->
 
-  <AdditionalParameters>
+<!--   <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
@@ -352,8 +352,8 @@
     </Filter>
 
   </AdditionalParameters>
-
-  <DurationIO>
+ -->
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -370,6 +370,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO>
+  </DurationIO> -->
 
 </IncompressibleNavierStokes>

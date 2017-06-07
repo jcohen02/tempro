@@ -98,13 +98,20 @@
   	        </xsl:otherwise>
   	      </xsl:choose>
           <xsl:choose>
-            <xsl:when test="UserDefinedType">
-              <xsl:if test="UserDefinedType = 'HighOrderPressure - INS Only'">
+            <xsl:when test="UserDefinedType/ExistingType">
+              <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
                 <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
               </xsl:if>
-              <xsl:if test="UserDefinedType = 'TimeDependent'">
+              <xsl:if test="UserDefinedType/ExistingType = 'TimeDependent'">
                 <xsl:attribute name="USERDEFINEDTYPE">T</xsl:attribute>
               </xsl:if>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="UserDefinedType/CustomExpression">
+              <xsl:attribute name="USERDEFINEDTYPE">
+                <xsl:value-of select="UserDefinedType/CustomExpression"/>
+              </xsl:attribute>
             </xsl:when>
           </xsl:choose>
         </D>
@@ -123,13 +130,20 @@
             </xsl:otherwise>
           </xsl:choose>
           <xsl:choose>
-            <xsl:when test="UserDefinedType">
-              <xsl:if test="UserDefinedType = 'HighOrderPressure - INS Only'">
+            <xsl:when test="UserDefinedType/ExistingType">
+              <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
                 <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
               </xsl:if>
-              <xsl:if test="UserDefinedType = 'TimeDependent'">
+              <xsl:if test="UserDefinedType/ExistingType = 'TimeDependent'">
                 <xsl:attribute name="USERDEFINEDTYPE">T</xsl:attribute>
               </xsl:if>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="UserDefinedType/CustomExpression">
+              <xsl:attribute name="USERDEFINEDTYPE">
+                <xsl:value-of select="UserDefinedType/CustomExpression"/>
+              </xsl:attribute>
             </xsl:when>
           </xsl:choose>
         </N>
@@ -148,15 +162,23 @@
             </xsl:otherwise>
           </xsl:choose>
           <xsl:choose>
-            <xsl:when test="UserDefinedType">
-              <xsl:if test="UserDefinedType = 'HighOrderPressure - INS Only'">
+            <xsl:when test="UserDefinedType/ExistingType">
+              <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
                 <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
               </xsl:if>
-              <xsl:if test="UserDefinedType = 'TimeDependent'">
+              <xsl:if test="UserDefinedType/ExistingType = 'TimeDependent'">
                 <xsl:attribute name="USERDEFINEDTYPE">T</xsl:attribute>
               </xsl:if>
             </xsl:when>
           </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="UserDefinedType/CustomExpression">
+              <xsl:attribute name="USERDEFINEDTYPE">
+                <xsl:value-of select="UserDefinedType/CustomExpression"/>
+              </xsl:attribute>
+            </xsl:when>
+          </xsl:choose>
+
         </P>
       </xsl:when>
     </xsl:choose>

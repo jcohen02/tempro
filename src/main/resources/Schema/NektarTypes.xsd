@@ -121,14 +121,29 @@
                     </xs:complexType>
                   </xs:element>
                   <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
-                    <xs:simpleType>
-                      <xs:restriction base="xs:string">
-                        <xs:enumeration value="TimeDependent"/>
-                        <xs:enumeration value="HighOrderPressure - INS Only"/>
-                        <xs:enumeration value="IsentropicVortex - CFS Only"/>
-                      </xs:restriction>
-                    </xs:simpleType>
+                    <xs:complexType>
+                      <xs:choice>
+                        <xs:element name="ExistingType">
+                          <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                              <xs:enumeration value="TimeDependent"/>
+                              <xs:enumeration value="HighOrderPressure"/>
+                            </xs:restriction>
+                          </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="CustomExpression" type="xs:string">
+                          <xs:annotation>
+                            <xs:appinfo>
+                              <libhpc:documentation>
+                                Provide a function describing this boundary condition.
+                              </libhpc:documentation>
+                            </xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:choice>
+                    </xs:complexType>
                   </xs:element>
+
                 </xs:sequence>
               </xs:complexType>
             </xs:element>

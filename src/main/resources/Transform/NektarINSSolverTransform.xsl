@@ -161,17 +161,6 @@
   </xsl:template>
 
   <xsl:template match="AdditionalParameters" mode ="Parameters">
-<!--     <xsl:if test="TimeIntegration/DiffusionAdvancement!='Explicit'">
-      <xsl:choose>
-        <xsl:when test="MatrixInversion/Iterative/IterativeSolverTolerance">
-          <P>IterativeSolverTolerance = <xsl:value-of select="MatrixInversion/Iterative/IterativeSolverTolerance"/></P>
-        </xsl:when>
-        <xsl:when test="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance">
-          <P>IterativeSolverTolerance = <xsl:value-of select="GlobalSysSolution/MatrixInversion/InversionType/Iterative/IterativeSolverTolerance"/></P>
-        </xsl:when>
-      </xsl:choose>
-    </xsl:if> -->
-
     <xsl:if test="SpectralVanishingViscosity">
       <P>SVVDiffCoeff = <xsl:value-of select="SpectralVanishingViscosity/SVVDiffCoeff"/></P>
       <P>SVVCutoffRatio = <xsl:value-of select="SpectralVanishingViscosity/SVVCutoffRatio"/></P>

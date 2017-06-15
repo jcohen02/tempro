@@ -5,7 +5,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://libhpc.doc.ic.ac.uk/prism/constraints PRISMConstraints.xsd">
     
-    <description>Constraints for the Nektar++ Incompressible Navier-Stokes solver</description>
+    <description>Constraints for the Nektar++ Incompressible Navier-Stokes Solver</description>
     
     <!-- This should be the solver name exactly as it appears in the root node
          of the tree that these constraints relate to. 
@@ -13,61 +13,102 @@
     <solver>IncompressibleNavierStokes</solver>
     
     <variables>
-
-      <variable path="NumericalAlgorithm.SolverType" name="SolverType">
+      <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
+          <value>CoupledLinearNS</value>
           <value>VelocityCorrectionScheme</value>
-          <value>DirectSolver</value>
+          <value>VCSWeakPressure</value>
         </domain>
-      </variable>
+      </variable>      
 
-<!--       <variable path="ProblemSpecification.EquationType" name="EquationType">
-        <domain>
-          <value>SteadyStokes</value>
-          <value>SteadyOseen</value>
-          <value>UnsteadyStokes</value>
-          <value>SteadyLinearisedNavierStokes</value>
-          <value>UnsteadyLinearisedNavierStokes</value>
-          <value>UnsteadyNavierStokes</value>
-        </domain>
-      </variable> -->
-      
-      <variable path="NumericalAlgorithm.TimeIntegration.TimeIntegrationMethod" 
+      <variable path="NumericalSpecification.TimeIntegration.TimeIntegrationMethod" 
                 name="TimeIntegrationMethod">
         <domain>
-          <value>Off</value>
+          <value>NotProvided</value>
           <value>IMEXOrder1</value>
           <value>IMEXOrder2</value>
           <value>IMEXOrder3</value>
+          <value>DIRKOrder1</value>
+          <value>ForwardEuler</value>
           <value>BackwardEuler</value>
-          <value>BDFOrder1</value>
-          <value>BDFOrder2</value>
+          <value>ClassicalRungeKutta4</value>
         </domain>
       </variable>
       
+      <variable path="NumericalSpecification.Projection" name="Projection">
+        <domain>
+          <value>ContinuousGalerkin</value>
+          <value>DiscontinuousGalerkin</value>
+        </domain>
+      </variable>      
+
     </variables>
     
     <constraints>
-      <!-- Constraint mappings for Equation Type -> AdvectionType -->
-      <!-- 
-           If an EquationType that has no advection term is selected 
-           (i.e. Laplace, Poisson, Helmholtz, SteadyDiffusionReaction, 
-           UnsteadyDiffusion or UnsteadyInviscidBurger), it is not valid to 
-           select an entry from NumericalAlgorithm -> AdvectionType and this 
-           must be switched off. 
-      -->
-
+      <!-- Mapping of Solver Type to the Time Integration Method -->
+      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="TimeIntegrationMethod">
+        <targetValue>NotProvided</targetValue>
+      </mapping>
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="TimeIntegrationMethod">
         <targetValue>IMEXOrder1</targetValue>
         <targetValue>IMEXOrder2</targetValue>
         <targetValue>IMEXOrder3</targetValue>
+        <targetValue>DIRKOrder1</targetValue>
+        <targetValue>ForwardEuler</targetValue>
         <targetValue>BackwardEuler</targetValue>
-        <targetValue>BDFOrder1</targetValue>
-        <targetValue>BDFOrder2</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="DirectSolver" targetVariable="TimeIntegrationMethod">
-        <targetValue>Off</targetValue>
+      <mapping variable="SolverType" varvalue="VCSWeakPressure" targetVariable="TimeIntegrationMethod">
+        <targetValue>IMEXOrder1</targetValue>
+        <targetValue>IMEXOrder2</targetValue>
+        <targetValue>IMEXOrder3</targetValue>
+        <targetValue>DIRKOrder1</targetValue>
+        <targetValue>ForwardEuler</targetValue>
+        <targetValue>BackwardEuler</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
       </mapping>
+
+      <!-- Mapping of solver type with projection type -->
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="VCSWeakPressure" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+      </mapping>
+
+      <!-- Mapping time integration type against projection type -->
+      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder1" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder2" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder3" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="BackwardEuler" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="ForwardEuler" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="ClassicalRungeKutta4" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+      </mapping>
+      <mapping variable="TimeIntegrationMethod" varvalue="DIRKOrder1" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+      </mapping>
+
+
     </constraints>              
                   
 </PrismConstraints>

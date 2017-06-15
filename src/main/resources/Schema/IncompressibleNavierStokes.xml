@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <DomainSpecification>
+<!--   <DomainSpecification>
     <Dimensions type="xs:string" inputType="choice">
       <tempss:item>2D</tempss:item>
       <tempss:item>3D</tempss:item>
@@ -23,7 +23,7 @@
       is the kinematic velocity. For this reason, units are not displayed, 
       since they depend onthere-scaling of the original problem.
     </libhpc:documentation>
-    <ReynoldsNumber type="positiveDouble"/>
+    <ReynoldsNumber type="positiveDouble" optional="true" />
     <KinematicViscosity type="xs:string"/>
     <Geometry type="geometryFileName" inputType="file">
       <libhpc:documentation>
@@ -58,7 +58,7 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </DomainSpecification>
+  </DomainSpecification> -->
 
   <NumericalSpecification>
     <libhpc:documentation>
@@ -224,7 +224,7 @@
     </TimeIntegration>    
   </NumericalSpecification>
 
-  <AdditionalParameters>
+<!--   <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
@@ -350,10 +350,9 @@
         </Param>
       </Variable>
     </Filter>
+  </AdditionalParameters> -->
 
-  </AdditionalParameters>
-
-  <DurationIO>
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -370,6 +369,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO>
+  </DurationIO> -->
 
 </IncompressibleNavierStokes>

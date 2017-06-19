@@ -317,6 +317,32 @@
     </xsl:if>    
   </xsl:template>
 
+<!--   <xsl:template match="Function" mode ="AddFunctions">
+    <xsl:message>Processing Function...</xsl:message>
+    <FUNCTION>
+      <xsl:attribute name="TYPE">
+        <xsl:value-of select="Type"/>
+      </xsl:attribute>
+      <xsl:apply-templates select="Variable" mode ="AddFunctions"/>
+    </FUNCTION> 
+  </xsl:template>
+
+  <xsl:template match="Variable" mode ="AddFunctions">
+        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
+        <xsl:apply-templates select="Param" mode ="AddTypes"/>
+  </xsl:template>
+
+  <xsl:template match="Param" mode ="AddTypes">
+    <xsl:if test="ParamName">
+      <PARAM>
+        <xsl:attribute name="NAME">
+          <xsl:value-of select="ParamName"/>
+        </xsl:attribute>
+        <xsl:value-of select="ParamValue"/>
+      </PARAM>
+    </xsl:if>    
+  </xsl:template> -->
+
   <xsl:template match="Filter" mode ="AddFilters">
     <xsl:message>Processing Filter...</xsl:message>
     <FILTER>
@@ -343,28 +369,35 @@
     </xsl:if>    
   </xsl:template>
 
-<!--   <xsl:template match="Variable" mode ="InitialConditionVars">
-    <xsl:if test="VariableName">
+  <xsl:template match="Variable" mode ="InitialConditionVars">
+    <xsl:if test="InputName">
       <xsl:message>Processing initial condition variables!</xsl:message>
-      <I> 
-        <xsl:attribute name="VAR">
-          <xsl:value-of select="VariableName"/>
-        </xsl:attribute>
         <xsl:choose>
           <xsl:when test="Type/Expression">
-            <xsl:attribute name="VALUE">
-              <xsl:value-of select="Type/Expression"/>
-            </xsl:attribute>
+            <E> 
+              <xsl:attribute name="VAR">
+                <xsl:value-of select="InputName"/>
+              </xsl:attribute>
+              <xsl:attribute name="VALUE">
+                <xsl:value-of select="Type/Expression"/>
+              </xsl:attribute>
+            </E>
+          </xsl:when>
+          <xsl:when test="Type/File">
+            <F>
+              <xsl:attribute name="FILE">
+                <xsl:value-of select ="InputName"/>
+              </xsl:attribute>
+            </F>
           </xsl:when>
           <xsl:otherwise>
             <xsl:message>Unable to set the value for this variable, it uses an unsupported type.</xsl:message>
           </xsl:otherwise>
         </xsl:choose>
-      </I>
     </xsl:if>    
   </xsl:template>
- -->
-  <xsl:template match="Variable" mode ="InitialConditionVars">
+
+  <xsl:template match="Variable" mode ="BaseflowVars">
     <xsl:if test="InputName">
       <xsl:message>Processing initial condition variables!</xsl:message>
         <xsl:choose>
@@ -415,7 +448,6 @@
           <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
-          <xsl:apply-templates select="AdditionalParameters/Functions" mode ="AddFunctions"/>
           <xsl:apply-templates select="AdditionalParameters/CustomParameter" mode ="AddParameter"/>
           <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
         </PARAMETERS>
@@ -435,7 +467,13 @@
           <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="InitialConditionVars"/>
         </FUNCTION>
 
+        <FUNCTION NAME="Baseflow">
+          <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseflowVars"/>
+        </FUNCTION>
+
       </CONDITIONS>
+
+      <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
 
       <FILTERS>
         <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>

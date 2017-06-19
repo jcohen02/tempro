@@ -36,6 +36,14 @@
 
   <xs:complexType name="NotProvided"/>
 
+<!--   <xs:complexType name="inputFileName">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="fileType" type="xs:string" fixed="RST" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType> -->
+
   <xs:complexType name="fileName">
     <xs:simpleContent>
       <xs:extension base="xs:string">

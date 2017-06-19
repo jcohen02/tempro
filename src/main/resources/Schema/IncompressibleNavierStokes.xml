@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-<!--   <DomainSpecification>
+  <DomainSpecification>
     <Dimensions type="xs:string" inputType="choice">
       <tempss:item>2D</tempss:item>
       <tempss:item>3D</tempss:item>
@@ -43,9 +43,27 @@
     <InitialConditions optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
       <Variable repeatable="true">
-        <VariableName type="xs:string"/>
+        <InputName type="xs:string"/>
         <Type paramType="choice">
           <Expression type="xs:string">
+            <libhpc:documentation>
+              Provide an expression describing the initial condition for this variable.
+            </libhpc:documentation>
+          </Expression>
+          <File type="fileName" inputType="file" id="fname">
+            <libhpc:documentation>
+              Provide a field file containing details of the initial condition for this variable.
+            </libhpc:documentation>
+          </File>
+        </Type>
+      </Variable>
+    </InitialConditions>
+    <InitialConditions optional="true">
+      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+      <Variable repeatable="true">
+        <Type paramType="choice">
+          <Expression type="xs:string">
+            <VariableName type="xs:string"/>
             <libhpc:documentation>
               Provide an expression describing the initial condition for this variable.
             </libhpc:documentation>
@@ -58,7 +76,7 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </DomainSpecification> -->
+  </DomainSpecification>
 
   <NumericalSpecification>
     <libhpc:documentation>
@@ -224,7 +242,7 @@
     </TimeIntegration>    
   </NumericalSpecification>
 
-<!--   <AdditionalParameters>
+  <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
@@ -350,9 +368,9 @@
         </Param>
       </Variable>
     </Filter>
-  </AdditionalParameters> -->
+  </AdditionalParameters>
 
-<!--   <DurationIO>
+  <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -369,6 +387,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO> -->
+  </DurationIO>
 
 </IncompressibleNavierStokes>

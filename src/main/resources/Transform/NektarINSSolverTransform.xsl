@@ -343,7 +343,7 @@
     </xsl:if>    
   </xsl:template>
 
-  <xsl:template match="Variable" mode ="InitialConditionVars">
+<!--   <xsl:template match="Variable" mode ="InitialConditionVars">
     <xsl:if test="VariableName">
       <xsl:message>Processing initial condition variables!</xsl:message>
       <I> 
@@ -361,6 +361,34 @@
           </xsl:otherwise>
         </xsl:choose>
       </I>
+    </xsl:if>    
+  </xsl:template>
+ -->
+  <xsl:template match="Variable" mode ="InitialConditionVars">
+    <xsl:if test="InputName">
+      <xsl:message>Processing initial condition variables!</xsl:message>
+        <xsl:choose>
+          <xsl:when test="Type/Expression">
+            <E> 
+              <xsl:attribute name="VAR">
+                <xsl:value-of select="InputName"/>
+              </xsl:attribute>
+              <xsl:attribute name="VALUE">
+                <xsl:value-of select="Type/Expression"/>
+              </xsl:attribute>
+            </E>
+          </xsl:when>
+          <xsl:when test="Type/File">
+            <F>
+              <xsl:attribute name="FILE">
+                <xsl:value-of select ="InputName"/>
+              </xsl:attribute>
+            </F>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:message>Unable to set the value for this variable, it uses an unsupported type.</xsl:message>
+          </xsl:otherwise>
+        </xsl:choose>
     </xsl:if>    
   </xsl:template>
 

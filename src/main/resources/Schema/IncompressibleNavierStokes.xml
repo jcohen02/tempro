@@ -50,7 +50,7 @@
               Provide an expression describing the initial condition for this variable.
             </libhpc:documentation>
           </Expression>
-          <File type="fileName" inputType="file" id="fname">
+          <File type="inputFileName" inputType="file" id="fname">
             <libhpc:documentation>
               Provide a field file containing details of the initial condition for this variable.
             </libhpc:documentation>
@@ -58,14 +58,14 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </DomainSpecification>
- -->
-<!--   <NumericalSpecification>
+  </DomainSpecification> -->
+
+  <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
-    <SolverType type="xs:string" inputType="choice">
+<!--     <SolverType type="xs:string" inputType="choice">
       <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
         VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
         DirectSolver: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/DirectSolver
@@ -89,17 +89,93 @@
       <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyNavierStokes</tempss:item>
-    </Equation>
+    </Equation> -->
 
-    <Driver type="xs:string"  inputType="choice" optional="true">
+<!--     <Driver type="xs:string"  inputType="choice" optional="true">
       <tempss:item>Standard</tempss:item>
       <tempss:item>Adaptive</tempss:item>
       <tempss:item>Arnoldi</tempss:item>
       <tempss:item>ModifiedArnoldi</tempss:item>
       <tempss:item>SteadyState</tempss:item>
+    </Driver> -->
+
+<!--     <Driver optional="true" paramType="choice">
+      <Standard></Standard>
+      <Adaptive></Adaptive>
+      <Arnoldi></Arnoldi>
+      <ModifiedArnoldi></ModifiedArnoldi>
+      <SteadyState></SteadyState>
+      <Arpack>
+        <ArpackProblemType type="xs:string"  inputType="choice">
+          <tempss:item>LargestMag</tempss:item>
+          <tempss:item>SmallestMag</tempss:item>
+          <tempss:item>LargestReal</tempss:item>
+          <tempss:item>SmallestReal</tempss:item>
+          <tempss:item>LargestImag</tempss:item>
+          <tempss:item>SmallestImag</tempss:item>
+        </ArpackProblemType>        
+      </Arpack>
+    </Driver> -->
+
+    <Driver repeatable="true" optional="true">
+      <DriverType paramType="choice">        
+        <Standard>
+        </Standard>
+        <Direct>
+          <SubStructuring type="xs:string"  inputType="choice">
+            <tempss:item>Full</tempss:item>
+            <tempss:item>StaticCondensation</tempss:item>
+          </SubStructuring>
+        </Direct>
+        <Iterative>
+          <SubStructuring type="xs:string"  inputType="choice">
+            <tempss:item>Full</tempss:item>
+            <tempss:item>StaticCondensation</tempss:item>
+          </SubStructuring>
+          <Preconditioner type="xs:string"  inputType="choice" optional="true">
+            <tempss:item>Diagonal</tempss:item>
+            <tempss:item>FullLinearSpace</tempss:item>
+            <tempss:item>LowEnergyBlock</tempss:item>
+            <tempss:item>Block</tempss:item>
+            <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+            <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+            <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+          </Preconditioner>
+          <SuccessiveRHS type="positiveIncDouble" optional="true">
+          </SuccessiveRHS>
+          <IterativeSolverTolerance type="positiveDouble">
+          </IterativeSolverTolerance>
+        </Iterative>
+        <Xxt>
+          <SubStructuring type="xs:string"  inputType="choice">
+            <tempss:item>Full</tempss:item>
+            <tempss:item>StaticCondensation</tempss:item>
+            <tempss:item>MultiLevelStaticCondensation</tempss:item>
+          </SubStructuring>
+        </Xxt>
+        <PETSc>
+          <SubStructuring type="xs:string"  inputType="choice">
+            <tempss:item>Full</tempss:item>
+            <tempss:item>StaticCondensation</tempss:item>
+            <tempss:item>MultiLevelStaticCondensation</tempss:item>
+          </SubStructuring>
+          <Preconditioner type="xs:string"  inputType="choice" optional="true">
+            <tempss:item>Diagonal</tempss:item>
+            <tempss:item>FullLinearSpace</tempss:item>
+            <tempss:item>LowEnergyBlock</tempss:item>
+            <tempss:item>Block</tempss:item>
+            <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+            <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+            <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+          </Preconditioner>
+          <IterativeSolverTolerance type="positiveDouble">
+          </IterativeSolverTolerance>
+        </PETSc>
+      </DriverType>
     </Driver>
 
-    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
+
+  <!--   <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
       <tempss:item>Direct</tempss:item>
       <tempss:item>Adjoint</tempss:item>
       <tempss:item>NonLinear</tempss:item>
@@ -221,10 +297,10 @@
         <tempss:item>Implicit</tempss:item>
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
-    </TimeIntegration>    
-  </NumericalSpecification> -->
+    </TimeIntegration>     -->
+  </NumericalSpecification>
 
-  <AdditionalParameters>
+  <!-- <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
@@ -368,9 +444,9 @@
         </Param>
       </Variable>
     </Filter>
-  </AdditionalParameters>
-<!-- 
-  <DurationIO>
+  </AdditionalParameters> -->
+
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>

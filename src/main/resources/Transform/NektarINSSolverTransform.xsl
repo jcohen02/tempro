@@ -71,13 +71,13 @@
         <xsl:value-of select="Equation" />
       </xsl:attribute>
     </I>
-    <xsl:if test="Driver">
+<!--     <xsl:if test="Driver">
       <I PROPERTY="Driver">
         <xsl:attribute name="VALUE">
           <xsl:value-of select="Driver" />
         </xsl:attribute>
       </I>
-    </xsl:if>
+    </xsl:if> -->
     <xsl:if test="EvolutionOperator">
       <I PROPERTY="EvolutionOperator">
         <xsl:attribute name="VALUE">
@@ -94,6 +94,83 @@
     </xsl:if>
   </xsl:template>
 
+    <xsl:template match="Driver" mode ="DriverSoln">
+    <xsl:message>Processing function...</xsl:message>
+    <DriverSOLNINFO>
+      <xsl:apply-templates select="DriverType" mode ="AddSoln"/>
+    </DriverSOLNINFO> 
+  </xsl:template>
+
+  <xsl:template match="DriverType" mode ="AddSoln">
+    <I PROPERTY="DriverSoln">
+      <xsl:attribute name="VALUE">
+        <xsl:choose>
+          <xsl:when test="Standard">Standard</xsl:when>
+          <xsl:when test="Adaptive">Adaptive</xsl:when>
+          <xsl:when test="Arnoldi">Arnoldi</xsl:when>
+          <xsl:when test="ModifiedArnoldi">ModifiedArnoldi</xsl:when>
+          <xsl:when test="SteadyState">SteadyState</xsl:when>
+          <xsl:when test="Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
+          <xsl:when test="Direct/SubStructuring = 'StaticCondensation'">DirectStaticCondensation</xsl:when>
+          <xsl:when test="Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
+          <xsl:when test="Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCondensation</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'Full'">XxtFull</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCondensation</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'MultiLevelStaticCondensation'">XxtMultiLevelStaticCondensation</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'Full'">PETScFull</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'StaticCondensation'">PETScStaticCondensation</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'MultiLevelStaticCondensation'">PETScMultiLevelStaticCondensation</xsl:when>
+        </xsl:choose>
+      </xsl:attribute>
+    </I>
+    <xsl:if test="Iterative">
+      <I PROPERTY="Preconditioner">
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="Iterative/Preconditioner = 'Diagonal'">Diagonal</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpace'">FullLinearSpace</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'LowEnergyBlock'">LowEnergyBlock</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'Block'">Block</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpaceWithDiagonal'">FullLinearSpaceWithDiagonal</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpaceWithLowEnergyBlock'">FullLinearSpaceWithLowEnergyBlock</xsl:when>
+            <xsl:when test="Iterative/Preconditioner = 'FullLinearSpaceWithBlock'">FullLinearSpaceWithBlock</xsl:when>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+      <I PROPERTY="IterativeSolverTolerance">
+        <xsl:attribute name="VALUE">
+            <xsl:value-of select="Iterative/IterativeSolverTolerance"/>
+        </xsl:attribute>
+      </I>
+      <xsl:if test="Iterative/SuccessiveRHS">
+        <I PROPERTY="SuccessiveRHS">
+          <xsl:attribute name="VALUE">
+              <xsl:value-of select="Iterative/SuccessiveRHS"/>
+          </xsl:attribute>
+        </I>
+      </xsl:if>
+    </xsl:if>
+    <xsl:if test="PETSc">
+      <I PROPERTY="Preconditioner">
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="PETSc/Preconditioner = 'Diagonal'">Diagonal</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpace'">FullLinearSpace</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'LowEnergyBlock'">LowEnergyBlock</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'Block'">Block</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpaceWithDiagonal'">FullLinearSpaceWithDiagonal</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpaceWithLowEnergyBlock'">FullLinearSpaceWithLowEnergyBlock</xsl:when>
+            <xsl:when test="PETSc/Preconditioner = 'FullLinearSpaceWithBlock'">FullLinearSpaceWithBlock</xsl:when>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+      <I PROPERTY="IterativeSolverTolerance">
+        <xsl:attribute name="VALUE">
+            <xsl:value-of select="PETSc/IterativeSolverTolerance"/>
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+  </xsl:template>
 
   <xsl:template match="NumericalSpecification" mode ="Expansion">
     <!-- We assume the composites required for the expansion match the domain -->
@@ -317,32 +394,6 @@
     </xsl:if>    
   </xsl:template>
 
-<!--   <xsl:template match="Function" mode ="AddFunctions">
-    <xsl:message>Processing Function...</xsl:message>
-    <FUNCTION>
-      <xsl:attribute name="TYPE">
-        <xsl:value-of select="Type"/>
-      </xsl:attribute>
-      <xsl:apply-templates select="Variable" mode ="AddFunctions"/>
-    </FUNCTION> 
-  </xsl:template>
-
-  <xsl:template match="Variable" mode ="AddFunctions">
-        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
-        <xsl:apply-templates select="Param" mode ="AddTypes"/>
-  </xsl:template>
-
-  <xsl:template match="Param" mode ="AddTypes">
-    <xsl:if test="ParamName">
-      <PARAM>
-        <xsl:attribute name="NAME">
-          <xsl:value-of select="ParamName"/>
-        </xsl:attribute>
-        <xsl:value-of select="ParamValue"/>
-      </PARAM>
-    </xsl:if>    
-  </xsl:template> -->
-
   <xsl:template match="Filter" mode ="AddFilters">
     <xsl:message>Processing Filter...</xsl:message>
     <FILTER>
@@ -453,6 +504,8 @@
         </PARAMETERS>
             
         <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
+
+        <xsl:apply-templates select="NumericalSpecification/Driver" mode ="DriverSoln"/>
 
         <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
         

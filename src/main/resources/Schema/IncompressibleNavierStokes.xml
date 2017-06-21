@@ -365,14 +365,11 @@
     </GlobalSysSolution>
 
     <Function repeatable="true" optional="true">
-      <Name type="xs:string"/>
-      <Variable repeatable="true">
-        <Name type="xs:string"/>
+      <FunctionName type="xs:string"/>
         <Expression repeatable="true">
           <ExpressionVar type="xs:string" />
           <ExpressionName type="xs:string"/>
         </Expression>
-      </Variable>
     </Function>
 
     <Filter repeatable="true" optional="true">

@@ -113,7 +113,7 @@
       </I>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="NumericalSpecification" mode ="Expansion">
     <!-- We assume the composites required for the expansion match the domain -->
     <xsl:attribute name="NUMMODES"><xsl:value-of select="Expansion/PolynomialOrder + 1"/></xsl:attribute>
@@ -312,27 +312,20 @@
     <xsl:message>Processing function...</xsl:message>
     <FUNCTION>
       <xsl:attribute name="NAME">
-        <xsl:value-of select="Name"/>
+        <xsl:value-of select="FunctionName"/>
       </xsl:attribute>
-      <xsl:apply-templates select="Variable" mode ="AddFunctions"/>
+      <xsl:apply-templates select="Expression" mode ="AddNames"/>
     </FUNCTION> 
-  </xsl:template>
-
-  <xsl:template match="Variable" mode ="AddFunctions">
-        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
-        <xsl:apply-templates select="Expression" mode ="AddNames"/>
   </xsl:template>
 
   <xsl:template match="Expression" mode ="AddNames">
     <xsl:if test="ExpressionVar">
-      <EXPRESSIONS>
         <E>
           <xsl:attribute name="VAR">
             <xsl:value-of select="ExpressionVar"/>
           </xsl:attribute>
           <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
         </E>
-      </EXPRESSIONS>
     </xsl:if>    
   </xsl:template>
 

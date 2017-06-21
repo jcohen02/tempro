@@ -440,8 +440,6 @@
             
         <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
 
-        <xsl:apply-templates select="NumericalSpecification/Driver" mode ="DriverSoln"/>
-
         <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
         
         <xsl:apply-templates select="DomainSpecification" mode ="Variables"/>

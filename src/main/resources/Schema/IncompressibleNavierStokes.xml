@@ -42,7 +42,7 @@
     </BoundaryDetails>
     <InitialConditions optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
-      <Variable repeatable="true">
+      <Variable>
         <InputName type="xs:string"/>
         <Type paramType="choice">
           <Expression type="xs:string">
@@ -50,7 +50,7 @@
               Provide an expression describing the initial condition for this variable.
             </libhpc:documentation>
           </Expression>
-          <File type="inputFileName" inputType="file" id="fname">
+          <File>
             <libhpc:documentation>
               Provide a field file containing details of the initial condition for this variable.
             </libhpc:documentation>
@@ -74,6 +74,7 @@
       <tempss:item>VelocityCorrectionScheme</tempss:item>
       <tempss:item>VCSWeakPressure</tempss:item>
     </SolverType>
+
     <Equation type="xs:string"  inputType="choice">
       <libhpc:documentation>
         SteadyStokes
@@ -90,6 +91,15 @@
       <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyNavierStokes</tempss:item>
     </Equation>
+
+    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
+      <tempss:item>Direct</tempss:item>
+      <tempss:item>Adjoint</tempss:item>
+      <tempss:item>NonLinear</tempss:item>
+      <tempss:item>TransientGrowth</tempss:item>
+      <tempss:item>SkewSymmetric</tempss:item>
+      <tempss:item>AdaptiveSFD</tempss:item>
+    </EvolutionOperator>
 
     <Driver optional="true">
       <DriverType paramType="choice">        
@@ -111,65 +121,6 @@
       </DriverType>
     </Driver>
 
-
-    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
-      <tempss:item>Direct</tempss:item>
-      <tempss:item>Adjoint</tempss:item>
-      <tempss:item>NonLinear</tempss:item>
-      <tempss:item>TransientGrowth</tempss:item>
-      <tempss:item>SkewSymmetric</tempss:item>
-      <tempss:item>AdaptiveSFD</tempss:item>
-    </EvolutionOperator>
-
-    <AdvectionForm type="xs:string" inputType="choice" optional="true">
-      <libhpc:documentation>
-        Sets the form in which the advection term is treated. See 
-        http://www.nektar.info/wiki/3.4/UserGuide/Tutorial/IncNavierStokesSolver
-      </libhpc:documentation>
-      <tempss:item>Convective</tempss:item>
-      <tempss:item>NonConservative</tempss:item>
-      <tempss:item>Linearised</tempss:item>
-      <tempss:item>Adjoint</tempss:item>
-      <tempss:item>SkewSymmetric</tempss:item>
-      <tempss:item>NoAdvection</tempss:item>
-    </AdvectionForm>
-    <CFL type="xs:string" optional="true"/>
-
-    <Expansion>
-      <libhpc:documentation>Specify details of how the solution function 
-      will be approximated.</libhpc:documentation>
-      <PolynomialOrder type="xs:positiveInteger">
-        <libhpc:documentation>The order of polynomial expansion used on each 
-          element. Higher order gives better approximation to the true solution. 
-          The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
-      </PolynomialOrder>
-      <BasisType type="xs:string" inputType="choice">
-        <libhpc:documentation>
-          The type of polynomials used as a basis to expand the solution 
-          function. There are two styles of basis polynomial: modal and nodal.
-           
-           Modal / hierarchical basis: don't need to redefine basis functions 
-           when increase the order (but have to be modified to get zero at boundary).
-           
-           Nodal: have to be redefined when the polynomial order is increased, 
-           but are naturally zero at the boundaries.
-           
-           Available choices:
-             MODIFIED: Legendre polynomials (modal) that have been multiplied 
-                       by two linear functions to make them zero at the boundaries.
-             GAUSS_LAGRANGE: Lagrange polynomials (nodal)
-             GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
-                           Gauss-Lobatto-Legendre
-             GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
-             CHEBYSHEV: another modal approach (similar to Fourier modes).
-        </libhpc:documentation>
-        <tempss:item>MODIFIED</tempss:item>
-        <tempss:item>GAUSS_LAGRANGE</tempss:item>
-        <tempss:item>GLL_LAGRANGE</tempss:item>
-        <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
-        <tempss:item>CHEBYSHEV</tempss:item>
-      </BasisType>
-    </Expansion>
     <Projection type="xs:string"  inputType="choice">
       <libhpc:documentation>
         ContinuousGalerkin: enforces continuity of solution across element boundaries
@@ -179,6 +130,7 @@
       <tempss:item>ContinuousGalerkin</tempss:item>
       <tempss:item>DiscontinuousGalerkin</tempss:item>
     </Projection>
+
     <TimeIntegration>
       <libhpc:documentation>Parameters setting the method for time integration.
       </libhpc:documentation>
@@ -235,6 +187,57 @@
         <tempss:item>Explicit</tempss:item>
       </DiffusionAdvancement>
     </TimeIntegration>    
+
+    <AdvectionForm type="xs:string" inputType="choice" optional="true">
+      <libhpc:documentation>
+        Sets the form in which the advection term is treated. See 
+        http://www.nektar.info/wiki/3.4/UserGuide/Tutorial/IncNavierStokesSolver
+      </libhpc:documentation>
+      <tempss:item>Convective</tempss:item>
+      <tempss:item>NonConservative</tempss:item>
+      <tempss:item>Linearised</tempss:item>
+      <tempss:item>Adjoint</tempss:item>
+      <tempss:item>SkewSymmetric</tempss:item>
+      <tempss:item>NoAdvection</tempss:item>
+    </AdvectionForm>
+
+    <CFL type="xs:string" optional="true"/>
+
+    <Expansion>
+      <libhpc:documentation>Specify details of how the solution function 
+      will be approximated.</libhpc:documentation>
+      <PolynomialOrder type="xs:positiveInteger">
+        <libhpc:documentation>The order of polynomial expansion used on each 
+          element. Higher order gives better approximation to the true solution. 
+          The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
+      </PolynomialOrder>
+      <BasisType type="xs:string" inputType="choice">
+        <libhpc:documentation>
+          The type of polynomials used as a basis to expand the solution 
+          function. There are two styles of basis polynomial: modal and nodal.
+           
+           Modal / hierarchical basis: don't need to redefine basis functions 
+           when increase the order (but have to be modified to get zero at boundary).
+           
+           Nodal: have to be redefined when the polynomial order is increased, 
+           but are naturally zero at the boundaries.
+           
+           Available choices:
+             MODIFIED: Legendre polynomials (modal) that have been multiplied 
+                       by two linear functions to make them zero at the boundaries.
+             GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+             GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
+                           Gauss-Lobatto-Legendre
+             GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+             CHEBYSHEV: another modal approach (similar to Fourier modes).
+        </libhpc:documentation>
+        <tempss:item>MODIFIED</tempss:item>
+        <tempss:item>GAUSS_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
+        <tempss:item>CHEBYSHEV</tempss:item>
+      </BasisType>
+    </Expansion>
   </NumericalSpecification>
 
   <AdditionalParameters>
@@ -252,7 +255,7 @@
               Provide an expression describing the initial condition for this variable.
             </libhpc:documentation>
           </Expression>
-          <File type="baseFileName" inputType="file">
+          <File>
             <libhpc:documentation>
               Provide a field file containing details of the initial condition for this variable.
             </libhpc:documentation>

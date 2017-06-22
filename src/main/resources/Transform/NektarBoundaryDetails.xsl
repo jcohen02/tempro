@@ -74,8 +74,8 @@
     <xsl:variable name="icount"><xsl:number/></xsl:variable>
     
     <REGION>
-      <xsl:attribute name="REF"><xsl:value-of select="exslt:node-set($mappings)/MAPPING[@BCNAME=$bcname]/@ID"/></xsl:attribute>
-        <xsl:apply-templates select="Variable" mode ="BCVariable"/>
+      <xsl:attribute name="REF"><xsl:value-of select="BoundaryConditionReference"/></xsl:attribute>
+      <xsl:apply-templates select="Variable" mode ="BCVariable"/>
     </REGION>
     
   </xsl:template>
@@ -153,9 +153,7 @@
           <xsl:attribute name="VAR"><xsl:value-of select="VariableName"/></xsl:attribute>
           <xsl:choose>
             <xsl:when test="ConditionValue/Expression">
-              <xsl:attribute name="VALUE">
-                [<xsl:value-of select="ConditionValue/Expression"/>]
-              </xsl:attribute>
+              <xsl:attribute name="VALUE">[<xsl:value-of select="ConditionValue/Expression"/>]</xsl:attribute>
             </xsl:when>
             <xsl:otherwise>
               <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>

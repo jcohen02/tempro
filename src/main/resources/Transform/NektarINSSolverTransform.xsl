@@ -259,15 +259,15 @@
       <xsl:attribute name="VALUE">
         <xsl:choose>
           <xsl:when test="Direct/SubStructuring = 'Full'">DirectFull</xsl:when>
-          <xsl:when test="Direct/SubStructuring = 'StaticCondensation'">DirectStaticCondensation</xsl:when>
+          <xsl:when test="Direct/SubStructuring = 'StaticCondensation'">DirectStaticCond</xsl:when>
           <xsl:when test="Iterative/SubStructuring = 'Full'">IterativeFull</xsl:when>
-          <xsl:when test="Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCondensation</xsl:when>
+          <xsl:when test="Iterative/SubStructuring = 'StaticCondensation'">IterativeStaticCond</xsl:when>
           <xsl:when test="Xxt/SubStructuring = 'Full'">XxtFull</xsl:when>
-          <xsl:when test="Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCondensation</xsl:when>
-          <xsl:when test="Xxt/SubStructuring = 'MultiLevelStaticCondensation'">XxtMultiLevelStaticCondensation</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'StaticCondensation'">XxtStaticCond</xsl:when>
+          <xsl:when test="Xxt/SubStructuring = 'MultiLevelStaticCondensation'">XxtMultiLevelStaticCond</xsl:when>
           <xsl:when test="PETSc/SubStructuring = 'Full'">PETScFull</xsl:when>
           <xsl:when test="PETSc/SubStructuring = 'StaticCondensation'">PETScStaticCondensation</xsl:when>
-          <xsl:when test="PETSc/SubStructuring = 'MultiLevelStaticCondensation'">PETScMultiLevelStaticCondensation</xsl:when>
+          <xsl:when test="PETSc/SubStructuring = 'MultiLevelStaticCondensation'">PETScMultiLevelStaticCond</xsl:when>
         </xsl:choose>
       </xsl:attribute>
     </I>

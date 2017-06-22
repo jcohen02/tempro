@@ -80,35 +80,6 @@
       <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>
       </mapping>
-
-      <!-- Mapping time integration type against projection type -->
-      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder1" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-      </mapping>
-      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder2" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-      </mapping>
-      <mapping variable="TimeIntegrationMethod" varvalue="IMEXOrder3" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-      </mapping>
-      <mapping variable="TimeIntegrationMethod" varvalue="BackwardEuler" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-        <targetValue>DiscontinuousGalerkin</targetValue>
-      </mapping>
-      <mapping variable="TimeIntegrationMethod" varvalue="ForwardEuler" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-        <targetValue>DiscontinuousGalerkin</targetValue>
-      </mapping>
-      <mapping variable="TimeIntegrationMethod" varvalue="ClassicalRungeKutta4" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-        <targetValue>DiscontinuousGalerkin</targetValue>
-      </mapping>
-      <mapping variable="TimeIntegrationMethod" varvalue="DIRKOrder1" targetVariable="Projection">
-        <targetValue>ContinuousGalerkin</targetValue>
-        <targetValue>DiscontinuousGalerkin</targetValue>
-      </mapping>
-
-
     </constraints>              
                   
 </PrismConstraints>

@@ -46,7 +46,7 @@
         <VariableName type="xs:string"/>
         <Type paramType="choice">
           <Expression type="xs:string" />
-          <File type="fileNameString" inputType="file">
+          <File type="inputNameString" inputType="file">
           </File>
         </Type>
       </Variable>
@@ -241,17 +241,10 @@
     <BaseFlow optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
       <Variable repeatable="true">
-        <InputName type="xs:string"/>
+        <VariableName type="xs:string"/>
         <Type paramType="choice">
-          <Expression type="xs:string">
-            <libhpc:documentation>
-              Provide an expression describing the initial condition for this variable.
-            </libhpc:documentation>
-          </Expression>
-          <File>
-            <libhpc:documentation>
-              Provide a field file containing details of the initial condition for this variable.
-            </libhpc:documentation>
+          <Expression type="xs:string" />
+          <File type="baseNameString" inputType="file">
           </File>
         </Type>
       </Variable>

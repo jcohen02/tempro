@@ -384,13 +384,12 @@
   </xsl:template>
 
   <xsl:template match="Variable" mode ="BaseflowVars">
-    <xsl:if test="InputName">
-      <xsl:message>Processing initial condition variables!</xsl:message>
+    <xsl:if test="VariableName">
         <xsl:choose>
           <xsl:when test="Type/Expression">
             <E> 
               <xsl:attribute name="VAR">
-                <xsl:value-of select="InputName"/>
+                <xsl:value-of select="VariableName"/>
               </xsl:attribute>
               <xsl:attribute name="VALUE">
                 <xsl:value-of select="Type/Expression"/>
@@ -400,15 +399,16 @@
           <xsl:when test="Type/File">
             <F>
               <xsl:attribute name="FILE">
-                <xsl:value-of select ="InputName"/>
+                <xsl:value-of select ="Type/File"/>
               </xsl:attribute>
             </F>
           </xsl:when>
-          <xsl:otherwise>
-            <xsl:message>Unable to set the value for this variable, it uses an unsupported type.</xsl:message>
-          </xsl:otherwise>
         </xsl:choose>
     </xsl:if>    
+  </xsl:template>
+  
+  <xsl:template match="BaseFlow" mode ="BaseConditions">
+    <xsl:apply-templates select="Variable" mode ="BaseflowVars"/>
   </xsl:template>
 
   <!-- Incompressible Navier-Stokes transform -->
@@ -451,7 +451,8 @@
         <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="HandleConditions"/>  
 
         <FUNCTION NAME="Baseflow">
-          <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseflowVars"/>
+          <!-- <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseflowVars"/> -->
+          <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseConditions"/>  
         </FUNCTION>
 
       </CONDITIONS>

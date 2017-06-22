@@ -118,6 +118,12 @@
     <!-- We assume the composites required for the expansion match the domain -->
     <xsl:attribute name="NUMMODES"><xsl:value-of select="Expansion/PolynomialOrder + 1"/></xsl:attribute>
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
+    <xsl:attribute name="FIELDS">
+      <xsl:choose>
+        <xsl:when test="//DomainSpecification/Dimensions = '2D'">u,v,p</xsl:when>
+        <xsl:when test="//DomainSpecification/Dimensions = '3D'">u,v,w,p</xsl:when>
+      </xsl:choose>
+    </xsl:attribute>
   </xsl:template>
 
   <xsl:template match="NumericalSpecification" mode ="SolverInfo">
@@ -419,8 +425,8 @@
         <E>
           <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
-          <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
-        </E>
+<!--           <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
+ -->        </E>
       </EXPANSIONS>
       
       <CONDITIONS>

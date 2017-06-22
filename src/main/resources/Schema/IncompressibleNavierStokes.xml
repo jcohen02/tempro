@@ -12,10 +12,6 @@
   </libhpc:documentation>
   
   <DomainSpecification>
-    <Dimensions type="xs:string" inputType="choice">
-      <tempss:item>2D</tempss:item>
-      <tempss:item>3D</tempss:item>
-    </Dimensions>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -23,7 +19,11 @@
       is the kinematic velocity. For this reason, units are not displayed, 
       since they depend onthere-scaling of the original problem.
     </libhpc:documentation>
-    <ReynoldsNumber type="positiveDouble" optional="true" />
+    <Dimensions type="xs:string" inputType="choice">
+      <tempss:item>2D</tempss:item>
+      <tempss:item>3D</tempss:item>
+    </Dimensions>
+<!--     <ReynoldsNumber type="positiveDouble" optional="true" />
     <KinematicViscosity type="xs:string"/>
     <Geometry type="geometryFileName" inputType="file">
       <libhpc:documentation>
@@ -50,11 +50,11 @@
           </File>
         </Type>
       </Variable>
-    </InitialConditions>
+    </InitialConditions> -->
   </DomainSpecification>
 
   <NumericalSpecification>
-    <libhpc:documentation>
+<!--     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
@@ -195,7 +195,7 @@
     </AdvectionForm>
 
     <CFL type="xs:string" optional="true"/>
-
+ -->
     <Expansion>
       <libhpc:documentation>Specify details of how the solution function 
       will be approximated.</libhpc:documentation>
@@ -233,7 +233,7 @@
     </Expansion>
   </NumericalSpecification>
 
-  <AdditionalParameters>
+<!--   <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
@@ -367,9 +367,9 @@
         </Param>
       </Variable>
     </Filter>
-  </AdditionalParameters>
+  </AdditionalParameters> -->
 
-  <DurationIO>
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -386,6 +386,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO>
+  </DurationIO> -->
 
 </IncompressibleNavierStokes>

@@ -101,7 +101,13 @@
     <xsl:if test="EvolutionOperator">
       <I PROPERTY="EvolutionOperator">
         <xsl:attribute name="VALUE">
-          <xsl:value-of select="EvolutionOperator" />
+          <xsl:choose>
+            <xsl:when test="EvolutionOperator = 'Direct'">Direct</xsl:when>
+            <xsl:when test="EvolutionOperator = 'NonLinear'">Nonlinear</xsl:when>
+            <xsl:when test="EvolutionOperator = 'TransientGrowth'">Transientgrowth</xsl:when>
+            <xsl:when test="EvolutionOperator = 'SkewSymmetric'">Skewsymmetric</xsl:when>
+            <xsl:when test="EvolutionOperator = 'AdaptiveSFD'">Adaptivesfd</xsl:when>
+          </xsl:choose>
         </xsl:attribute>
       </I>
     </xsl:if>
@@ -241,7 +247,7 @@
   <xsl:template match="MatrixInversion" mode ="GlobalSysSoln">
         <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
         <V>
-          <xsl:attribute name="Var">
+          <xsl:attribute name="VAR">
             <xsl:value-of select="Field"/>
           </xsl:attribute>
           <xsl:apply-templates select="InversionType" mode ="AddSoln"/>

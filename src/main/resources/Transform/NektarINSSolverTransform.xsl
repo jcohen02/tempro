@@ -30,7 +30,9 @@
   </xsl:template>
 
   <xsl:template match="DomainSpecification" mode ="NavierStokesParameters">
-    <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
+    <xsl:if test="ReynoldsNumber">
+      <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
+    </xsl:if>
     <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
   </xsl:template>
 
@@ -72,18 +74,20 @@
       </xsl:attribute>
     </I>
 
-    <I PROPERTY="DriverSoln">
-      <xsl:attribute name="VALUE">
-        <xsl:choose>
-          <xsl:when test="Driver/DriverType/Standard">Standard</xsl:when>
-          <xsl:when test="Driver/DriverType/Adaptive">Adaptive</xsl:when>
-          <xsl:when test="Driver/DriverType/Arnoldi">Arnoldi</xsl:when>
-          <xsl:when test="Driver/DriverType/ModifiedArnoldi">ModifiedArnoldi</xsl:when>
-          <xsl:when test="Driver/DriverType/SteadyState">SteadyState</xsl:when>
-          <xsl:when test="Driver/DriverType/Arpack">Arpack</xsl:when>
-        </xsl:choose>
-      </xsl:attribute>
-    </I>
+    <xsl:if test="Driver">
+      <I PROPERTY="DriverSoln">
+        <xsl:attribute name="VALUE">
+          <xsl:choose>
+            <xsl:when test="Driver/DriverType/Standard">Standard</xsl:when>
+            <xsl:when test="Driver/DriverType/Adaptive">Adaptive</xsl:when>
+            <xsl:when test="Driver/DriverType/Arnoldi">Arnoldi</xsl:when>
+            <xsl:when test="Driver/DriverType/ModifiedArnoldi">ModifiedArnoldi</xsl:when>
+            <xsl:when test="Driver/DriverType/SteadyState">SteadyState</xsl:when>
+            <xsl:when test="Driver/DriverType/Arpack">Arpack</xsl:when>
+          </xsl:choose>
+        </xsl:attribute>
+      </I>
+    </xsl:if>
     <xsl:if test="Driver/DriverType/Arpack">
       <I PROPERTY="ArpackProblemType">
         <xsl:attribute name="VALUE">
@@ -102,6 +106,7 @@
       <I PROPERTY="EvolutionOperator">
         <xsl:attribute name="VALUE">
           <xsl:choose>
+            <xsl:when test="EvolutionOperator = 'Adjoint'">Adjoint</xsl:when>
             <xsl:when test="EvolutionOperator = 'Direct'">Direct</xsl:when>
             <xsl:when test="EvolutionOperator = 'NonLinear'">Nonlinear</xsl:when>
             <xsl:when test="EvolutionOperator = 'TransientGrowth'">Transientgrowth</xsl:when>
@@ -336,7 +341,10 @@
           <xsl:attribute name="VAR">
             <xsl:value-of select="ExpressionVar"/>
           </xsl:attribute>
-          <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/>
+          <xsl:attribute name="VALUE">
+            <xsl:value-of select="ExpressionName"/>
+          </xsl:attribute>
+          <!-- <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/> -->
         </E>
     </xsl:if>    
   </xsl:template>
@@ -392,7 +400,11 @@
   </xsl:template>
   
   <xsl:template match="InitialConditions" mode ="HandleConditions">
-    <xsl:apply-templates select="Variable" mode ="InitialConditionVars"/>
+    <xsl:if test="Variable">
+      <FUNCTION NAME="InitialConditions">
+        <xsl:apply-templates select="Variable" mode ="InitialConditionVars"/>
+      </FUNCTION>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="Variable" mode ="BaseflowVars">
@@ -420,7 +432,11 @@
   </xsl:template>
   
   <xsl:template match="BaseFlow" mode ="BaseConditions">
-    <xsl:apply-templates select="Variable" mode ="BaseflowVars"/>
+    <xsl:if test="Variable">
+      <FUNCTION NAME="Baseflow">
+        <xsl:apply-templates select="Variable" mode ="BaseflowVars"/>
+      </FUNCTION>
+    </xsl:if>
   </xsl:template>
 
   <!-- Incompressible Navier-Stokes transform -->
@@ -462,10 +478,7 @@
 
         <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="HandleConditions"/>  
 
-        <FUNCTION NAME="Baseflow">
-          <!-- <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseflowVars"/> -->
-          <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseConditions"/>  
-        </FUNCTION>
+        <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseConditions"/>  
 
       </CONDITIONS>
 

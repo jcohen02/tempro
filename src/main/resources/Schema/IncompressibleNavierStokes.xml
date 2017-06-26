@@ -68,6 +68,26 @@
       <tempss:item>VCSWeakPressure</tempss:item>
     </SolverType>
 
+    <Driver optional="true">
+      <DriverType paramType="choice">        
+        <Standard></Standard>
+        <Adaptive></Adaptive>
+        <Arnoldi></Arnoldi>
+        <ModifiedArnoldi></ModifiedArnoldi>
+        <SteadyState></SteadyState>
+        <Arpack>
+          <ArpackProblemType type="xs:string"  inputType="choice">
+            <tempss:item>LargestMag</tempss:item>
+            <tempss:item>SmallestMag</tempss:item>
+            <tempss:item>LargestReal</tempss:item>
+            <tempss:item>SmallestReal</tempss:item>
+            <tempss:item>LargestImag</tempss:item>
+            <tempss:item>SmallestImag</tempss:item>
+          </ArpackProblemType>        
+        </Arpack>
+      </DriverType>
+    </Driver>
+
     <Equation type="xs:string"  inputType="choice">
       <libhpc:documentation>
         SteadyStokes
@@ -94,26 +114,6 @@
       <tempss:item>AdaptiveSFD</tempss:item>
     </EvolutionOperator>
 
-    <Driver optional="true">
-      <DriverType paramType="choice">        
-        <Standard></Standard>
-        <Adaptive></Adaptive>
-        <Arnoldi></Arnoldi>
-        <ModifiedArnoldi></ModifiedArnoldi>
-        <SteadyState></SteadyState>
-        <Arpack>
-          <ArpackProblemType type="xs:string"  inputType="choice">
-            <tempss:item>LargestMag</tempss:item>
-            <tempss:item>SmallestMag</tempss:item>
-            <tempss:item>LargestReal</tempss:item>
-            <tempss:item>SmallestReal</tempss:item>
-            <tempss:item>LargestImag</tempss:item>
-            <tempss:item>SmallestImag</tempss:item>
-          </ArpackProblemType>        
-        </Arpack>
-      </DriverType>
-    </Driver>
-
     <Projection type="xs:string"  inputType="choice">
       <libhpc:documentation>
         ContinuousGalerkin: enforces continuity of solution across element boundaries
@@ -122,6 +122,7 @@
       </libhpc:documentation>
       <tempss:item>ContinuousGalerkin</tempss:item>
       <tempss:item>DiscontinuousGalerkin</tempss:item>
+      <tempss:item>MixedGalerkin</tempss:item>
     </Projection>
 
     <TimeIntegration>
@@ -231,6 +232,19 @@
         <tempss:item>CHEBYSHEV</tempss:item>
       </BasisType>
     </Expansion>
+
+    <Quasi-3D paramType="choice" optional="true">
+      <Homogenous1D>
+        <HomModesZ type="positiveDouble"/>
+        <LZ type="positiveDouble"/>
+      </Homogenous1D>
+      <Homogenous2D>
+        <HomModesY type="positiveDouble"/>
+        <LY type="positiveDouble"/>
+        <HomModesZ type="positiveDouble"/>
+        <LZ type="positiveDouble"/>
+      </Homogenous2D>
+    </Quasi-3D>
   </NumericalSpecification>
 
   <AdditionalParameters>
@@ -460,7 +474,6 @@
       <tempss:item>NonUniform - Boundary</tempss:item>
       <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
-
   </AdditionalParameters>
 
   <DurationIO>

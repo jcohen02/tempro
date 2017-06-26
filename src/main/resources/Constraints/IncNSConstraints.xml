@@ -39,6 +39,7 @@
         <domain>
           <value>ContinuousGalerkin</value>
           <value>DiscontinuousGalerkin</value>
+          <value>Mixed_CG_DisContinuous</value>
         </domain>
       </variable>      
 
@@ -71,11 +72,11 @@
       <!-- Mapping of solver type with projection type -->
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>
-        <targetValue>DiscontinuousGalerkin</targetValue>
+        <targetValue>Mixed_CG_DisContinuous</targetValue>
       </mapping>
       <mapping variable="SolverType" varvalue="VCSWeakPressure" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>
-        <targetValue>DiscontinuousGalerkin</targetValue>
+        <targetValue>Mixed_CG_DisContinuous</targetValue>
       </mapping>
       <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>

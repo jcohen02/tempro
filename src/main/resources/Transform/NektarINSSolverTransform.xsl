@@ -143,6 +143,7 @@
         <xsl:choose>
           <xsl:when test="Projection = 'ContinuousGalerkin'">Continuous</xsl:when>
           <xsl:when test="Projection = 'DiscontinuousGalerkin'">DisContinuous</xsl:when>
+          <xsl:when test="Projection = 'MixedGalerkin'">Mixed_CG_DisContinuous</xsl:when>
         </xsl:choose>
       </xsl:attribute>
     </I>
@@ -226,6 +227,41 @@
       </I>
     </xsl:if>
   </xsl:template>
+
+  <xsl:template match="Quasi-3D" mode ="AddFFTW">
+    <xsl:if test="Homogenous1D">
+      <I PROPERTY="HOMOGENOUS">
+        <xsl:attribute name="VALUE">
+          1D
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+    <xsl:if test="Homogenous2D">
+      <I PROPERTY="HOMOGENOUS">
+        <xsl:attribute name="VALUE">
+          2D
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+    <I PROPERTY="USEFFT">
+      <xsl:attribute name="VALUE">
+        FFTW
+      </xsl:attribute>
+    </I>
+  </xsl:template> 
+
+  <xsl:template match="Quasi-3D" mode ="AddFFTWParam">
+    <xsl:if test="Homogenous1D">
+      <P>LZ = <xsl:value-of select="Homogenous1D/LZ"/></P>
+      <P>HomModesZ = <xsl:value-of select="Homogenous1D/HomModesZ"/></P>
+    </xsl:if>
+    <xsl:if test="Homogenous2D">
+      <P>LZ = <xsl:value-of select="Homogenous2D/LZ"/></P>
+      <P>HomModesZ = <xsl:value-of select="Homogenous2D/HomModesZ"/></P>
+      <P>LY = <xsl:value-of select="Homogenous2D/LY"/></P>
+      <P>HomModesY = <xsl:value-of select="Homogenous2D/HomModesY"/></P>
+    </xsl:if>
+  </xsl:template> 
 
   <xsl:template match="CustomExpression" mode ="AddExpression">
     <E>
@@ -595,14 +631,14 @@
         <E>
           <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
-<!--           <xsl:attribute name="FIELDS">u,v,p</xsl:attribute>
- -->        </E>
+        </E>
       </EXPANSIONS>
       
       <CONDITIONS>
         <SOLVERINFO>
           <xsl:apply-templates select="NumericalSpecification" mode ="NavierStokesSolverInfo"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="SolverInfo"/>
+          <xsl:apply-templates select="NumericalSpecification/Quasi-3D" mode ="AddFFTW"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
         </SOLVERINFO>
 
@@ -610,6 +646,7 @@
           <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
+          <xsl:apply-templates select="NumericalSpecification/Quasi-3D" mode ="AddFFTWParam"/>
           <xsl:apply-templates select="AdditionalParameters/CustomParameter" mode ="AddParameter"/>
           <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
         </PARAMETERS>

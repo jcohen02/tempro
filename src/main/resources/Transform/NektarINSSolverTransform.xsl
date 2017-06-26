@@ -348,6 +348,43 @@
     </xsl:if>    
   </xsl:template>
 
+  <xsl:template match="Force" mode ="AddForces">
+      <FORCE>
+        <xsl:if test="Absorption">
+          <xsl:attribute name="TYPE">Absorption</xsl:attribute>
+          <xsl:apply-templates select="Absorption" mode ="AddForces"/>
+        </xsl:if>
+        <xsl:if test="Body">
+          <xsl:attribute name="TYPE">Body</xsl:attribute>
+          <xsl:apply-templates select="Body" mode ="AddForces"/>
+        </xsl:if>
+        <xsl:if test="Noise">
+          <xsl:attribute name="TYPE">Noise</xsl:attribute>
+          <xsl:apply-templates select="Noise" mode ="AddForces"/>
+        </xsl:if>
+      </FORCE>
+  </xsl:template>
+
+  <xsl:template match="Absorption" mode ="AddForces">
+      <COEFF><xsl:value-of select="Coeff"/></COEFF>
+      <REFFLOW><xsl:value-of select="RefFlow"/></REFFLOW>
+      <REFFLOWTIME><xsl:value-of select="RefFlowTime"/></REFFLOWTIME>
+  </xsl:template>
+
+  <xsl:template match="Body" mode ="AddForces">
+      <BODYFORCE><xsl:value-of select="Body"/></BODYFORCE>
+  </xsl:template>
+
+  <xsl:template match="Noise" mode ="AddForces">
+      <WHITENOISE><xsl:value-of select="Whitenoise"/></WHITENOISE>
+      <xsl:if test="UpdateFreq">
+        <UPDATEFREQ><xsl:value-of select="UpdateFreq"/></UPDATEFREQ>
+      </xsl:if>
+      <xsl:if test="Nsteps">
+        <NSTEPS><xsl:value-of select="Nsteps"/></NSTEPS>
+      </xsl:if>
+  </xsl:template>
+
   <xsl:template match="Filter" mode ="AddFilters">
     <xsl:if test="FilterType">
       <FILTER>
@@ -593,6 +630,7 @@
 
       </CONDITIONS>
 
+      <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
       <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
       <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
       

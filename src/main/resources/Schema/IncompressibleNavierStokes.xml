@@ -260,104 +260,6 @@
       <Value type="xs:string"/>
     </CustomParameter>
 
-   <SpectralhpDealiasing optional="true">
-      <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
-        can stablise certain simulations through the use of additional 
-        integration of the nonlinear convective terms.
-      </libhpc:documentation>
-    </SpectralhpDealiasing>
-    <SpectralVanishingViscosity optional="true">
-      <libhpc:documentation>Adds additional damping for high-frequency modes 
-        which may help in stabilising underresolved simulations.
-      </libhpc:documentation>
-      <SVVDiffCoeff type="positiveIncDouble">
-        <libhpc:documentation>Adds additional damping for high-frequency modes 
-          which may help in stabilising underresolved simulations.
-        </libhpc:documentation>
-      </SVVDiffCoeff>
-      <SVVCutoffRatio type="positiveIncDouble01">
-        <libhpc:documentation>Dictates the frequencies of the coefficients to 
-          be damped. i.e. for polynomial order 7, a value of 0.75 means 
-          damping is only applied to modes 6 and 7.
-        </libhpc:documentation>
-      </SVVCutoffRatio>
-    </SpectralVanishingViscosity>
-    <WeightPartitions type="xs:string" inputType="choice" optional="true">
-      <libhpc:documentation>If using a hybrid mesh of more than one element type 
-        , this should be set to NonUniform to give better parallel partitions.
-      </libhpc:documentation>
-      <tempss:item>Uniform</tempss:item>
-      <tempss:item>NonUniform - DoF</tempss:item>
-      <tempss:item>NonUniform - Boundary</tempss:item>
-      <tempss:item>NonUniform - Both</tempss:item>
-    </WeightPartitions>
-
-    <GlobalSysSolution repeatable="true" optional="true">
-      <MatrixInversion repeatable="true">
-        <Field type="xs:string"/>
-        <InversionType paramType="choice">
-          <Direct>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-            </SubStructuring>
-          </Direct>
-          <Iterative>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-            </SubStructuring>
-            <Preconditioner type="xs:string"  inputType="choice" optional="true">
-              <tempss:item>Diagonal</tempss:item>
-              <tempss:item>FullLinearSpace</tempss:item>
-              <tempss:item>LowEnergyBlock</tempss:item>
-              <tempss:item>Block</tempss:item>
-              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
-              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
-              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
-            </Preconditioner>
-            <SuccessiveRHS type="positiveIncDouble" optional="true">
-            </SuccessiveRHS>
-            <IterativeSolverTolerance type="positiveDouble">
-            </IterativeSolverTolerance>
-          </Iterative>
-          <Xxt>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-              <tempss:item>MultiLevelStaticCondensation</tempss:item>
-            </SubStructuring>
-          </Xxt>
-          <PETSc>
-            <SubStructuring type="xs:string"  inputType="choice">
-              <tempss:item>Full</tempss:item>
-              <tempss:item>StaticCondensation</tempss:item>
-              <tempss:item>MultiLevelStaticCondensation</tempss:item>
-            </SubStructuring>
-            <Preconditioner type="xs:string"  inputType="choice" optional="true">
-              <tempss:item>Diagonal</tempss:item>
-              <tempss:item>FullLinearSpace</tempss:item>
-              <tempss:item>LowEnergyBlock</tempss:item>
-              <tempss:item>Block</tempss:item>
-              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
-              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
-              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
-            </Preconditioner>
-            <IterativeSolverTolerance type="positiveDouble">
-            </IterativeSolverTolerance>
-          </PETSc>
-        </InversionType>
-      </MatrixInversion>
-    </GlobalSysSolution>
-
-    <Function repeatable="true" optional="true">
-      <FunctionName type="xs:string"/>
-        <Expression repeatable="true">
-          <ExpressionVar type="xs:string" />
-          <ExpressionName type="xs:string"/>
-        </Expression>
-    </Function>
-
     <Filter repeatable="true" optional="true">
       <FilterType paramType="choice">
         <AeroForces>
@@ -443,6 +345,122 @@
         </Threshold>
       </FilterType>
     </Filter>
+
+    <Force repeatable="true" paramType="choice" optional="true">
+      <Absorption>
+        <Coeff type="xs:string"/>
+        <RefFlow type="xs:string"/>
+        <RefFlowTime type="xs:string"/>
+      </Absorption>
+      <Body>
+        <BodyForce type="xs:string"/>
+      </Body>
+      <Noise>
+        <Whitenoise type="positiveDouble"/>
+        <UpdateFreq type="positiveDouble" optional="true"/>
+        <Nsteps type="positiveDouble" optional="true"/>
+      </Noise>
+    </Force>
+
+    <Function repeatable="true" optional="true">
+      <FunctionName type="xs:string"/>
+        <Expression repeatable="true">
+          <ExpressionVar type="xs:string" />
+          <ExpressionName type="xs:string"/>
+        </Expression>
+    </Function>
+
+    <GlobalSysSolution repeatable="true" optional="true">
+      <MatrixInversion repeatable="true">
+        <Field type="xs:string"/>
+        <InversionType paramType="choice">
+          <Direct>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Direct>
+          <Iterative>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice" optional="true">
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble" optional="true">
+            </SuccessiveRHS>
+            <IterativeSolverTolerance type="positiveDouble">
+            </IterativeSolverTolerance>
+          </Iterative>
+          <Xxt>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+              <tempss:item>MultiLevelStaticCondensation</tempss:item>
+            </SubStructuring>
+          </Xxt>
+          <PETSc>
+            <SubStructuring type="xs:string"  inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+              <tempss:item>MultiLevelStaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string"  inputType="choice" optional="true">
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+            </Preconditioner>
+            <IterativeSolverTolerance type="positiveDouble">
+            </IterativeSolverTolerance>
+          </PETSc>
+        </InversionType>
+      </MatrixInversion>
+    </GlobalSysSolution>
+
+   <SpectralhpDealiasing optional="true">
+      <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
+        can stablise certain simulations through the use of additional 
+        integration of the nonlinear convective terms.
+      </libhpc:documentation>
+    </SpectralhpDealiasing>
+    <SpectralVanishingViscosity optional="true">
+      <libhpc:documentation>Adds additional damping for high-frequency modes 
+        which may help in stabilising underresolved simulations.
+      </libhpc:documentation>
+      <SVVDiffCoeff type="positiveIncDouble">
+        <libhpc:documentation>Adds additional damping for high-frequency modes 
+          which may help in stabilising underresolved simulations.
+        </libhpc:documentation>
+      </SVVDiffCoeff>
+      <SVVCutoffRatio type="positiveIncDouble01">
+        <libhpc:documentation>Dictates the frequencies of the coefficients to 
+          be damped. i.e. for polynomial order 7, a value of 0.75 means 
+          damping is only applied to modes 6 and 7.
+        </libhpc:documentation>
+      </SVVCutoffRatio>
+    </SpectralVanishingViscosity>
+
+    <WeightPartitions type="xs:string" inputType="choice" optional="true">
+      <libhpc:documentation>If using a hybrid mesh of more than one element type 
+        , this should be set to NonUniform to give better parallel partitions.
+      </libhpc:documentation>
+      <tempss:item>Uniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
+    </WeightPartitions>
+
   </AdditionalParameters>
 
   <DurationIO>

@@ -437,6 +437,7 @@
         <PARAM NAME="OutputFrequency"><xsl:value-of select="MovingAverage/OutputFile/Frequency"/></PARAM>
       </xsl:if>
       <PARAM NAME="SampleFrequency"><xsl:value-of select="MovingAverage/SampleFrequency"/></PARAM>
+      <xsl:if test="MovingAverage/Tau">
         <PARAM NAME="Tau"><xsl:value-of select="MovingAverage/Tau"/></PARAM>
       </xsl:if>
     </xsl:if>

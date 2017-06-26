@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <!-- <DomainSpecification>
+  <DomainSpecification>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -51,9 +51,9 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </DomainSpecification> -->
+  </DomainSpecification>
 
- <!--  <NumericalSpecification>
+  <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -232,7 +232,7 @@
       </BasisType>
     </Expansion>
   </NumericalSpecification>
- -->
+
   <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
@@ -443,18 +443,9 @@
         </Threshold>
       </FilterType>
     </Filter>
-<!--     <Filter repeatable="true" optional="true">
-      <Type type="xs:string"/>
-      <Variable repeatable="true">
-        <Param repeatable="true">
-          <ParamName type="xs:string" />
-          <ParamValue type="xs:string"/>
-        </Param>
-      </Variable>
-    </Filter>
- -->  </AdditionalParameters>
+  </AdditionalParameters>
 
-<!--   <DurationIO>
+  <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -471,6 +462,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO> -->
+  </DurationIO>
 
 </IncompressibleNavierStokes>

@@ -344,35 +344,131 @@
           <xsl:attribute name="VALUE">
             <xsl:value-of select="ExpressionName"/>
           </xsl:attribute>
-          <!-- <xsl:text>Value=</xsl:text><xsl:value-of select="ExpressionName"/> -->
         </E>
     </xsl:if>    
   </xsl:template>
 
   <xsl:template match="Filter" mode ="AddFilters">
-    <xsl:message>Processing Filter...</xsl:message>
-    <FILTER>
-      <xsl:attribute name="TYPE">
-        <xsl:value-of select="Type"/>
-      </xsl:attribute>
-      <xsl:apply-templates select="Variable" mode ="AddFilters"/>
-    </FILTER> 
+    <xsl:if test="FilterType">
+      <FILTER>
+        <xsl:if test="FilterType/AeroForces">
+          <xsl:attribute name="NAME">AeroForces</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/AverageFields">
+          <xsl:attribute name="NAME">AverageFields</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/Checkpoint">
+          <xsl:attribute name="NAME">Checkpoint</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/Energy">
+          <xsl:attribute name="NAME">ModalEnergy</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/HistoryPoints">
+          <xsl:attribute name="NAME">HistoryPoints</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/ReynoldStresses">
+          <xsl:attribute name="NAME">ReynoldStresses</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/Threshold/Minimum">
+          <xsl:attribute name="NAME">ThresholdMin</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+        <xsl:if test="FilterType/Threshold/Maximum">
+          <xsl:attribute name="NAME">ThresholdMax</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
+      </FILTER>
+    </xsl:if>
   </xsl:template>
 
-  <xsl:template match="Variable" mode ="AddFilters">
-        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
-        <xsl:apply-templates select="Param" mode ="AddTypes"/>
-  </xsl:template>
-
-  <xsl:template match="Param" mode ="AddTypes">
-    <xsl:if test="ParamName">
-      <PARAM>
-        <xsl:attribute name="NAME">
-          <xsl:value-of select="ParamName"/>
-        </xsl:attribute>
-        <xsl:value-of select="ParamValue"/>
+  <xsl:template match="FilterType" mode ="AddParams">
+    <xsl:if test="AeroForces">
+      <xsl:if test="AeroForces/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="AeroForces/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="AeroForces/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+      <PARAM NAME="Boundary"><xsl:value-of select="AeroForces/Boundary"/></PARAM>
+    </xsl:if>
+    <xsl:if test="AverageFields">
+      <xsl:if test="AverageFields/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="AverageFields/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="AverageFields/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+      <xsl:if test="AverageFields/SampleFile">
+        <PARAM NAME="SampleFilename"><xsl:value-of select="AverageFields/SampleFile/File"/></PARAM>
+        <PARAM NAME="SampleFrequency"><xsl:value-of select="AverageFields/SampleFile/Frequency"/></PARAM>
+      </xsl:if>
+    </xsl:if>
+    <xsl:if test="Checkpoint">
+      <xsl:if test="Checkpoint/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="Checkpoint/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="Checkpoint/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+    </xsl:if>
+    <xsl:if test="Energy">
+      <xsl:if test="Energy/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="Energy/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="Energy/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+    </xsl:if>
+    <xsl:if test="HistoryPoints">
+      <xsl:if test="HistoryPoints/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="HistoryPoints/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="HistoryPoints/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+      <PARAM NAME="Points">
+        <xsl:apply-templates select="HistoryPoints/Points" mode ="AddHistPoints"/>
       </PARAM>
-    </xsl:if>    
+    </xsl:if>
+    <xsl:if test="ReynoldsStresses">
+      <xsl:if test="ReynoldsStresses/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="ReynoldsStresses/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="ReynoldsStresses/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+      <xsl:if test="ReynoldsStresses/SampleFile">
+        <PARAM NAME="SampleFilename"><xsl:value-of select="ReynoldsStresses/SampleFile/File"/></PARAM>
+        <PARAM NAME="SampleFrequency"><xsl:value-of select="ReynoldsStresses/SampleFile/Frequency"/></PARAM>
+      </xsl:if>
+      <xsl:if test="ReynoldsStresses/Alpha">
+        <PARAM NAME="alpha"><xsl:value-of select="ReynoldsStresses/Alpha"/></PARAM>
+      </xsl:if>
+    </xsl:if>
+    <xsl:if test="Threshold/Minimum">
+      <xsl:if test="Threshold/Minimum/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="Threshold/Minimum/OutputFile/FileName"/></PARAM>
+      </xsl:if>
+      <xsl:if test="Threshold/Minimum/ThresholdVar">
+        <PARAM NAME="ThresholdVar"><xsl:value-of select="Threshold/Minimum/ThresholdVar"/></PARAM>
+      </xsl:if>
+      <xsl:if test="Threshold/Minimum/StartTime">
+        <PARAM NAME="StartTime"><xsl:value-of select="Threshold/Minimum/StartTime"/></PARAM>
+      </xsl:if>
+      <PARAM NAME="ThresholdValue"><xsl:value-of select="Threshold/Minimum/ThresholdValue"/></PARAM>
+      <PARAM NAME="InitialValue"><xsl:value-of select="Threshold/Minimum/InitialValue"/></PARAM>
+    </xsl:if>
+    <xsl:if test="Threshold/Maximum">
+      <xsl:if test="Threshold/Maximum/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="Threshold/Maximum/OutputFile/FileName"/></PARAM>
+      </xsl:if>
+      <xsl:if test="Threshold/Maximum/ThresholdVar">
+        <PARAM NAME="ThresholdVar"><xsl:value-of select="Threshold/Maximum/ThresholdVar"/></PARAM>
+      </xsl:if>
+      <xsl:if test="Threshold/Maximum/StartTime">
+        <PARAM NAME="StartTime"><xsl:value-of select="Threshold/Maximum/StartTime"/></PARAM>
+      </xsl:if>
+      <PARAM NAME="ThresholdValue"><xsl:value-of select="Threshold/Maximum/ThresholdValue"/></PARAM>
+      <PARAM NAME="InitialValue"><xsl:value-of select="Threshold/Maximum/InitialValue"/></PARAM>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="Points" mode ="AddHistPoints">
+    <xsl:value-of select="concat( X, '&#x9;', Y, '&#x9;', Z, '&#xA;' , '&#10;')"/>
   </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">
@@ -483,10 +579,7 @@
       </CONDITIONS>
 
       <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
-
-      <FILTERS>
-        <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
-      </FILTERS>
+      <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
       
       <!-- Copy in the geometry -->
       <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>

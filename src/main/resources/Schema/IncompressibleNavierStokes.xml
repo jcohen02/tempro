@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <DomainSpecification>
+  <!-- <DomainSpecification>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -51,9 +51,9 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </DomainSpecification>
+  </DomainSpecification> -->
 
-  <NumericalSpecification>
+ <!--  <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
@@ -232,7 +232,7 @@
       </BasisType>
     </Expansion>
   </NumericalSpecification>
-
+ -->
   <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
@@ -359,6 +359,87 @@
     </Function>
 
     <Filter repeatable="true" optional="true">
+      <FilterType paramType="choice">
+        <AeroForces>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>
+          <Boundary type="xs:string"/>        
+        </AeroForces>
+        <AverageFields>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>          
+          <SampleFile optional="true">
+            <File type="fieldNameString" inputType="file">
+            </File>
+            <Frequency type="xs:string"/>
+          </SampleFile>          
+        </AverageFields>
+        <Checkpoint>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>
+        </Checkpoint>
+        <Energy>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>
+        </Energy>
+        <HistoryPoints>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>
+          <Points repeatable="true">
+            <X type="xs:string"/>
+            <Y type="xs:string"/>
+            <Z type="xs:string"/>
+          </Points>          
+        </HistoryPoints>
+<!--
+        <MovingAverage/>
+        <MovingBody/>
+      -->
+        <ReynoldsStresses>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>          
+          <SampleFile optional="true">
+            <File type="fieldNameString" inputType="file">
+            </File>
+            <Frequency type="xs:string"/>
+          </SampleFile>     
+          <Alpha type="xs:string" optional="true"/>
+        </ReynoldsStresses>
+        <Threshold optional="true">
+          <Minimum optional="true">
+            <OutputFile optional="true">
+              <FileName type="xs:string"/>
+            </OutputFile> 
+            <ThresholdVar type="xs:string" optional="true"/>
+            <ThresholdValue type="xs:string"/>
+            <InitialValue type="xs:string"/>
+            <StartTime type="xs:string" optional="true"/>
+          </Minimum>
+          <Maximum optional="true">
+            <OutputFile optional="true">
+              <FileName type="xs:string"/>
+            </OutputFile> 
+            <ThresholdVar type="xs:string" optional="true"/>
+            <ThresholdValue type="xs:string"/>
+            <InitialValue type="xs:string"/>
+            <StartTime type="xs:string" optional="true"/>
+          </Maximum>
+        </Threshold>
+      </FilterType>
+    </Filter>
+<!--     <Filter repeatable="true" optional="true">
       <Type type="xs:string"/>
       <Variable repeatable="true">
         <Param repeatable="true">
@@ -367,9 +448,9 @@
         </Param>
       </Variable>
     </Filter>
-  </AdditionalParameters>
+ -->  </AdditionalParameters>
 
-  <DurationIO>
+<!--   <DurationIO>
     <libhpc:documentation>
       This section contains parameters that specify administrative details.
     </libhpc:documentation>
@@ -386,6 +467,6 @@
       <libhpc:documentation>Specify the interval in time steps between each 
       print out of the current solution time.</libhpc:documentation>
     </IO_InfoSteps>
-  </DurationIO>
+  </DurationIO> -->
 
 </IncompressibleNavierStokes>

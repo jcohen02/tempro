@@ -83,6 +83,14 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+
+  <xs:complexType name="fieldNameString">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="fileTypeString" type="xs:string" fixed="FLD" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
   
   <xs:complexType name="geometryFileName">
     <xs:simpleContent>

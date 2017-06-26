@@ -421,9 +421,10 @@
       <xsl:if test="HistoryPoints/OutputFile">
         <PARAM NAME="OutputFile"><xsl:value-of select="HistoryPoints/OutputFile/FileName"/></PARAM>
         <PARAM NAME="OutputFrequency"><xsl:value-of select="HistoryPoints/OutputFile/Frequency"/></PARAM>
-      </xsl:if>
+      </xsl:if>  
       <PARAM NAME="Points">
         <xsl:apply-templates select="HistoryPoints/Points" mode ="AddHistPoints"/>
+        <xsl:value-of select="concat( '&#160;', '&#xA;' )"/>
       </PARAM>
     </xsl:if>
     <xsl:if test="ReynoldsStresses">
@@ -468,7 +469,7 @@
   </xsl:template>
 
   <xsl:template match="Points" mode ="AddHistPoints">
-    <xsl:value-of select="concat( X, '&#x9;', Y, '&#x9;', Z, '&#xA;' , '&#10;')"/>
+    <xsl:value-of select="concat( '&#xA;', '&#160;', '&#160;', X, '&#160;', Y, '&#160;', Z, '&#160;')"/>
   </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">

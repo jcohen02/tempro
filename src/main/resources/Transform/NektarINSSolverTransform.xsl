@@ -371,6 +371,10 @@
           <xsl:attribute name="NAME">HistoryPoints</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
+        <xsl:if test="FilterType/MovingAverage">
+          <xsl:attribute name="NAME">MovingAverage</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
         <xsl:if test="FilterType/ReynoldStresses">
           <xsl:attribute name="NAME">ReynoldStresses</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
@@ -426,6 +430,15 @@
         <xsl:apply-templates select="HistoryPoints/Points" mode ="AddHistPoints"/>
         <xsl:value-of select="concat( '&#160;', '&#xA;' )"/>
       </PARAM>
+    </xsl:if>
+    <xsl:if test="MovingAverage">
+      <xsl:if test="MovingAverage/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="MovingAverage/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="MovingAverage/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
+      <PARAM NAME="SampleFrequency"><xsl:value-of select="MovingAverage/SampleFrequency"/></PARAM>
+        <PARAM NAME="Tau"><xsl:value-of select="MovingAverage/Tau"/></PARAM>
+      </xsl:if>
     </xsl:if>
     <xsl:if test="ReynoldsStresses">
       <xsl:if test="ReynoldsStresses/OutputFile">

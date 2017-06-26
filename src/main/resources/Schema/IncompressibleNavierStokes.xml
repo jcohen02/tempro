@@ -401,10 +401,14 @@
             <Z type="xs:string"/>
           </Points>          
         </HistoryPoints>
-<!--
-        <MovingAverage/>
-        <MovingBody/>
-      -->
+        <MovingAverage>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>          
+          <SampleFrequency type="xs:string"/>
+          <Tau type="xs:string" optional="true"/>
+        </MovingAverage>
         <ReynoldsStresses>
           <OutputFile optional="true">
             <FileName type="xs:string"/>

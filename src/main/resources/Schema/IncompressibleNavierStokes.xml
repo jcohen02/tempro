@@ -19,13 +19,23 @@
       is the kinematic velocity. For this reason, units are not displayed, 
       since they depend onthere-scaling of the original problem.
     </libhpc:documentation>
-    <Dimensions type="xs:string" inputType="choice">
+    <Dimensions paramType="choice">
       <libhpc:documentation>Dimensions define the "real" mesh dimensions and not
         the augmentation with quasi-dimensions.
       </libhpc:documentation>
-      <tempss:item>1D</tempss:item>
-      <tempss:item>2D</tempss:item>
-      <tempss:item>3D</tempss:item>
+      <Standard-1D></Standard-1D>
+      <Standard-2D></Standard-2D>
+      <Standard-3D></Standard-3D>
+      <Quasi-2D>
+        <HomModesY type="positiveDouble"/>
+        <LY type="positiveDouble"/>
+        <HomModesZ type="positiveDouble"/>
+        <LZ type="positiveDouble"/>        
+      </Quasi-2D>
+      <Quasi-3D>
+        <HomModesZ type="positiveDouble"/>
+        <LZ type="positiveDouble"/>        
+      </Quasi-3D>
     </Dimensions>
     <ReynoldsNumber type="positiveDouble" optional="true" />
     <KinematicViscosity type="xs:string"/>
@@ -55,8 +65,11 @@
         </Type>
       </Variable>
     </InitialConditions>
+    <Mapping repeatable="true" optional="true">
+      <Type type="xs:string"/>
+      <Expression type="xs:string"/>
+    </Mapping>
   </DomainSpecification>
-
   <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
@@ -237,18 +250,6 @@
       </BasisType>
     </Expansion>
 
-    <Quasi-3D paramType="choice" optional="true">
-      <Homogenous1D>
-        <HomModesZ type="positiveDouble"/>
-        <LZ type="positiveDouble"/>
-      </Homogenous1D>
-      <Homogenous2D>
-        <HomModesY type="positiveDouble"/>
-        <LY type="positiveDouble"/>
-        <HomModesZ type="positiveDouble"/>
-        <LZ type="positiveDouble"/>
-      </Homogenous2D>
-    </Quasi-3D>
   </NumericalSpecification>
 
   <AdditionalParameters>

@@ -13,14 +13,6 @@
     <solver>IncompressibleNavierStokes</solver>
     
     <variables>
-      <variable path="DomainSpecification.Dimensions" name="Dimensions">
-        <domain>
-          <value>1D</value>
-          <value>2D</value>
-          <value>3D</value>
-        </domain>
-      </variable>      
-
       <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
           <value>CoupledLinearNS</value>
@@ -49,15 +41,7 @@
           <value>DiscontinuousGalerkin</value>
           <value>MixedGalerkin</value>
         </domain>
-      </variable>      
-
-      <variable path="NumericalSpecification.Quasi-3D" name="Quasi-3D">
-        <domain>
-          <value>Homogenous1D</value>
-          <value>Homogenous2D</value>
-          <value>None</value>
-        </domain>
-      </variable>      
+      </variable>           
 
     </variables>
     
@@ -96,17 +80,6 @@
       </mapping>
       <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>
-      </mapping>
-
-      <!-- Mapping of Dimensions to the ability to extend into additional quasi dimensions -->
-      <mapping variable="Dimensions" varvalue="1D" targetVariable="Quasi-3D">
-        <targetValue>Homogenous2D</targetValue>
-      </mapping>
-      <mapping variable="Dimensions" varvalue="2D" targetVariable="Quasi-3D">
-        <targetValue>Homogenous1D</targetValue>
-      </mapping>
-      <mapping variable="Dimensions" varvalue="3D" targetVariable="Quasi-3D">
-        <targetValue>None</targetValue>
       </mapping>
       
     </constraints>              

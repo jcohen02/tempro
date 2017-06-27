@@ -39,16 +39,27 @@
   <xsl:template match="DomainSpecification" mode ="Variables">
     <VARIABLES> 
         <xsl:choose>
-          <xsl:when test="Dimensions = '1D'">
+          <xsl:when test="Dimensions/Standard-1D">
             <V ID="0">u</V>
             <V ID="2">p</V>
           </xsl:when>
-          <xsl:when test="Dimensions = '2D'">
+          <xsl:when test="Dimensions/Standard-2D">
             <V ID="0">u</V>
             <V ID="1">v</V>
             <V ID="2">p</V>
           </xsl:when>
-          <xsl:when test="Dimensions = '3D'">
+          <xsl:when test="Dimensions/Standard-3D">
+            <V ID="0">u</V>
+            <V ID="1">v</V>
+            <V ID="2">w</V>
+            <V ID="3">p</V>
+          </xsl:when>
+          <xsl:when test="Dimensions/Quasi-2D">
+            <V ID="0">u</V>
+            <V ID="1">v</V>
+            <V ID="2">p</V>
+          </xsl:when>
+          <xsl:when test="Dimensions/Quasi-3D">
             <V ID="0">u</V>
             <V ID="1">v</V>
             <V ID="2">w</V>
@@ -57,11 +68,66 @@
         </xsl:choose>
     </VARIABLES>
   </xsl:template>
+
+  <xsl:template match="DomainSpecification" mode ="AddFFTW">
+    <xsl:if test="Dimensions/Quasi-3D">
+      <I PROPERTY="HOMOGENOUS">
+        <xsl:attribute name="VALUE">
+          1D
+        </xsl:attribute>
+      </I>
+      <I PROPERTY="USEFFT">
+        <xsl:attribute name="VALUE">
+          FFTW
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+    <xsl:if test="Dimensions/Quasi-2D">
+      <I PROPERTY="HOMOGENOUS">
+        <xsl:attribute name="VALUE">
+          2D
+        </xsl:attribute>
+      </I>
+      <I PROPERTY="USEFFT">
+        <xsl:attribute name="VALUE">
+          FFTW
+        </xsl:attribute>
+      </I>
+    </xsl:if>
+  </xsl:template> 
+
+  <xsl:template match="DomainSpecification" mode ="AddFFTWParam">
+    <xsl:if test="Dimensions/Quasi-3D">
+      <P>LZ = <xsl:value-of select="Dimensions/Quasi-3D/LZ"/></P>
+      <P>HomModesZ = <xsl:value-of select="Dimensions/Quasi-3D/HomModesZ"/></P>
+    </xsl:if>
+    <xsl:if test="Dimensions/Quasi-2D">
+      <P>LZ = <xsl:value-of select="Dimensions/Quasi-2D/LZ"/></P>
+      <P>HomModesZ = <xsl:value-of select="Dimensions/Quasi-2D/HomModesZ"/></P>
+      <P>LY = <xsl:value-of select="Dimensions/Quasi-2D/LY"/></P>
+      <P>HomModesY = <xsl:value-of select="Dimensions/Quasi-2D/HomModesY"/></P>
+    </xsl:if>
+  </xsl:template> 
     
   <xsl:template match="NumericalSpecification" mode ="Parameters">
     <xsl:choose>
       <xsl:when test="CFL">
         <P>CFL = <xsl:value-of select="CFL"/></P>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="DomainSpecification" mode ="Mapping">
+    <xsl:choose>
+      <xsl:when test="Mapping">
+        <MAPPING>
+          <xsl:attribute name="TYPE">
+            <xsl:value-of select="Mapping/Type" />
+          </xsl:attribute>
+          <COORDS>
+            <xsl:value-of select="Mapping/Expression" />
+          </COORDS>
+        </MAPPING>
       </xsl:when>
     </xsl:choose>
   </xsl:template>
@@ -135,9 +201,11 @@
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
     <xsl:attribute name="FIELDS">
       <xsl:choose>
-        <xsl:when test="//DomainSpecification/Dimensions = '1D'">u,p</xsl:when>
-        <xsl:when test="//DomainSpecification/Dimensions = '2D'">u,v,p</xsl:when>
-        <xsl:when test="//DomainSpecification/Dimensions = '3D'">u,v,w,p</xsl:when>
+        <xsl:when test="//DomainSpecification/Dimensions/Standard-1D">u,p</xsl:when>
+        <xsl:when test="//DomainSpecification/Dimensions/Standard-2D">u,v,p</xsl:when>
+        <xsl:when test="//DomainSpecification/Dimensions/Standard-3D">u,v,w,p</xsl:when>
+        <xsl:when test="//DomainSpecification/Dimensions/Quasi-2D">u,v,p</xsl:when>
+        <xsl:when test="//DomainSpecification/Dimensions/Quasi-3D">u,v,w,p</xsl:when>
       </xsl:choose>
     </xsl:attribute>
   </xsl:template>
@@ -232,41 +300,6 @@
       </I>
     </xsl:if>
   </xsl:template>
-
-  <xsl:template match="Quasi-3D" mode ="AddFFTW">
-    <xsl:if test="Homogenous1D">
-      <I PROPERTY="HOMOGENOUS">
-        <xsl:attribute name="VALUE">
-          1D
-        </xsl:attribute>
-      </I>
-    </xsl:if>
-    <xsl:if test="Homogenous2D">
-      <I PROPERTY="HOMOGENOUS">
-        <xsl:attribute name="VALUE">
-          2D
-        </xsl:attribute>
-      </I>
-    </xsl:if>
-    <I PROPERTY="USEFFT">
-      <xsl:attribute name="VALUE">
-        FFTW
-      </xsl:attribute>
-    </I>
-  </xsl:template> 
-
-  <xsl:template match="Quasi-3D" mode ="AddFFTWParam">
-    <xsl:if test="Homogenous1D">
-      <P>LZ = <xsl:value-of select="Homogenous1D/LZ"/></P>
-      <P>HomModesZ = <xsl:value-of select="Homogenous1D/HomModesZ"/></P>
-    </xsl:if>
-    <xsl:if test="Homogenous2D">
-      <P>LZ = <xsl:value-of select="Homogenous2D/LZ"/></P>
-      <P>HomModesZ = <xsl:value-of select="Homogenous2D/HomModesZ"/></P>
-      <P>LY = <xsl:value-of select="Homogenous2D/LY"/></P>
-      <P>HomModesY = <xsl:value-of select="Homogenous2D/HomModesY"/></P>
-    </xsl:if>
-  </xsl:template> 
 
   <xsl:template match="CustomExpression" mode ="AddExpression">
     <E>
@@ -643,15 +676,15 @@
         <SOLVERINFO>
           <xsl:apply-templates select="NumericalSpecification" mode ="NavierStokesSolverInfo"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="SolverInfo"/>
-          <xsl:apply-templates select="NumericalSpecification/Quasi-3D" mode ="AddFFTW"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
+          <xsl:apply-templates select="DomainSpecification" mode ="AddFFTW"/>
         </SOLVERINFO>
 
         <PARAMETERS>
           <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="DomainSpecification" mode ="AddFFTWParam"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
-          <xsl:apply-templates select="NumericalSpecification/Quasi-3D" mode ="AddFFTWParam"/>
           <xsl:apply-templates select="AdditionalParameters/CustomParameter" mode ="AddParameter"/>
           <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
         </PARAMETERS>
@@ -675,6 +708,7 @@
       <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
       <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
       <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
+      <xsl:apply-templates select="DomainSpecification" mode ="Mapping"/>  
       
       <!-- Copy in the geometry -->
       <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>

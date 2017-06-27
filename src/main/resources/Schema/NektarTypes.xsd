@@ -191,6 +191,19 @@
                       </xs:choice>
                     </xs:complexType>
                   </xs:element>
+                  <xs:element name="PrimaryCoefficient" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                      <xs:element name="Expression" type="xs:string">
+                        <xs:annotation>
+                          <xs:appinfo>
+                            <libhpc:documentation>
+                              Provide a function describing this boundary condition.
+                            </libhpc:documentation>
+                          </xs:appinfo>
+                        </xs:annotation>
+                      </xs:element>
+                    </xs:complexType>
+                  </xs:element>
 
                 </xs:sequence>
               </xs:complexType>

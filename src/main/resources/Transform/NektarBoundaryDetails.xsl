@@ -114,6 +114,13 @@
               </xsl:attribute>
             </xsl:when>
           </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="PrimaryCoefficient">
+              <xsl:attribute name="PRIMCOEFF">
+                <xsl:value-of select="PrimaryCoefficient/Expression"/>
+              </xsl:attribute>
+            </xsl:when>
+          </xsl:choose>
         </D>
       </xsl:when>
       <xsl:when test="ConditionType = 'Neumann (N)'">
@@ -143,6 +150,13 @@
             <xsl:when test="UserDefinedType/CustomExpression">
               <xsl:attribute name="USERDEFINEDTYPE">
                 <xsl:value-of select="UserDefinedType/CustomExpression"/>
+              </xsl:attribute>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="PrimaryCoefficient">
+              <xsl:attribute name="PRIMCOEFF">
+                <xsl:value-of select="PrimaryCoefficient/Expression"/>
               </xsl:attribute>
             </xsl:when>
           </xsl:choose>
@@ -176,7 +190,13 @@
               </xsl:attribute>
             </xsl:when>
           </xsl:choose>
-
+          <xsl:choose>
+            <xsl:when test="PrimaryCoefficient">
+              <xsl:attribute name="PRIMCOEFF">
+                <xsl:value-of select="PrimaryCoefficient/Expression"/>
+              </xsl:attribute>
+            </xsl:when>
+          </xsl:choose>
         </P>
       </xsl:when>
     </xsl:choose>

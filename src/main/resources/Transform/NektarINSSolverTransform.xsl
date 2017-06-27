@@ -39,6 +39,10 @@
   <xsl:template match="DomainSpecification" mode ="Variables">
     <VARIABLES> 
         <xsl:choose>
+          <xsl:when test="Dimensions = '1D'">
+            <V ID="0">u</V>
+            <V ID="2">p</V>
+          </xsl:when>
           <xsl:when test="Dimensions = '2D'">
             <V ID="0">u</V>
             <V ID="1">v</V>
@@ -131,6 +135,7 @@
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
     <xsl:attribute name="FIELDS">
       <xsl:choose>
+        <xsl:when test="//DomainSpecification/Dimensions = '1D'">u,p</xsl:when>
         <xsl:when test="//DomainSpecification/Dimensions = '2D'">u,v,p</xsl:when>
         <xsl:when test="//DomainSpecification/Dimensions = '3D'">u,v,w,p</xsl:when>
       </xsl:choose>

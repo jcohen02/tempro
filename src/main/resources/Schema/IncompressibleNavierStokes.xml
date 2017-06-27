@@ -20,6 +20,10 @@
       since they depend onthere-scaling of the original problem.
     </libhpc:documentation>
     <Dimensions type="xs:string" inputType="choice">
+      <libhpc:documentation>Dimensions define the "real" mesh dimensions and not
+        the augmentation with quasi-dimensions.
+      </libhpc:documentation>
+      <tempss:item>1D</tempss:item>
       <tempss:item>2D</tempss:item>
       <tempss:item>3D</tempss:item>
     </Dimensions>

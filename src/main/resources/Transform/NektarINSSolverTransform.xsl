@@ -246,6 +246,9 @@
     <P>IO_CheckSteps = <xsl:value-of select="IO_CheckSteps"/></P>
     <P>IO_InfoSteps = <xsl:value-of select="IO_InfoSteps"/></P>
     <xsl:choose>
+      <xsl:when test="IO_CFLSteps">
+        <P>IO_CFLSteps = <xsl:value-of select="IO_CFLSteps"/></P>
+      </xsl:when>
       <xsl:when test="FinalTime">
         <P>FinTime = <xsl:value-of select="FinalTime"/></P>
       </xsl:when>

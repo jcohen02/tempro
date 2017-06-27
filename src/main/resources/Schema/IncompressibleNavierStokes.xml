@@ -83,6 +83,7 @@
       <tempss:item>CoupledLinearNS</tempss:item>
       <tempss:item>VelocityCorrectionScheme</tempss:item>
       <tempss:item>VCSWeakPressure</tempss:item>
+      <tempss:item>VCSMapping</tempss:item>
     </SolverType>
 
     <Driver optional="true">
@@ -251,6 +252,26 @@
     </Expansion>
 
   </NumericalSpecification>
+
+  <DurationIO>
+    <libhpc:documentation>
+      This section contains parameters that specify administrative details.
+    </libhpc:documentation>
+    <FinalTime type="xs:string" optional="true"/>
+    <TimeStep type="xs:string" optional="true"/>
+    <NumSteps type="xs:string" optional="true"/>
+    <IO_CFLSteps type="xs:string" optional="true"/>
+    <IO_CheckSteps type="xs:string">
+      <libhpc:documentation>
+        The solution can be dumped out at regular intervals. This parameter 
+        specifies the number of time steps for this interval.
+      </libhpc:documentation>
+    </IO_CheckSteps>
+    <IO_InfoSteps type="xs:string">
+      <libhpc:documentation>Specify the interval in time steps between each 
+      print out of the current solution time.</libhpc:documentation>
+    </IO_InfoSteps>
+  </DurationIO>
 
   <AdditionalParameters>
     <libhpc:documentation>
@@ -480,24 +501,5 @@
       <tempss:item>NonUniform - Both</tempss:item>
     </WeightPartitions>
   </AdditionalParameters>
-
-  <DurationIO>
-    <libhpc:documentation>
-      This section contains parameters that specify administrative details.
-    </libhpc:documentation>
-      <FinalTime type="xs:string" optional="true"/>
-      <TimeStep type="xs:string" optional="true"/>
-      <NumSteps type="xs:string" optional="true"/>
-    <IO_CheckSteps type="xs:string">
-      <libhpc:documentation>
-        The solution can be dumped out at regular intervals. This parameter 
-        specifies the number of time steps for this interval.
-      </libhpc:documentation>
-    </IO_CheckSteps>
-    <IO_InfoSteps type="xs:string">
-      <libhpc:documentation>Specify the interval in time steps between each 
-      print out of the current solution time.</libhpc:documentation>
-    </IO_InfoSteps>
-  </DurationIO>
 
 </IncompressibleNavierStokes>

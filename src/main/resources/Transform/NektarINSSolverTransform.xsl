@@ -71,27 +71,19 @@
 
   <xsl:template match="DomainSpecification" mode ="AddFFTW">
     <xsl:if test="Dimensions/Quasi-3D">
-      <I PROPERTY="HOMOGENOUS">
-        <xsl:attribute name="VALUE">
-          1D
-        </xsl:attribute>
+      <I PROPERTY="HOMOGENEOUS">
+        <xsl:attribute name="VALUE">1D</xsl:attribute>
       </I>
       <I PROPERTY="USEFFT">
-        <xsl:attribute name="VALUE">
-          FFTW
-        </xsl:attribute>
+        <xsl:attribute name="VALUE">FFTW</xsl:attribute>
       </I>
     </xsl:if>
     <xsl:if test="Dimensions/Quasi-2D">
-      <I PROPERTY="HOMOGENOUS">
-        <xsl:attribute name="VALUE">
-          2D
-        </xsl:attribute>
+      <I PROPERTY="HOMOGENEOUS">
+        <xsl:attribute name="VALUE">2D</xsl:attribute>
       </I>
       <I PROPERTY="USEFFT">
-        <xsl:attribute name="VALUE">
-          FFTW
-        </xsl:attribute>
+        <xsl:attribute name="VALUE">FFTW</xsl:attribute>
       </I>
     </xsl:if>
   </xsl:template> 
@@ -703,10 +695,11 @@
 
         <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseConditions"/>  
 
+        <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
+
       </CONDITIONS>
 
       <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
-      <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/>
       <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
       <xsl:apply-templates select="DomainSpecification" mode ="Mapping"/>  
       

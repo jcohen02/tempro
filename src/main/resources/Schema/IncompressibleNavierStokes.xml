@@ -12,7 +12,6 @@
   </libhpc:documentation>
   
   <ProblemSpecification>
-
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -224,7 +223,6 @@
         <tempss:item>CHEBYSHEV</tempss:item>
       </BasisType>
     </Expansion>
-
   </NumericalSpecification>
 
   <AdditionalParameters>
@@ -262,15 +260,17 @@
       </Variable>
     </BaseFlow>
 
-    <CustomExpression repeatable="true" optional="true">
-      <Name type="xs:string"/>
-      <Value type="xs:string"/>
-    </CustomExpression>
+    <CustomInputs optional="true">
+      <CustomExpression repeatable="true" optional="true">
+        <Name type="xs:string"/>
+        <Value type="xs:string"/>
+      </CustomExpression>
 
-    <CustomParameter repeatable="true" optional="true">
-      <Name type="xs:string"/>
-      <Value type="xs:string"/>
-    </CustomParameter>
+      <CustomParameter repeatable="true" optional="true">
+        <Name type="xs:string"/>
+        <Value type="xs:string"/>
+      </CustomParameter>
+    </CustomInputs>
 
     <Filter repeatable="true" optional="true">
       <FilterType paramType="choice">
@@ -381,7 +381,10 @@
           <ExpressionName type="xs:string"/>
         </Expression>
     </Function>
+  </AdditionalParameters>
 
+  <AdvancedParameters>
+    <CFL type="xs:string" optional="true"/>
     <GlobalSysSolution repeatable="true" optional="true">
       <MatrixInversion repeatable="true">
         <Field type="xs:string"/>
@@ -439,20 +442,6 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
-
-    <WeightPartitions type="xs:string" inputType="choice" optional="true">
-      <libhpc:documentation>If using a hybrid mesh of more than one element type 
-        , this should be set to NonUniform to give better parallel partitions.
-      </libhpc:documentation>
-      <tempss:item>Uniform</tempss:item>
-      <tempss:item>NonUniform - DoF</tempss:item>
-      <tempss:item>NonUniform - Boundary</tempss:item>
-      <tempss:item>NonUniform - Both</tempss:item>
-    </WeightPartitions>
-  </AdditionalParameters>
-
-  <AdvancedParameters>
-    <CFL type="xs:string" optional="true"/>
     <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 
@@ -475,6 +464,15 @@
         </libhpc:documentation>
       </SVVCutoffRatio>
     </SpectralVanishingViscosity>
+    <WeightPartitions type="xs:string" inputType="choice" optional="true">
+      <libhpc:documentation>If using a hybrid mesh of more than one element type 
+        , this should be set to NonUniform to give better parallel partitions.
+      </libhpc:documentation>
+      <tempss:item>Uniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
+    </WeightPartitions>
   </AdvancedParameters>
 
 </IncompressibleNavierStokes>

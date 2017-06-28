@@ -679,7 +679,7 @@
           <xsl:apply-templates select="NumericalSpecification" mode ="SolverInfo"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="SolverInfo"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTW"/>
-          <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
+          <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomExpression" mode ="AddExpression"/>
         </SOLVERINFO>
 
         <PARAMETERS>
@@ -688,11 +688,11 @@
           <xsl:apply-templates select="NumericalSpecification/TimeIntegration/Timing" mode ="Parameters"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="AddCFL"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="Parameters"/>
-          <xsl:apply-templates select="AdditionalParameters/CustomParameter" mode ="AddParameter"/>
+          <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomParameter" mode ="AddParameter"/>
           <xsl:apply-templates select="AdditionalParameters/IOParams" mode ="Parameters"/>
         </PARAMETERS>
             
-        <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
+        <xsl:apply-templates select="AdvancedParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
 
         
         <xsl:apply-templates select="ProblemSpecification" mode ="Variables"/>

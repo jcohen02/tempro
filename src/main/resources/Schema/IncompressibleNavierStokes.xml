@@ -11,7 +11,8 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <DomainSpecification>
+  <ProblemSpecification>
+
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -65,26 +66,66 @@
         </Type>
       </Variable>
     </InitialConditions>
-    <Mapping repeatable="true" optional="true">
-      <Type type="xs:string"/>
-      <Expression type="xs:string"/>
-    </Mapping>
-  </DomainSpecification>
+  </ProblemSpecification>
+
   <NumericalSpecification>
     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
-    <SolverType type="xs:string" inputType="choice">
+    <SolverType paramType="choice">
       <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
         VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
         DirectSolver: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/DirectSolver
       </libhpc:documentation>
-      <tempss:item>CoupledLinearNS</tempss:item>
-      <tempss:item>VelocityCorrectionScheme</tempss:item>
-      <tempss:item>VCSWeakPressure</tempss:item>
-      <tempss:item>VCSMapping</tempss:item>
+      <CoupledLinearNS>
+      </CoupledLinearNS>
+      <VelocityCorrectionScheme>
+      </VelocityCorrectionScheme>
+      <VCSWeakPressure>
+      </VCSWeakPressure>
+      <VCSMapping>
+        <MappingType type="xs:string"/>
+        <Expression type="xs:string"/>
+      </VCSMapping>
     </SolverType>
+
+    <Equation type="xs:string"  inputType="choice">
+      <libhpc:documentation>
+        SteadyStokes
+        SteadyOseen
+        UnsteadyStokes
+        SteadyLinearisedNavierStokes
+        UnsteadyLinearisedNavierStokes
+        UnsteadyNavierStokes
+      </libhpc:documentation>
+      <tempss:item>SteadyStokes</tempss:item>
+      <tempss:item>SteadyOseen</tempss:item>
+      <tempss:item>UnsteadyStokes</tempss:item>
+      <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
+      <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
+      <tempss:item>UnsteadyNavierStokes</tempss:item>
+    </Equation>
+
+    <TimeIntegration>
+      <libhpc:documentation>Parameters setting the method for time integration.
+      </libhpc:documentation>
+      <Timing>
+        <TimeStep type="xs:string" optional="true"/>
+        <NumSteps type="xs:string" optional="true"/>
+        <FinalTime type="xs:string" optional="true"/>
+      </Timing>
+      <TimeIntegrationMethod type="xs:string" inputType="choice">
+        <tempss:item>NotProvided</tempss:item>
+        <tempss:item>IMEXOrder1</tempss:item>
+        <tempss:item>IMEXOrder2</tempss:item>
+        <tempss:item>IMEXOrder3</tempss:item>
+        <tempss:item>DIRKOrder1</tempss:item>
+        <tempss:item>ForwardEuler</tempss:item>
+        <tempss:item>BackwardEuler</tempss:item>
+        <tempss:item>ClassicalRungeKutta4</tempss:item>
+      </TimeIntegrationMethod>
+    </TimeIntegration>    
 
     <Driver optional="true">
       <DriverType paramType="choice">        
@@ -106,32 +147,6 @@
       </DriverType>
     </Driver>
 
-    <Equation type="xs:string"  inputType="choice">
-      <libhpc:documentation>
-        SteadyStokes
-        SteadyOseen
-        UnsteadyStokes
-        SteadyLinearisedNavierStokes
-        UnsteadyLinearisedNavierStokes
-        UnsteadyNavierStokes
-      </libhpc:documentation>
-      <tempss:item>SteadyStokes</tempss:item>
-      <tempss:item>SteadyOseen</tempss:item>
-      <tempss:item>UnsteadyStokes</tempss:item>
-      <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
-      <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
-      <tempss:item>UnsteadyNavierStokes</tempss:item>
-    </Equation>
-
-    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
-      <tempss:item>Direct</tempss:item>
-      <tempss:item>Adjoint</tempss:item>
-      <tempss:item>NonLinear</tempss:item>
-      <tempss:item>TransientGrowth</tempss:item>
-      <tempss:item>SkewSymmetric</tempss:item>
-      <tempss:item>AdaptiveSFD</tempss:item>
-    </EvolutionOperator>
-
     <Projection type="xs:string"  inputType="choice">
       <libhpc:documentation>
         ContinuousGalerkin: enforces continuity of solution across element boundaries
@@ -142,63 +157,24 @@
       <tempss:item>DiscontinuousGalerkin</tempss:item>
       <tempss:item>MixedGalerkin</tempss:item>
     </Projection>
-
-    <TimeIntegration>
-      <libhpc:documentation>Parameters setting the method for time integration.
+    
+    <DiffusionAdvancement type="xs:string"  inputType="choice" optional="true">
+      <libhpc:documentation>
+        Specifies whether diffusion is handled implicitly or explicitly in 
+        the time integration scheme. 
       </libhpc:documentation>
-      <TimeIntegrationMethod type="xs:string" inputType="choice">
-        <libhpc:documentation>
-          Method of time stepping. See: http://www.nektar.info/wiki/3.2/Reference/TimeStepping
-          
-          - Formally Explicit Methods: These types of methods are considered 
-            explicit from an ODE point of view. They are characterised by a 
-            lower triangular coefficient matrix formula, i.e. formula for 
-            formula. To avoid confusion, we make a further distinction:
-          
-            - direct explicit method: Only forward operators are required.
-            - indirect explicit method: The inverse operator is required.
-            - Diagonally Implicit Methods': Compared to explicit methods, 
-              the coefficient matrix formula has now non-zero entries on the 
-              diagonal. This means that each stage value depend on the stage 
-              derivative at the same stage, requiring an implicit step. 
-              However, the calculation of the different stage values is still 
-              uncoupled. Best known are the DIRK schemes.
-            - IMEX schemes: These schemes support the concept of being able to 
-              split right hand forcing term into an explicit and implicit 
-              component. This is useful in advection diffusion type problems 
-              where the advection is handled explicity and the diffusion is 
-              handled implicit.
-              
-          Choices supported by libhpc/nekkloud:
-            "ForwardEuler"          Forward-Euler scheme
-            "BackwardEuler"         Backward Euler scheme
-            "IMEXOrder1"            IMEX 1st order scheme using Euler Backwards 
-                                    Euler Forwards
-            "IMEXOrder2"            IMEX 2nd order scheme using Backward 
-                                    Different Formula and Extrapolation
-            "IMEXOrder3"            IMEX 3rd order scheme using Backward 
-                                    Different Formula and Extrapolation
-            "DIRKOrder1"            Diagonally Implicit Runge-Kutta scheme of order 1
-            "ClassicalRungeKutta4"  4th order Runge Kutta scheme
-        </libhpc:documentation>
-        <tempss:item>NotProvided</tempss:item>
-        <tempss:item>IMEXOrder1</tempss:item>
-        <tempss:item>IMEXOrder2</tempss:item>
-        <tempss:item>IMEXOrder3</tempss:item>
-        <tempss:item>DIRKOrder1</tempss:item>
-        <tempss:item>ForwardEuler</tempss:item>
-        <tempss:item>BackwardEuler</tempss:item>
-        <tempss:item>ClassicalRungeKutta4</tempss:item>
-      </TimeIntegrationMethod>
-      <DiffusionAdvancement type="xs:string"  inputType="choice" optional="true">
-        <libhpc:documentation>
-          Specifies whether diffusion is handled implicitly or explicitly in 
-          the time integration scheme. 
-        </libhpc:documentation>
-        <tempss:item>Implicit</tempss:item>
-        <tempss:item>Explicit</tempss:item>
-      </DiffusionAdvancement>
-    </TimeIntegration>    
+      <tempss:item>Implicit</tempss:item>
+      <tempss:item>Explicit</tempss:item>
+    </DiffusionAdvancement>
+
+    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
+      <tempss:item>Direct</tempss:item>
+      <tempss:item>Adjoint</tempss:item>
+      <tempss:item>NonLinear</tempss:item>
+      <tempss:item>TransientGrowth</tempss:item>
+      <tempss:item>SkewSymmetric</tempss:item>
+      <tempss:item>AdaptiveSFD</tempss:item>
+    </EvolutionOperator>
 
     <AdvectionForm type="xs:string" inputType="choice" optional="true">
       <libhpc:documentation>
@@ -212,8 +188,6 @@
       <tempss:item>SkewSymmetric</tempss:item>
       <tempss:item>NoAdvection</tempss:item>
     </AdvectionForm>
-
-    <CFL type="xs:string" optional="true"/>
 
     <Expansion>
       <libhpc:documentation>Specify details of how the solution function 
@@ -253,31 +227,29 @@
 
   </NumericalSpecification>
 
-  <DurationIO>
-    <libhpc:documentation>
-      This section contains parameters that specify administrative details.
-    </libhpc:documentation>
-    <FinalTime type="xs:string" optional="true"/>
-    <TimeStep type="xs:string" optional="true"/>
-    <NumSteps type="xs:string" optional="true"/>
-    <IO_CFLSteps type="xs:string" optional="true"/>
-    <IO_CheckSteps type="xs:string">
-      <libhpc:documentation>
-        The solution can be dumped out at regular intervals. This parameter 
-        specifies the number of time steps for this interval.
-      </libhpc:documentation>
-    </IO_CheckSteps>
-    <IO_InfoSteps type="xs:string">
-      <libhpc:documentation>Specify the interval in time steps between each 
-      print out of the current solution time.</libhpc:documentation>
-    </IO_InfoSteps>
-  </DurationIO>
-
   <AdditionalParameters>
     <libhpc:documentation>
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
     </libhpc:documentation>
+    
+    <IOParams optional="true">
+      <libhpc:documentation>
+        This section contains parameters that specify administrative details.
+      </libhpc:documentation>
+      <IO_CFLSteps type="xs:string" optional="true"/>
+      <IO_CheckSteps type="xs:string">
+        <libhpc:documentation>
+          The solution can be dumped out at regular intervals. This parameter 
+          specifies the number of time steps for this interval.
+        </libhpc:documentation>
+      </IO_CheckSteps>
+      <IO_InfoSteps type="xs:string">
+        <libhpc:documentation>Specify the interval in time steps between each 
+        print out of the current solution time.</libhpc:documentation>
+      </IO_InfoSteps>
+    </IOParams>
+
     <BaseFlow optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
       <Variable repeatable="true">
@@ -468,7 +440,20 @@
       </MatrixInversion>
     </GlobalSysSolution>
 
-   <SpectralhpDealiasing optional="true">
+    <WeightPartitions type="xs:string" inputType="choice" optional="true">
+      <libhpc:documentation>If using a hybrid mesh of more than one element type 
+        , this should be set to NonUniform to give better parallel partitions.
+      </libhpc:documentation>
+      <tempss:item>Uniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
+    </WeightPartitions>
+  </AdditionalParameters>
+
+  <AdvancedParameters>
+    <CFL type="xs:string" optional="true"/>
+    <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 
         integration of the nonlinear convective terms.
@@ -490,16 +475,6 @@
         </libhpc:documentation>
       </SVVCutoffRatio>
     </SpectralVanishingViscosity>
-
-    <WeightPartitions type="xs:string" inputType="choice" optional="true">
-      <libhpc:documentation>If using a hybrid mesh of more than one element type 
-        , this should be set to NonUniform to give better parallel partitions.
-      </libhpc:documentation>
-      <tempss:item>Uniform</tempss:item>
-      <tempss:item>NonUniform - DoF</tempss:item>
-      <tempss:item>NonUniform - Boundary</tempss:item>
-      <tempss:item>NonUniform - Both</tempss:item>
-    </WeightPartitions>
-  </AdditionalParameters>
+  </AdvancedParameters>
 
 </IncompressibleNavierStokes>

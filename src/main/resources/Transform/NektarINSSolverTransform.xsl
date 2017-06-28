@@ -29,14 +29,14 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="DomainSpecification" mode ="NavierStokesParameters">
+  <xsl:template match="ProblemSpecification" mode ="NavierStokesParameters">
     <xsl:if test="ReynoldsNumber">
       <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
     </xsl:if>
     <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
   </xsl:template>
 
-  <xsl:template match="DomainSpecification" mode ="Variables">
+  <xsl:template match="ProblemSpecification" mode ="Variables">
     <VARIABLES> 
         <xsl:choose>
           <xsl:when test="Dimensions/Standard-1D">
@@ -69,7 +69,7 @@
     </VARIABLES>
   </xsl:template>
 
-  <xsl:template match="DomainSpecification" mode ="AddFFTW">
+  <xsl:template match="ProblemSpecification" mode ="AddFFTW">
     <xsl:if test="Dimensions/Quasi-3D">
       <I PROPERTY="HOMOGENEOUS">
         <xsl:attribute name="VALUE">1D</xsl:attribute>
@@ -88,7 +88,7 @@
     </xsl:if>
   </xsl:template> 
 
-  <xsl:template match="DomainSpecification" mode ="AddFFTWParam">
+  <xsl:template match="ProblemSpecification" mode ="AddFFTWParam">
     <xsl:if test="Dimensions/Quasi-3D">
       <P>LZ = <xsl:value-of select="Dimensions/Quasi-3D/LZ"/></P>
       <P>HomModesZ = <xsl:value-of select="Dimensions/Quasi-3D/HomModesZ"/></P>
@@ -101,7 +101,7 @@
     </xsl:if>
   </xsl:template> 
     
-  <xsl:template match="NumericalSpecification" mode ="Parameters">
+  <xsl:template match="AdvancedParameters" mode ="AddCFL">
     <xsl:choose>
       <xsl:when test="CFL">
         <P>CFL = <xsl:value-of select="CFL"/></P>
@@ -109,25 +109,28 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="DomainSpecification" mode ="Mapping">
-    <xsl:choose>
-      <xsl:when test="Mapping">
-        <MAPPING>
-          <xsl:attribute name="TYPE">
-            <xsl:value-of select="Mapping/Type" />
-          </xsl:attribute>
-          <COORDS>
-            <xsl:value-of select="Mapping/Expression" />
-          </COORDS>
-        </MAPPING>
-      </xsl:when>
-    </xsl:choose>
+  <xsl:template match="NumericalSpecification" mode ="AddMap">
+    <xsl:if test="SolverType/VCSMapping">
+      <MAPPING>
+        <xsl:attribute name="TYPE">
+          <xsl:value-of select="SolverType/VCSMapping/MappingType" />
+        </xsl:attribute>
+        <COORDS>
+          <xsl:value-of select="SolverType/VCSMapping/Expression" />
+        </COORDS>
+      </MAPPING>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="NumericalSpecification" mode ="NavierStokesSolverInfo">
     <I PROPERTY="SolverType">
       <xsl:attribute name="VALUE">
-        <xsl:value-of select="SolverType" />
+        <xsl:choose>
+          <xsl:when test="SolverType/CoupledLinearNS">CoupledLinearNS</xsl:when>
+          <xsl:when test="SolverType/VelocityCorrectionScheme">VelocityCorrectionScheme</xsl:when>
+          <xsl:when test="SolverType/VCSWeakPressure">VCSWeakPressure</xsl:when>
+          <xsl:when test="SolverType/VCSMapping">VCSMapping</xsl:when>
+        </xsl:choose>
       </xsl:attribute>
     </I>
     <I PROPERTY="EQTYPE">
@@ -193,11 +196,11 @@
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
     <xsl:attribute name="FIELDS">
       <xsl:choose>
-        <xsl:when test="//DomainSpecification/Dimensions/Standard-1D">u,p</xsl:when>
-        <xsl:when test="//DomainSpecification/Dimensions/Standard-2D">u,v,p</xsl:when>
-        <xsl:when test="//DomainSpecification/Dimensions/Standard-3D">u,v,w,p</xsl:when>
-        <xsl:when test="//DomainSpecification/Dimensions/Quasi-2D">u,v,p</xsl:when>
-        <xsl:when test="//DomainSpecification/Dimensions/Quasi-3D">u,v,w,p</xsl:when>
+        <xsl:when test="//ProblemSpecification/Dimensions/Standard-1D">u,p</xsl:when>
+        <xsl:when test="//ProblemSpecification/Dimensions/Standard-2D">u,v,p</xsl:when>
+        <xsl:when test="//ProblemSpecification/Dimensions/Standard-3D">u,v,w,p</xsl:when>
+        <xsl:when test="//ProblemSpecification/Dimensions/Quasi-2D">u,v,p</xsl:when>
+        <xsl:when test="//ProblemSpecification/Dimensions/Quasi-3D">u,v,w,p</xsl:when>
       </xsl:choose>
     </xsl:attribute>
   </xsl:template>
@@ -237,18 +240,23 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="DomainSpecification" mode ="CompositeNavierStokes">
+  <xsl:template match="ProblemSpecification" mode ="CompositeNavierStokes">
     <!-- We assume the composites required for the expansion match the domain -->
     <xsl:attribute name="COMPOSITE"><xsl:value-of select="normalize-space(Geometry/NEKTAR/GEOMETRY/DOMAIN)"/></xsl:attribute>
   </xsl:template>
 
-  <xsl:template match="DurationIO" mode ="Parameters">
+  <xsl:template match="IOParams" mode ="Parameters">
     <P>IO_CheckSteps = <xsl:value-of select="IO_CheckSteps"/></P>
     <P>IO_InfoSteps = <xsl:value-of select="IO_InfoSteps"/></P>
     <xsl:choose>
       <xsl:when test="IO_CFLSteps">
         <P>IO_CFLSteps = <xsl:value-of select="IO_CFLSteps"/></P>
       </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="Timing" mode ="Parameters">
+    <xsl:choose>
       <xsl:when test="FinalTime">
         <P>FinTime = <xsl:value-of select="FinalTime"/></P>
       </xsl:when>
@@ -265,16 +273,14 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="AdditionalParameters" mode ="Parameters">
+  <xsl:template match="AdvancedParameters" mode ="Parameters">
     <xsl:if test="SpectralVanishingViscosity">
       <P>SVVDiffCoeff = <xsl:value-of select="SpectralVanishingViscosity/SVVDiffCoeff"/></P>
       <P>SVVCutoffRatio = <xsl:value-of select="SpectralVanishingViscosity/SVVCutoffRatio"/></P>
     </xsl:if>
-
   </xsl:template>
 
-  <xsl:template match="AdditionalParameters" mode ="SolverInfo">
-
+  <xsl:template match="AdvancedParameters" mode ="SolverInfo">
     <xsl:if test="SpectralhpDealiasing">
       <I PROPERTY="SPECTRALHPDEALIASING" VALUE="True" />
     </xsl:if>
@@ -297,14 +303,14 @@
   </xsl:template>
 
   <xsl:template match="CustomExpression" mode ="AddExpression">
-    <E>
-      <xsl:attribute name="NAME">
+    <I>
+      <xsl:attribute name="PROPERTY">
         <xsl:value-of select="Name"/>
       </xsl:attribute>
       <xsl:attribute name="VALUE">
         <xsl:value-of select="Value"/>
       </xsl:attribute>
-    </E>
+    </I>
   </xsl:template>
 
   <xsl:template match="CustomParameter" mode ="AddParameter">
@@ -658,11 +664,11 @@
 
   <!-- Incompressible Navier-Stokes transform -->
   <xsl:template match="/IncompressibleNavierStokes">
-    <xsl:apply-templates select="DomainSpecification/Geometry" mode ="ErrorChecks"/>
+    <xsl:apply-templates select="ProblemSpecification/Geometry" mode ="ErrorChecks"/>
     <NEKTAR>
       <EXPANSIONS>
         <E>
-          <xsl:apply-templates select="DomainSpecification" mode ="CompositeNavierStokes"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="CompositeNavierStokes"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
         </E>
       </EXPANSIONS>
@@ -671,30 +677,31 @@
         <SOLVERINFO>
           <xsl:apply-templates select="NumericalSpecification" mode ="NavierStokesSolverInfo"/>
           <xsl:apply-templates select="NumericalSpecification" mode ="SolverInfo"/>
-          <xsl:apply-templates select="AdditionalParameters" mode ="SolverInfo"/>
-          <xsl:apply-templates select="DomainSpecification" mode ="AddFFTW"/>
+          <xsl:apply-templates select="AdvancedParameters" mode ="SolverInfo"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTW"/>
+          <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
         </SOLVERINFO>
 
         <PARAMETERS>
-          <xsl:apply-templates select="DomainSpecification" mode ="NavierStokesParameters"/>
-          <xsl:apply-templates select="DomainSpecification" mode ="AddFFTWParam"/>
-          <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
-          <xsl:apply-templates select="AdditionalParameters" mode ="Parameters"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTWParam"/>
+          <xsl:apply-templates select="NumericalSpecification/TimeIntegration/Timing" mode ="Parameters"/>
+          <xsl:apply-templates select="AdvancedParameters" mode ="AddCFL"/>
+          <xsl:apply-templates select="AdvancedParameters" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters/CustomParameter" mode ="AddParameter"/>
-          <xsl:apply-templates select="DurationIO" mode ="Parameters"/>
+          <xsl:apply-templates select="AdditionalParameters/IOParams" mode ="Parameters"/>
         </PARAMETERS>
             
         <xsl:apply-templates select="AdditionalParameters/GlobalSysSolution" mode ="GlobalSysSoln"/>
 
-        <xsl:apply-templates select="AdditionalParameters/CustomExpression" mode ="AddExpression"/>
         
-        <xsl:apply-templates select="DomainSpecification" mode ="Variables"/>
+        <xsl:apply-templates select="ProblemSpecification" mode ="Variables"/>
         
-        <xsl:apply-templates select="DomainSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
+        <xsl:apply-templates select="ProblemSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
 
         <!-- <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/> -->
 
-        <xsl:apply-templates select="DomainSpecification/InitialConditions" mode ="HandleConditions"/>  
+        <xsl:apply-templates select="ProblemSpecification/InitialConditions" mode ="HandleConditions"/>  
 
         <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode ="BaseConditions"/>  
 
@@ -704,10 +711,10 @@
 
       <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
       <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
-      <xsl:apply-templates select="DomainSpecification" mode ="Mapping"/>  
+      <xsl:apply-templates select="NumericalSpecification" mode ="AddMap"/>  
       
       <!-- Copy in the geometry -->
-      <xsl:copy-of select="DomainSpecification/Geometry/NEKTAR/GEOMETRY"/>
+      <xsl:copy-of select="ProblemSpecification/Geometry/NEKTAR/GEOMETRY"/>
 
     </NEKTAR>
   </xsl:template>

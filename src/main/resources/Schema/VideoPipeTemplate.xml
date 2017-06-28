@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
+<VideoPipe xmlns="http://www.libhpc.imperial.ac.uk"
+                            xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+                            xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
+
+  <Functions>
+    <Map type="xs:string" inputType="choice">
+      <tempss:item>MapSequential</tempss:item>
+      <tempss:item>MapParallel</tempss:item>
+    </Map>
+    <ConcVid type="xs:string" inputType="choice">
+      <tempss:item>ConcVidSequential</tempss:item>
+      <tempss:item>ConcVidParallel</tempss:item>
+    </ConcVid>
+  </Functions>
+  
+  <Users>
+    <User type="xs:string" inputType="choice">
+      <tempss:item>User1</tempss:item>
+      <tempss:item>User2</tempss:item>
+      <tempss:item>User3</tempss:item>
+    </User>
+  </Users>
+  
+  <Machines>
+    <Machine paramType="choice">
+      <StandaloneServer>
+        <Architecture type="xs:string" inputType="choice">
+          <tempss:item>Sequential</tempss:item>
+        </Architecture>
+      </StandaloneServer>
+      <OpenstackCloud>
+        <Architecture type="xs:string" inputType="choice">
+          <tempss:item>Parallel</tempss:item>
+        </Architecture>
+      </OpenstackCloud>
+      <PBSCluster>
+        <Architecture type="xs:string" inputType="choice">
+          <tempss:item>Parallel</tempss:item>
+        </Architecture>
+      </PBSCluster>
+      <AmazonEC2>
+        <Architecture type="xs:string" inputType="choice">
+          <tempss:item>Sequential</tempss:item>
+        </Architecture>
+      </AmazonEC2>
+    </Machine>
+  </Machines>
+    
+</VideoPipe>

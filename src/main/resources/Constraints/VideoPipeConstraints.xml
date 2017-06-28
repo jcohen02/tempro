@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PrismConstraints
+    xmlns="http://libhpc.doc.ic.ac.uk/prism/constraints"
+    xmlns:prism="http://libhpc.doc.ic.ac.uk/prism/constraints"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://libhpc.doc.ic.ac.uk/prism/constraints PRISMConstraints.xsd">
+
+    <description>Constraints for the Video Pipe example</description>
+
+    <!-- This should be the solver name exactly as it appears in the root node
+         of the tree that these constraints relate to.
+    -->
+    <solver>VideoPipe</solver>
+
+    <variables>
+      <variable path="Functions.Map" name="Map">
+        <domain>
+          <value>MapSequential</value>
+          <value>MapParallel</value>
+        </domain>
+      </variable>
+
+      <variable path="Functions.ConcVid" name="ConcVid">
+        <domain>
+          <value>ConcVidSequential</value>
+          <value>ConcVidParallel</value>
+        </domain>
+      </variable>
+
+      <variable path="Machines.Machine" name="Machine">
+        <domain>
+          <value>StandaloneServer</value>
+          <value>PBSCluster</value>
+          <value>OpenstackCloud</value>
+          <value>AmazonEC2</value>
+        </domain>
+      </variable>
+
+      <variable path="Users.User" name="User">
+        <domain>
+          <value>User1</value>
+          <value>User2</value>
+          <value>User3</value>
+        </domain>
+      </variable>
+
+
+
+    </variables>
+
+    <constraints>
+      <!-- Constraint mappings for Equation Type -> AdvectionType -->
+      <!--
+           If an EquationType that has no advection term is selected
+           (i.e. Laplace, Poisson, Helmholtz, SteadyDiffusionReaction,
+           UnsteadyDiffusion or UnsteadyInviscidBurger), it is not valid to
+           select an entry from NumericalAlgorithm -> AdvectionType and this
+           must be switched off.
+      -->
+
+      <mapping variable="Map" varvalue="MapSequential" targetVariable="Machine">
+        <targetValue>StandaloneServer</targetValue>
+        <targetValue>AmazonEC2</targetValue>
+      </mapping>
+
+      <mapping variable="Map" varvalue="MapParallel" targetVariable="Machine">
+        <targetValue>PBSCluster</targetValue>
+        <targetValue>OpenstackCloud</targetValue>
+      </mapping>
+
+      <mapping variable="ConcVid" varvalue="ConcVidSequential" targetVariable="Machine">
+        <targetValue>StandaloneServer</targetValue>
+        <targetValue>AmazonEC2</targetValue>
+      </mapping>
+
+      <mapping variable="ConcVid" varvalue="ConcVidParallel" targetVariable="Machine">
+        <targetValue>PBSCluster</targetValue>
+        <targetValue>OpenstackCloud</targetValue>
+      </mapping>
+
+      <mapping variable="Map" varvalue="MapSequential" targetVariable="ConcVid">
+        <targetValue>ConcVidSequential</targetValue>
+      </mapping>
+
+      <mapping variable="Map" varvalue="MapParallel" targetVariable="ConcVid">
+        <targetValue>ConcVidParallel</targetValue>
+      </mapping>
+
+      <mapping variable="User" varvalue="User1" targetVariable="Machine">
+        <targetValue>AmazonEC2</targetValue>
+      </mapping>
+
+      <mapping variable="User" varvalue="User2" targetVariable="Machine">
+        <targetValue>PBSCluster</targetValue>
+        <targetValue>StandaloneServer</targetValue>
+        <targetValue>OpenstackCloud</targetValue>
+      </mapping>
+
+      <mapping variable="User" varvalue="User3" targetVariable="Machine">
+        <targetValue>StandaloneServer</targetValue>
+      </mapping>
+
+    </constraints>
+
+</PrismConstraints>

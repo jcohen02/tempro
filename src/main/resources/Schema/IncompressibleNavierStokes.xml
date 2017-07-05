@@ -23,19 +23,28 @@
       <libhpc:documentation>Dimensions define the "real" mesh dimensions and not
         the augmentation with quasi-dimensions.
       </libhpc:documentation>
-      <Standard-1D></Standard-1D>
-      <Standard-2D></Standard-2D>
-      <Standard-3D></Standard-3D>
-      <Quasi-2D>
-        <HomModesY type="positiveDouble"/>
-        <LY type="positiveDouble"/>
-        <HomModesZ type="positiveDouble"/>
-        <LZ type="positiveDouble"/>        
-      </Quasi-2D>
-      <Quasi-3D>
-        <HomModesZ type="positiveDouble"/>
-        <LZ type="positiveDouble"/>        
-      </Quasi-3D>
+      <OneDimensional>
+      </OneDimensional>
+      <TwoDimensional>
+        <QuasiDimensions optional="true">
+          <HomModesY type="positiveDouble"/>
+          <LY type="positiveDouble"/>
+        </QuasiDimensions>
+      </TwoDimensional>
+      <ThreeDimensional>
+        <QuasiDimensions optional="true" paramType="choice">
+          <Single>
+            <HomModesZ type="positiveDouble"/>
+            <LZ type="positiveDouble"/>        
+          </Single>
+          <Double>
+            <HomModesY type="positiveDouble"/>
+            <LY type="positiveDouble"/>        
+            <HomModesZ type="positiveDouble"/>
+            <LZ type="positiveDouble"/>        
+          </Double>
+        </QuasiDimensions>
+      </ThreeDimensional>
     </Dimensions>
     <ReynoldsNumber type="positiveDouble" optional="true" />
     <KinematicViscosity type="xs:string"/>
@@ -79,14 +88,14 @@
       </libhpc:documentation>
       <CoupledLinearNS>
       </CoupledLinearNS>
-      <VelocityCorrectionScheme>
+      <VelocityCorrectionScheme paramType="choice">
+        <Standard></Standard>
+        <WeakPressure></WeakPressure>
+        <Mapping>
+          <MappingType type="xs:string"/>
+          <Expression type="xs:string"/>
+        </Mapping>
       </VelocityCorrectionScheme>
-      <VCSWeakPressure>
-      </VCSWeakPressure>
-      <VCSMapping>
-        <MappingType type="xs:string"/>
-        <Expression type="xs:string"/>
-      </VCSMapping>
     </SolverType>
 
     <Equation type="xs:string"  inputType="choice">
@@ -130,7 +139,6 @@
       <DriverType paramType="choice">        
         <Standard></Standard>
         <Adaptive></Adaptive>
-        <Arnoldi></Arnoldi>
         <ModifiedArnoldi></ModifiedArnoldi>
         <SteadyState></SteadyState>
         <Arpack>

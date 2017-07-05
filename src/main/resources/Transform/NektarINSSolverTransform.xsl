@@ -39,38 +39,33 @@
   <xsl:template match="ProblemSpecification" mode ="Variables">
     <VARIABLES> 
         <xsl:choose>
-          <xsl:when test="Dimensions/Standard-1D">
+          <xsl:when test="Dimensions/OneDimensional">
             <V ID="0">u</V>
-            <V ID="2">p</V>
+            <xsl:if test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
+              <V ID="1">p</V>
+            </xsl:if>
           </xsl:when>
-          <xsl:when test="Dimensions/Standard-2D">
-            <V ID="0">u</V>
-            <V ID="1">v</V>
-            <V ID="2">p</V>
-          </xsl:when>
-          <xsl:when test="Dimensions/Standard-3D">
+          <xsl:when test="Dimensions/TwoDimensional">
             <V ID="0">u</V>
             <V ID="1">v</V>
-            <V ID="2">w</V>
-            <V ID="3">p</V>
+            <xsl:if test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
+              <V ID="2">p</V>
+            </xsl:if>
           </xsl:when>
-          <xsl:when test="Dimensions/Quasi-2D">
-            <V ID="0">u</V>
-            <V ID="1">v</V>
-            <V ID="2">p</V>
-          </xsl:when>
-          <xsl:when test="Dimensions/Quasi-3D">
+          <xsl:when test="Dimensions/ThreeDimensional">
             <V ID="0">u</V>
             <V ID="1">v</V>
             <V ID="2">w</V>
-            <V ID="3">p</V>
+            <xsl:if test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
+              <V ID="3">p</V>
+            </xsl:if>
           </xsl:when>
         </xsl:choose>
     </VARIABLES>
   </xsl:template>
 
   <xsl:template match="ProblemSpecification" mode ="AddFFTW">
-    <xsl:if test="Dimensions/Quasi-3D">
+    <xsl:if test="Dimensions/TwoDimensional/QuasiDimensions">
       <I PROPERTY="HOMOGENEOUS">
         <xsl:attribute name="VALUE">1D</xsl:attribute>
       </I>
@@ -78,7 +73,15 @@
         <xsl:attribute name="VALUE">FFTW</xsl:attribute>
       </I>
     </xsl:if>
-    <xsl:if test="Dimensions/Quasi-2D">
+    <xsl:if test="Dimensions/ThreeDimensional/QuasiDimensions/Single">
+      <I PROPERTY="HOMOGENEOUS">
+        <xsl:attribute name="VALUE">1D</xsl:attribute>
+      </I>
+      <I PROPERTY="USEFFT">
+        <xsl:attribute name="VALUE">FFTW</xsl:attribute>
+      </I>
+    </xsl:if>
+    <xsl:if test="Dimensions/ThreeDimensional/QuasiDimensions/Double">
       <I PROPERTY="HOMOGENEOUS">
         <xsl:attribute name="VALUE">2D</xsl:attribute>
       </I>
@@ -89,15 +92,19 @@
   </xsl:template> 
 
   <xsl:template match="ProblemSpecification" mode ="AddFFTWParam">
-    <xsl:if test="Dimensions/Quasi-3D">
-      <P>LZ = <xsl:value-of select="Dimensions/Quasi-3D/LZ"/></P>
-      <P>HomModesZ = <xsl:value-of select="Dimensions/Quasi-3D/HomModesZ"/></P>
+    <xsl:if test="Dimensions/TwoDimensional/QuasiDimensions">
+      <P>LY = <xsl:value-of select="Dimensions/TwoDimensional/QuasiDimensions/LY"/></P>
+      <P>HomModesY = <xsl:value-of select="Dimensions/TwoDimensional/QuasiDimensions/HomModesY"/></P>
     </xsl:if>
-    <xsl:if test="Dimensions/Quasi-2D">
-      <P>LZ = <xsl:value-of select="Dimensions/Quasi-2D/LZ"/></P>
-      <P>HomModesZ = <xsl:value-of select="Dimensions/Quasi-2D/HomModesZ"/></P>
-      <P>LY = <xsl:value-of select="Dimensions/Quasi-2D/LY"/></P>
-      <P>HomModesY = <xsl:value-of select="Dimensions/Quasi-2D/HomModesY"/></P>
+    <xsl:if test="Dimensions/ThreeDimensional/QuasiDimensions/Single">
+      <P>LZ = <xsl:value-of select="Dimensions/ThreeDimensional/QuasiDimensions/Single/LZ"/></P>
+      <P>HomModesZ = <xsl:value-of select="Dimensions/ThreeDimensional/QuasiDimensions/Single/HomModesZ"/></P>
+    </xsl:if>
+    <xsl:if test="Dimensions/ThreeDimensional/QuasiDimensions/Double">
+      <P>LZ = <xsl:value-of select="Dimensions/ThreeDimensional/QuasiDimensions/Double/LZ"/></P>
+      <P>HomModesZ = <xsl:value-of select="Dimensions/ThreeDimensional/QuasiDimensions/Double/HomModesZ"/></P>
+      <P>LY = <xsl:value-of select="Dimensions/ThreeDimensional/QuasiDimensions/Double/LY"/></P>
+      <P>HomModesY = <xsl:value-of select="Dimensions/ThreeDimensional/QuasiDimensions/Double/HomModesY"/></P>
     </xsl:if>
   </xsl:template> 
     
@@ -127,9 +134,9 @@
       <xsl:attribute name="VALUE">
         <xsl:choose>
           <xsl:when test="SolverType/CoupledLinearNS">CoupledLinearNS</xsl:when>
-          <xsl:when test="SolverType/VelocityCorrectionScheme">VelocityCorrectionScheme</xsl:when>
-          <xsl:when test="SolverType/VCSWeakPressure">VCSWeakPressure</xsl:when>
-          <xsl:when test="SolverType/VCSMapping">VCSMapping</xsl:when>
+          <xsl:when test="SolverType/VelocityCorrectionScheme/Standard">VelocityCorrectionScheme</xsl:when>
+          <xsl:when test="SolverType/VelocityCorrectionScheme/WeakPressure">VCSWeakPressure</xsl:when>
+          <xsl:when test="SolverType/VelocityCorrectionScheme/Mapping">Mapping</xsl:when>
         </xsl:choose>
       </xsl:attribute>
     </I>
@@ -145,7 +152,6 @@
           <xsl:choose>
             <xsl:when test="Driver/DriverType/Standard">Standard</xsl:when>
             <xsl:when test="Driver/DriverType/Adaptive">Adaptive</xsl:when>
-            <xsl:when test="Driver/DriverType/Arnoldi">Arnoldi</xsl:when>
             <xsl:when test="Driver/DriverType/ModifiedArnoldi">ModifiedArnoldi</xsl:when>
             <xsl:when test="Driver/DriverType/SteadyState">SteadyState</xsl:when>
             <xsl:when test="Driver/DriverType/Arpack">Arpack</xsl:when>
@@ -196,11 +202,20 @@
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
     <xsl:attribute name="FIELDS">
       <xsl:choose>
-        <xsl:when test="//ProblemSpecification/Dimensions/Standard-1D">u,p</xsl:when>
-        <xsl:when test="//ProblemSpecification/Dimensions/Standard-2D">u,v,p</xsl:when>
-        <xsl:when test="//ProblemSpecification/Dimensions/Standard-3D">u,v,w,p</xsl:when>
-        <xsl:when test="//ProblemSpecification/Dimensions/Quasi-2D">u,v,p</xsl:when>
-        <xsl:when test="//ProblemSpecification/Dimensions/Quasi-3D">u,v,w,p</xsl:when>
+        <xsl:when test="//NumericalSpecification/SolverType/CoupledLinearNS">
+          <xsl:choose>
+            <xsl:when test="//ProblemSpecification/Dimensions/OneDimensional">u</xsl:when>
+            <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v</xsl:when>
+            <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w</xsl:when>
+          </xsl:choose>
+        </xsl:when>
+        <xsl:when test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
+          <xsl:choose>
+            <xsl:when test="//ProblemSpecification/Dimensions/OneDimensional">u,p</xsl:when>
+            <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v,p</xsl:when>
+            <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w,p</xsl:when>
+          </xsl:choose>
+        </xsl:when>
       </xsl:choose>
     </xsl:attribute>
   </xsl:template>

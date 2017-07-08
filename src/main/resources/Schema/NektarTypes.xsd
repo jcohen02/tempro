@@ -113,105 +113,126 @@
       <xs:enumeration value="False"/>
     </xs:restriction>
   </xs:simpleType>
-  
+
   <xs:complexType name="BoundaryDetails">
     <xs:sequence>
       <xs:element name="BoundaryCondition" minOccurs="0" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>
-              A boundary condition specifying the solution at one of the geometry 
-              boundaries. Add as many boundary conditions as required for the 
-              problem that you are solving. You will be able to allocate these 
-              boundary conditions to boundary regions once you add a geometry file.
-            </libhpc:documentation>
-          </xs:appinfo>
-        </xs:annotation>
+        <xs:element name="BoundaryConditionReference" type="xs:string"/>
+        <xs:element name="BoundaryConditionType">
         <xs:complexType>
-          <xs:sequence>
-            <xs:element name="BoundaryConditionReference" type="xs:string"/>
-            <xs:element name="Variable" minOccurs="1" maxOccurs="unbounded">
+          <xs:choice>
+            <xs:element name="VelocityCorrectionScheme-2D">
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element name="VariableName" type="xs:string"/>
-                  <xs:element name="ConditionType">
-                    <xs:simpleType>
-                      <xs:restriction base="xs:string">
-                        <xs:enumeration value="Dirichlet (D)"/>
-                        <xs:enumeration value="Neumann (N)"/>
-                        <xs:enumeration value="Periodic (P)"/>
-                      </xs:restriction>
-                    </xs:simpleType>
-                  </xs:element>
-                  <xs:element name="ConditionValue">
                     <xs:complexType>
-                      <xs:choice>
-                        <xs:element name="Expression" type="xs:string">
-                          <xs:annotation>
-                            <xs:appinfo>
-                              <libhpc:documentation>
-      	                        Provide a function describing this boundary condition.
-      	                      </libhpc:documentation>
-                            </xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                        <xs:element name="File" type="fileName">
-                          <xs:annotation>
-                            <xs:appinfo>
-                              <libhpc:documentation>
-      	                        Provide a file describing this boundary condition - this will 
-      	                        be a field file describing an edge of the mesh field.
-      	                      </libhpc:documentation>
-                            </xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                      </xs:choice>
+                      <xs:element name="u-velocity" type="VariableDefinition" />
+                      <xs:element name="v-velocity" type="VariableDefinition" />
+                      <xs:element name="p-pressure" type="VariableDefinition" />
                     </xs:complexType>
-                  </xs:element>
-                  <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
-                    <xs:complexType>
-                      <xs:choice>
-                        <xs:element name="ExistingType">
-                          <xs:simpleType>
-                            <xs:restriction base="xs:string">
-                              <xs:enumeration value="TimeDependent"/>
-                              <xs:enumeration value="HighOrderPressure"/>
-                            </xs:restriction>
-                          </xs:simpleType>
-                        </xs:element>
-                        <xs:element name="CustomExpression" type="xs:string">
-                          <xs:annotation>
-                            <xs:appinfo>
-                              <libhpc:documentation>
-                                Provide a function describing this boundary condition.
-                              </libhpc:documentation>
-                            </xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                      </xs:choice>
-                    </xs:complexType>
-                  </xs:element>
-                  <xs:element name="PrimaryCoefficient" minOccurs="0" maxOccurs="1">
-                    <xs:complexType>
-                      <xs:element name="Expression" type="xs:string">
-                        <xs:annotation>
-                          <xs:appinfo>
-                            <libhpc:documentation>
-                              Provide a function describing this boundary condition.
-                            </libhpc:documentation>
-                          </xs:appinfo>
-                        </xs:annotation>
-                      </xs:element>
-                    </xs:complexType>
-                  </xs:element>
-
                 </xs:sequence>
               </xs:complexType>
             </xs:element>
-          </xs:sequence>
+            <xs:element name="VelocityCorrectionScheme-3D">
+              <xs:complexType>
+                <xs:sequence>
+                    <xs:complexType>
+                      <xs:element name="u-velocity" type="VariableDefinition" />
+                      <xs:element name="v-velocity" type="VariableDefinition" />
+                      <xs:element name="w-velocity" type="VariableDefinition" />
+                      <xs:element name="p-pressure" type="VariableDefinition" />
+                    </xs:complexType>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="CoupledLinearNS-2D">
+              <xs:complexType>
+                <xs:sequence>
+                    <xs:complexType>
+                      <xs:element name="u-velocity" type="VariableDefinition" />
+                      <xs:element name="v-velocity" type="VariableDefinition" />
+                    </xs:complexType>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="CoupledLinearNS-3D">
+              <xs:complexType>
+                <xs:sequence>
+                    <xs:complexType>
+                      <xs:element name="u-velocity" type="VariableDefinition" />
+                      <xs:element name="v-velocity" type="VariableDefinition" />
+                      <xs:element name="w-velocity" type="VariableDefinition" />
+                    </xs:complexType>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:choice>
         </xs:complexType>
+        </xs:element>
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:complexType name="VariableDefinition">
+    <xs:element name="Variable">
+      <xs:element name="ConditionType">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Dirichlet (D)"/>
+            <xs:enumeration value="Neumann (N)"/>
+            <xs:enumeration value="Periodic (P)"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ConditionValue">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Expression" type="xs:string">
+            </xs:element>
+            <xs:element name="File" type="fileName">
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="ExistingType">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="HighOrderPressure"/>
+                  <xs:enumeration value="MovingBody"/>
+                  <xs:enumeration value="Radiation"/>
+                  <xs:enumeration value="TimeDependent"/>
+                  <xs:enumeration value="Wormersley"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="CustomExpression" type="xs:string">
+              <xs:annotation>
+                <xs:appinfo>
+                  <libhpc:documentation>
+                    Provide a function describing this boundary condition.
+                  </libhpc:documentation>
+                </xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PrimaryCoefficient" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:element name="Expression" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <libhpc:documentation>
+                  Provide a function describing this boundary condition.
+                </libhpc:documentation>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+        </xs:complexType>
+      </xs:element>
+    </xs:element>
+  </xs:complexType> 
 
 </xs:schema>

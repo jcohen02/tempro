@@ -23,8 +23,6 @@
       <libhpc:documentation>Dimensions define the "real" mesh dimensions and not
         the augmentation with quasi-dimensions.
       </libhpc:documentation>
-      <OneDimensional>
-      </OneDimensional>
       <TwoDimensional>
         <QuasiDimensions optional="true">
           <HomModesY type="positiveDouble"/>
@@ -205,25 +203,6 @@
           The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
       </PolynomialOrder>
       <BasisType type="xs:string" inputType="choice">
-        <libhpc:documentation>
-          The type of polynomials used as a basis to expand the solution 
-          function. There are two styles of basis polynomial: modal and nodal.
-           
-           Modal / hierarchical basis: don't need to redefine basis functions 
-           when increase the order (but have to be modified to get zero at boundary).
-           
-           Nodal: have to be redefined when the polynomial order is increased, 
-           but are naturally zero at the boundaries.
-           
-           Available choices:
-             MODIFIED: Legendre polynomials (modal) that have been multiplied 
-                       by two linear functions to make them zero at the boundaries.
-             GAUSS_LAGRANGE: Lagrange polynomials (nodal)
-             GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
-                           Gauss-Lobatto-Legendre
-             GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
-             CHEBYSHEV: another modal approach (similar to Fourier modes).
-        </libhpc:documentation>
         <tempss:item>MODIFIED</tempss:item>
         <tempss:item>GAUSS_LAGRANGE</tempss:item>
         <tempss:item>GLL_LAGRANGE</tempss:item>

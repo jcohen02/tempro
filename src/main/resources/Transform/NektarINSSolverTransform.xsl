@@ -39,12 +39,6 @@
   <xsl:template match="ProblemSpecification" mode ="Variables">
     <VARIABLES> 
         <xsl:choose>
-          <xsl:when test="Dimensions/OneDimensional">
-            <V ID="0">u</V>
-            <xsl:if test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
-              <V ID="1">p</V>
-            </xsl:if>
-          </xsl:when>
           <xsl:when test="Dimensions/TwoDimensional">
             <V ID="0">u</V>
             <V ID="1">v</V>
@@ -713,8 +707,6 @@
         <xsl:apply-templates select="ProblemSpecification" mode ="Variables"/>
         
         <xsl:apply-templates select="ProblemSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
-
-        <!-- <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/> -->
 
         <xsl:apply-templates select="ProblemSpecification/InitialConditions" mode ="HandleConditions"/>  
 

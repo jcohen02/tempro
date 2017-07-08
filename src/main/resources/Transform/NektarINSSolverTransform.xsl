@@ -198,14 +198,12 @@
       <xsl:choose>
         <xsl:when test="//NumericalSpecification/SolverType/CoupledLinearNS">
           <xsl:choose>
-            <xsl:when test="//ProblemSpecification/Dimensions/OneDimensional">u</xsl:when>
             <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v</xsl:when>
             <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w</xsl:when>
           </xsl:choose>
         </xsl:when>
         <xsl:when test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
           <xsl:choose>
-            <xsl:when test="//ProblemSpecification/Dimensions/OneDimensional">u,p</xsl:when>
             <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v,p</xsl:when>
             <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w,p</xsl:when>
           </xsl:choose>

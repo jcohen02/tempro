@@ -116,7 +116,7 @@
 
   <xs:complexType name="BoundaryDetails">
     <xs:sequence>
-      <xs:element name="BoundaryCondition" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="BoundaryCondition" minOccurs="1" maxOccurs="unbounded">
         <xs:element name="BoundaryConditionReference" type="xs:string"/>
         <xs:element name="BoundaryConditionType">
         <xs:complexType>

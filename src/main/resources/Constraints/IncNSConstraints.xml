@@ -13,11 +13,26 @@
     <solver>IncompressibleNavierStokes</solver>
     
     <variables>
+      <variable path="ProblemSpecification.Dimensions" name="Dimensions">
+        <domain>
+          <value>TwoDimensional</value>
+          <value>ThreeDimensional</value>
+        </domain>
+      </variable>
+
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.BoundaryConditionType" name="BCType">
+        <domain>
+          <value>VelocityCorrectionScheme-2D</value>
+          <value>VelocityCorrectionScheme-3D</value>
+          <value>CoupledLinearNS-2D</value>
+          <value>CoupledLinearNS-3D</value>
+        </domain>
+      </variable>
+
       <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
           <value>CoupledLinearNS</value>
           <value>VelocityCorrectionScheme</value>
-          <value>VCSWeakPressure</value>
         </domain>
       </variable>      
 
@@ -46,6 +61,26 @@
     </variables>
     
     <constraints>
+      <!-- Mapping of Dimension to the Boundary Conditions -->
+      <mapping variable="Dimensions" varvalue="TwoDimensional" targetVariable="BCType">
+        <targetValue>VelocityCorrectionScheme-2D</targetValue>
+        <targetValue>CoupledLinearNS-2D</targetValue>
+      </mapping>
+      <mapping variable="Dimensions" varvalue="ThreeDimensional" targetVariable="BCType">
+        <targetValue>VelocityCorrectionScheme-3D</targetValue>
+        <targetValue>CoupledLinearNS-3D</targetValue>
+      </mapping>
+      
+      <!-- Mapping of SolverType to the BoundaryCondition -->
+      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="BCType">
+        <targetValue>CoupledLinearNS-2D</targetValue>
+        <targetValue>CoupledLinearNS-3D</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="BCType">
+        <targetValue>VelocityCorrectionScheme-2D</targetValue>
+        <targetValue>VelocityCorrectionScheme-3D</targetValue>
+      </mapping>
+
       <!-- Mapping of Solver Type to the Time Integration Method -->
       <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="TimeIntegrationMethod">
         <targetValue>NotProvided</targetValue>
@@ -59,16 +94,6 @@
         <targetValue>BackwardEuler</targetValue>
         <targetValue>ClassicalRungeKutta4</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="VCSWeakPressure" targetVariable="TimeIntegrationMethod">
-        <targetValue>IMEXOrder1</targetValue>
-        <targetValue>IMEXOrder2</targetValue>
-        <targetValue>IMEXOrder3</targetValue>
-        <targetValue>DIRKOrder1</targetValue>
-        <targetValue>ForwardEuler</targetValue>
-        <targetValue>BackwardEuler</targetValue>
-        <targetValue>ClassicalRungeKutta4</targetValue>
-      </mapping>
-
       <!-- Mapping of solver type with projection type -->
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>

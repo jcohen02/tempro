@@ -109,6 +109,7 @@
         <EvolutionOperator type="EvolutionType"/>
       </SteadyStateSimulation>
     </SimulationType>
+
     <SolverType paramType="choice">
       <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
         VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
@@ -120,8 +121,36 @@
         <Standard></Standard>
         <WeakPressure></WeakPressure>
         <Mapping>
-          <MappingType type="xs:string"/>
-          <Expression type="xs:string"/>
+          <MappingType type="xs:string" inputType="choice">
+            <tempss:item>Translation</tempss:item>
+            <tempss:item>XofZ</tempss:item>
+            <tempss:item>XofXZ</tempss:item>
+            <tempss:item>XYofZ</tempss:item>
+            <tempss:item>XYofXY</tempss:item>
+            <tempss:item>General</tempss:item>            
+          </MappingType>
+          <Coords>
+            <Variable repeatable="true">
+              <Name type="xs:string"/>
+              <Value type="xs:string"/>
+            </Variable>
+          </Coords>
+          <Velocity>
+            <Variable optional="true" repeatable="true">
+              <Name type="xs:string"/>
+              <Value type="xs:string"/>
+            </Variable>            
+          </Velocity>
+          <TimeDependent optional="true"/>
+          <AdvancedParameters>
+            <PressureTolerance type="positiveDouble" optional="true"/>
+            <ViscousTolerance type="positiveDouble" optional="true"/>
+            <PressureRelaxation type="positiveDouble" optional="true"/>
+            <ViscousRelaxation type="positiveDouble" optional="true"/>
+            <MappingImplicitPressure optional="true"/>
+            <MappingImplicitViscous optional="true"/>
+            <MappingNeglectViscous optional="true"/>
+          </AdvancedParameters>
         </Mapping>
       </VelocityCorrectionScheme>
     </SolverType>

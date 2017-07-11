@@ -334,6 +334,9 @@
   </xsl:template>
 
   <xsl:template match="AdvancedParameters" mode="SolverInfo">
+    <xsl:if test="Dealiasing">
+      <I PROPERTY="DEALIASING" VALUE="True" />
+    </xsl:if>
     <xsl:if test="SpectralhpDealiasing">
       <I PROPERTY="SPECTRALHPDEALIASING" VALUE="True" />
     </xsl:if>

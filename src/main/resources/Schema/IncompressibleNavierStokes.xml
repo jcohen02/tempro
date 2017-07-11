@@ -426,6 +426,7 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
+    <Dealiasing optional="true"/>
     <SpectralhpDealiasing optional="true">
       <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
         can stablise certain simulations through the use of additional 

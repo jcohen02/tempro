@@ -79,6 +79,36 @@
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
+    <SimulationType paramType="choice">
+      <DirectNumericalSimulation>
+        <TimeIntegration>
+          <Timing>
+            <TimeStep type="xs:string" optional="true"/>
+            <NumSteps type="xs:string" optional="true"/>
+            <FinalTime type="xs:string" optional="true"/>
+          </Timing>
+          <TimeIntegrationMethod type="TimingType"/>
+        </TimeIntegration>
+        <Driver type="DriverType" optional="true"/>
+        <Advection type="AdvectionType"/>
+      </DirectNumericalSimulation>
+      <StabilityAnalysis>
+        <TimeIntegration>
+          <Timing>
+            <TimeStep type="xs:string" optional="true"/>
+            <NumSteps type="xs:string" optional="true"/>
+            <FinalTime type="xs:string" optional="true"/>
+          </Timing>
+          <TimeIntegrationMethod type="TimingType"/>
+        </TimeIntegration>
+        <Driver type="DriverType" optional="true"/>
+        <EvolutionOperator type="EvolutionType"/>
+      </StabilityAnalysis>
+      <SteadyStateSimulation>
+        <Driver type="DriverType" optional="true"/>
+        <EvolutionOperator type="EvolutionType"/>
+      </SteadyStateSimulation>
+    </SimulationType>
     <SolverType paramType="choice">
       <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
         VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
@@ -109,48 +139,8 @@
       <tempss:item>SteadyOseen</tempss:item>
       <tempss:item>UnsteadyStokes</tempss:item>
       <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
-      <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyNavierStokes</tempss:item>
-    </Equation>
-
-    <TimeIntegration>
-      <libhpc:documentation>Parameters setting the method for time integration.
-      </libhpc:documentation>
-      <Timing>
-        <TimeStep type="xs:string" optional="true"/>
-        <NumSteps type="xs:string" optional="true"/>
-        <FinalTime type="xs:string" optional="true"/>
-      </Timing>
-      <TimeIntegrationMethod type="xs:string" inputType="choice">
-        <tempss:item>NotProvided</tempss:item>
-        <tempss:item>IMEXOrder1</tempss:item>
-        <tempss:item>IMEXOrder2</tempss:item>
-        <tempss:item>IMEXOrder3</tempss:item>
-        <tempss:item>DIRKOrder1</tempss:item>
-        <tempss:item>ForwardEuler</tempss:item>
-        <tempss:item>BackwardEuler</tempss:item>
-        <tempss:item>ClassicalRungeKutta4</tempss:item>
-      </TimeIntegrationMethod>
-    </TimeIntegration>    
-
-    <Driver optional="true">
-      <DriverType paramType="choice">        
-        <Standard></Standard>
-        <Adaptive></Adaptive>
-        <ModifiedArnoldi></ModifiedArnoldi>
-        <SteadyState></SteadyState>
-        <Arpack>
-          <ArpackProblemType type="xs:string"  inputType="choice">
-            <tempss:item>LargestMag</tempss:item>
-            <tempss:item>SmallestMag</tempss:item>
-            <tempss:item>LargestReal</tempss:item>
-            <tempss:item>SmallestReal</tempss:item>
-            <tempss:item>LargestImag</tempss:item>
-            <tempss:item>SmallestImag</tempss:item>
-          </ArpackProblemType>        
-        </Arpack>
-      </DriverType>
-    </Driver>
+    </Equation>  
 
     <Projection type="xs:string"  inputType="choice">
       <libhpc:documentation>
@@ -171,28 +161,6 @@
       <tempss:item>Implicit</tempss:item>
       <tempss:item>Explicit</tempss:item>
     </DiffusionAdvancement>
-
-    <EvolutionOperator type="xs:string"  inputType="choice" optional="true">
-      <tempss:item>Direct</tempss:item>
-      <tempss:item>Adjoint</tempss:item>
-      <tempss:item>NonLinear</tempss:item>
-      <tempss:item>TransientGrowth</tempss:item>
-      <tempss:item>SkewSymmetric</tempss:item>
-      <tempss:item>AdaptiveSFD</tempss:item>
-    </EvolutionOperator>
-
-    <AdvectionForm type="xs:string" inputType="choice" optional="true">
-      <libhpc:documentation>
-        Sets the form in which the advection term is treated. See 
-        http://www.nektar.info/wiki/3.4/UserGuide/Tutorial/IncNavierStokesSolver
-      </libhpc:documentation>
-      <tempss:item>Convective</tempss:item>
-      <tempss:item>NonConservative</tempss:item>
-      <tempss:item>Linearised</tempss:item>
-      <tempss:item>Adjoint</tempss:item>
-      <tempss:item>SkewSymmetric</tempss:item>
-      <tempss:item>NoAdvection</tempss:item>
-    </AdvectionForm>
 
     <Expansion>
       <libhpc:documentation>Specify details of how the solution function 

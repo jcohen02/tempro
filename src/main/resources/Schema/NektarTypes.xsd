@@ -114,6 +114,63 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:complexType name="AdvectionType">
+    <xs:choice>
+      <xs:element name="Convective"/>
+      <xs:element name="NonConservative"/>
+      <xs:element name="Linearised"/>
+      <xs:element name="Adjoint"/>
+      <xs:element name="SkewSymmetric"/>
+      <xs:element name="NoAdvection"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="EvolutionType">
+    <xs:choice>
+      <xs:element name="Direct"/>
+      <xs:element name="Adjoint"/>
+      <xs:element name="NonLinear"/>
+      <xs:element name="SkewSymmetric"/>
+      <xs:element name="TransientGrowth"/>
+      <xs:element name="AdaptiveSFD"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="DriverType">
+    <xs:choice>
+      <xs:element name="Standard"/>
+      <xs:element name="Adaptive"/>
+      <xs:element name="ModifiedArnoldi"/>
+      <xs:element name="SteadyState"/>
+      <xs:element name="Arpack">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="LargestMag"/>
+            <xs:enumeration value="SmallestMag"/>
+            <xs:enumeration value="LargestReal"/>
+            <xs:enumeration value="SmallestReal"/>
+            <xs:enumeration value="LargestImag"/>
+            <xs:enumeration value="SmallestImag"/>
+          </xs:restriction>
+        </xs:simpleType>        
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="TimingType">
+    <xs:choice>
+      <xs:element name="IMEXOrder1"/>
+      <xs:element name="IMEXOrder2"/>
+      <xs:element name="IMEXOrder3"/>
+      <xs:element name="DIRKOrder1"/>
+      <xs:element name="ForwardEuler"/>
+      <xs:element name="BackwardEuler"/>
+      <xs:element name="ClassicalRungeKutta4"/>
+      <xs:element name="BDFImplicitOrder1"/>
+      <xs:element name="BDFImplicitOrder2"/>
+    </xs:choice>  
+  </xs:complexType>
+
   <xs:complexType name="BoundaryDetails">
     <xs:sequence>
       <xs:element name="BoundaryCondition" minOccurs="1" maxOccurs="unbounded">

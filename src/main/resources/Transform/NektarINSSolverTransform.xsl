@@ -6,6 +6,9 @@
   
   <!-- Import templates for handling boundary region/condition generation -->
   <xsl:import href="NektarBoundaryDetails.xsl"/>
+
+  <!-- Import templates for handling simulation type generation -->
+  <xsl:import href="NektarSimulationDetails.xsl"/>
   
   <xsl:output method="xml" indent="yes"/>
   <xsl:strip-space elements="*"/>
@@ -124,6 +127,33 @@
   </xsl:template>
 
   <xsl:template match="NumericalSpecification" mode ="NavierStokesSolverInfo">
+    <!-- Add in drivers -->
+    <xsl:if test="SimulationType/DirectNumericalSimulation" >
+      <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/Driver" mode="AddDriver"/>
+      <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/Driver" mode="AddArpackType"/>
+    </xsl:if>
+    <xsl:if test="SimulationType/SteadyStateSimulation" >
+      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/Driver" mode="AddDriver"/>
+      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/Driver" mode="AddArpackType"/>
+    </xsl:if>
+    <xsl:if test="SimulationType/StabilityAnalysis" >
+      <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddDriver"/>
+      <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddArpackType"/>
+    </xsl:if>
+
+    <!-- Add in advection -->
+    <xsl:if test="SimulationType/DirectNumericalSimulation" >
+      <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/Advection" mode="AddAdvection"/>
+    </xsl:if>
+
+    <!-- Add in evolution operators -->
+    <xsl:if test="SimulationType/StabilityAnalysis" >
+      <xsl:apply-templates select="SimulationType/StabilityAnalysis/EvolutionOperator" mode="AddEvolution"/>
+    </xsl:if>
+    <xsl:if test="SimulationType/SteadyStateSimulation" >
+      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/EvolutionOperator" mode="AddEvolution"/>
+    </xsl:if>
+
     <I PROPERTY="SolverType">
       <xsl:attribute name="VALUE">
         <xsl:choose>
@@ -139,55 +169,6 @@
         <xsl:value-of select="Equation" />
       </xsl:attribute>
     </I>
-
-    <xsl:if test="Driver">
-      <I PROPERTY="DriverSoln">
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="Driver/DriverType/Standard">Standard</xsl:when>
-            <xsl:when test="Driver/DriverType/Adaptive">Adaptive</xsl:when>
-            <xsl:when test="Driver/DriverType/ModifiedArnoldi">ModifiedArnoldi</xsl:when>
-            <xsl:when test="Driver/DriverType/SteadyState">SteadyState</xsl:when>
-            <xsl:when test="Driver/DriverType/Arpack">Arpack</xsl:when>
-          </xsl:choose>
-        </xsl:attribute>
-      </I>
-    </xsl:if>
-    <xsl:if test="Driver/DriverType/Arpack">
-      <I PROPERTY="ArpackProblemType">
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="Driver/DriverType/Arpack/ArpackProblemType = 'LargestMag'">LargestMag</xsl:when>
-            <xsl:when test="Driver/DriverType/Arpack/ArpackProblemType = 'SmallestMag'">SmallestMag</xsl:when>
-            <xsl:when test="Driver/DriverType/Arpack/ArpackProblemType = 'LargestReal'">LargestReal</xsl:when>
-            <xsl:when test="Driver/DriverType/Arpack/ArpackProblemType = 'SmallestReal'">SmallestReal</xsl:when>
-            <xsl:when test="Driver/DriverType/Arpack/ArpackProblemType = 'LargestImage'">LargestImage</xsl:when>
-            <xsl:when test="Driver/DriverType/Arpack/ArpackProblemType = 'SmallestImag'">SmallestImag</xsl:when>
-          </xsl:choose>
-        </xsl:attribute>
-      </I>
-    </xsl:if>
-    <xsl:if test="EvolutionOperator">
-      <I PROPERTY="EvolutionOperator">
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="EvolutionOperator = 'Adjoint'">Adjoint</xsl:when>
-            <xsl:when test="EvolutionOperator = 'Direct'">Direct</xsl:when>
-            <xsl:when test="EvolutionOperator = 'NonLinear'">Nonlinear</xsl:when>
-            <xsl:when test="EvolutionOperator = 'TransientGrowth'">Transientgrowth</xsl:when>
-            <xsl:when test="EvolutionOperator = 'SkewSymmetric'">Skewsymmetric</xsl:when>
-            <xsl:when test="EvolutionOperator = 'AdaptiveSFD'">Adaptivesfd</xsl:when>
-          </xsl:choose>
-        </xsl:attribute>
-      </I>
-    </xsl:if>
-    <xsl:if test="AdvectionForm">
-      <I PROPERTY="AdvectionForm">
-        <xsl:attribute name="VALUE">
-          <xsl:value-of select="AdvectionForm" />
-        </xsl:attribute>
-      </I>
-    </xsl:if>
   </xsl:template>
 
   <xsl:template match="NumericalSpecification" mode ="Expansion">
@@ -222,6 +203,13 @@
         </xsl:choose>
       </xsl:attribute>
     </I>
+    <!-- Add time integration stuff into the domain -->
+    <xsl:if test="SimulationType/DirectNumericalSimulation" >
+      <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/TimeIntegration/TimeIntegrationMethod" mode="AddTiming"/>
+    </xsl:if>
+    <xsl:if test="SimulationType/StabilityAnalysis" >
+      <xsl:apply-templates select="SimulationType/StabilityAnalysis/TimeIntegration/TimeIntegrationMethod" mode="AddTiming"/>
+    </xsl:if>
     <xsl:if test="TimeIntegration/DiffusionAdvancement">
       <I PROPERTY="DiffusionAdvancement">
         <xsl:attribute name="VALUE">
@@ -229,11 +217,6 @@
         </xsl:attribute>
       </I>
     </xsl:if>
-    <I PROPERTY="TimeIntegrationMethod">
-      <xsl:attribute name="VALUE">
-        <xsl:value-of select="TimeIntegration/TimeIntegrationMethod" />
-      </xsl:attribute>
-    </I>
   </xsl:template>
 
   <xsl:template match ="Geometry" mode="ErrorChecks">
@@ -692,10 +675,11 @@
         <PARAMETERS>
           <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesParameters"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTWParam"/>
-          <xsl:apply-templates select="NumericalSpecification/TimeIntegration/Timing" mode ="Parameters"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="AddCFL"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomParameter" mode ="AddParameter"/>
+          <xsl:apply-templates select="NumericalSpecification/SimulationType/*/TimeIntegration/Timing" mode="Parameters"/>
+
           <xsl:apply-templates select="AdditionalParameters/IOParams" mode ="Parameters"/>
         </PARAMETERS>
             

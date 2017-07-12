@@ -250,6 +250,7 @@
           <xs:restriction base="xs:string">
             <xs:enumeration value="Dirichlet (D)"/>
             <xs:enumeration value="Neumann (N)"/>
+            <xs:enumeration value="Robin (R)"/>
             <xs:enumeration value="Periodic (P)"/>
           </xs:restriction>
         </xs:simpleType>

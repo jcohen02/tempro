@@ -125,6 +125,12 @@
           <xsl:apply-templates select="Variable" mode ="BCValues"/>
         </N>
       </xsl:when>
+      <xsl:when test="Variable/ConditionType = 'Robin (R)'">
+        <R>
+          <xsl:attribute name="VAR">u</xsl:attribute>
+          <xsl:apply-templates select="Variable" mode ="BCValues"/>
+        </R>
+      </xsl:when>
       <xsl:when test="Variable/ConditionType = 'Periodic (P)'">
         <P>
           <xsl:attribute name="VAR">u</xsl:attribute>
@@ -147,6 +153,12 @@
           <xsl:attribute name="VAR">v</xsl:attribute>
           <xsl:apply-templates select="Variable" mode ="BCValues"/>
         </N>
+      </xsl:when>
+      <xsl:when test="Variable/ConditionType = 'Robin (R)'">
+        <R>
+          <xsl:attribute name="VAR">v</xsl:attribute>
+          <xsl:apply-templates select="Variable" mode ="BCValues"/>
+        </R>
       </xsl:when>
       <xsl:when test="Variable/ConditionType = 'Periodic (P)'">
         <P>
@@ -171,6 +183,12 @@
           <xsl:apply-templates select="Variable" mode ="BCValues"/>
         </N>
       </xsl:when>
+      <xsl:when test="Variable/ConditionType = 'Robin (R)'">
+        <R>
+          <xsl:attribute name="VAR">w</xsl:attribute>
+          <xsl:apply-templates select="Variable" mode ="BCValues"/>
+        </R>
+      </xsl:when>
       <xsl:when test="Variable/ConditionType = 'Periodic (P)'">
         <P>
           <xsl:attribute name="VAR">w</xsl:attribute>
@@ -193,6 +211,12 @@
           <xsl:attribute name="VAR">p</xsl:attribute>
           <xsl:apply-templates select="Variable" mode ="BCValues"/>
         </N>
+      </xsl:when>
+      <xsl:when test="Variable/ConditionType = 'Robin (R)'">
+        <R>
+          <xsl:attribute name="VAR">p</xsl:attribute>
+          <xsl:apply-templates select="Variable" mode ="BCValues"/>
+        </R>
       </xsl:when>
       <xsl:when test="Variable/ConditionType = 'Periodic (P)'">
         <P>

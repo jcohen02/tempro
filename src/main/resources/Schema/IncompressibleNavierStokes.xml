@@ -103,10 +103,34 @@
         </TimeIntegration>
         <Driver type="DriverType" optional="true"/>
         <EvolutionOperator type="EvolutionType"/>
+        <BaseFlow optional="true">
+          <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+          <Variable repeatable="true">
+            <VariableName type="xs:string"/>
+            <Type paramType="choice">
+              <Expression type="xs:string" />
+              <File type="baseNameString" inputType="file">
+              </File>
+            </Type>
+          </Variable>
+        </BaseFlow>
+        <ModeType type="ModeType"/>
       </StabilityAnalysis>
       <SteadyStateSimulation>
         <Driver type="DriverType" optional="true"/>
         <EvolutionOperator type="EvolutionType"/>
+        <BaseFlow optional="true">
+          <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+          <Variable repeatable="true">
+            <VariableName type="xs:string"/>
+            <Type paramType="choice">
+              <Expression type="xs:string" />
+              <File type="baseNameString" inputType="file">
+              </File>
+            </Type>
+          </Variable>
+        </BaseFlow>
+        <ModeType type="ModeType"/>
       </SteadyStateSimulation>
     </SimulationType>
 
@@ -228,18 +252,6 @@
         print out of the current solution time.</libhpc:documentation>
       </IO_InfoSteps>
     </IOParams>
-
-    <BaseFlow optional="true">
-      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
-      <Variable repeatable="true">
-        <VariableName type="xs:string"/>
-        <Type paramType="choice">
-          <Expression type="xs:string" />
-          <File type="baseNameString" inputType="file">
-          </File>
-        </Type>
-      </Variable>
-    </BaseFlow>
 
     <CustomInputs optional="true">
       <CustomExpression repeatable="true" optional="true">

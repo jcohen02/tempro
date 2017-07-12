@@ -197,10 +197,12 @@
     </xsl:if>
     <xsl:if test="SimulationType/SteadyStateSimulation" >
       <xsl:apply-templates select="SimulationType/SteadyStateSimulation/Driver" mode="AddDriver"/>
+      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/ModeType" mode="AddModes"/>
       <xsl:apply-templates select="SimulationType/SteadyStateSimulation/Driver" mode="AddArpackType"/>
     </xsl:if>
     <xsl:if test="SimulationType/StabilityAnalysis" >
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddDriver"/>
+      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/ModeType" mode="AddModes"/>
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddArpackType"/>
     </xsl:if>
 
@@ -748,9 +750,9 @@
       
       <CONDITIONS>
         <SOLVERINFO>
-          <xsl:apply-templates select="NumericalSpecification" mode="NavierStokesSolverInfo"/>
           <xsl:apply-templates select="NumericalSpecification" mode="SolverInfo"/>
           <xsl:apply-templates select="AdvancedParameters" mode="SolverInfo"/>
+          <xsl:apply-templates select="NumericalSpecification" mode="NavierStokesSolverInfo"/>
           <xsl:apply-templates select="ProblemSpecification" mode="AddFFTW"/>
           <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomExpression" mode="AddExpression"/>
           <xsl:apply-templates select="NumericalSpecification/SolverType/VelocityCorrectionScheme/Mapping" mode="AdvancedExpressions"/>
@@ -778,7 +780,7 @@
 
         <xsl:apply-templates select="ProblemSpecification/InitialConditions" mode="HandleConditions"/>  
 
-        <xsl:apply-templates select="AdditionalParameters/BaseFlow" mode="BaseConditions"/>  
+        <xsl:apply-templates select="NumericalSpecification/SimulationType/*/BaseFlow" mode="BaseConditions"/>  
 
         <xsl:apply-templates select="AdditionalParameters/Function" mode="AddFunctions"/>
         <xsl:apply-templates select="NumericalSpecification/SolverType/VelocityCorrectionScheme/Mapping" mode="MappingFunction"/>

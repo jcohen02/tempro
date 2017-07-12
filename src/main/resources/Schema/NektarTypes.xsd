@@ -114,6 +114,14 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:complexType name="ModeType">
+    <xs:choice>
+      <xs:element name="MultipleMode"/>
+      <xs:element name="SingleMode"/>
+      <xs:element name="HalfMode"/>
+    </xs:choice>
+  </xs:complexType>
+
   <xs:complexType name="AdvectionType">
     <xs:choice>
       <xs:element name="Convective"/>

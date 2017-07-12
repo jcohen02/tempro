@@ -15,6 +15,18 @@
       
   </xsl:template> -->
   
+  <xsl:template match="ModeType" mode="AddModes">
+    <I PROPERTY="ModeType">
+      <xsl:attribute name="VALUE">
+        <xsl:choose>
+          <xsl:when test="MultipleMode">MultipleMode</xsl:when>
+          <xsl:when test="SingleMode">SingleMode</xsl:when>
+          <xsl:when test="HalfMode">HalfMode</xsl:when>
+        </xsl:choose>
+      </xsl:attribute>
+    </I>    
+  </xsl:template>
+
   <xsl:template match="Driver" mode="AddDriver">
     <I PROPERTY="DRIVER">
       <xsl:attribute name="VALUE">

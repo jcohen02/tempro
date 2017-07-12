@@ -56,7 +56,6 @@
             <xsl:when test="SkewSymmetric">SkewSymmetric</xsl:when>
             <xsl:when test="TransientGrowth">TransientGrowth</xsl:when>
             <xsl:when test="AdaptiveSFD">AdaptiveSFD</xsl:when>
-            <xsl:when test="AdaptiveSFD">AdaptiveSFD</xsl:when>
           </xsl:choose>
         </xsl:attribute>
       </I>    
@@ -74,6 +73,18 @@
     </xsl:if>
     <xsl:if test="nits">
       <P> nits = <xsl:value-of select="nits" /> </P>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="ClassicalSFD" mode="AddSFDParams">
+    <xsl:if test="ControlCoefficient">
+      <P> ControlCoeff = <xsl:value-of select="ControlCoefficient" /> </P>
+    </xsl:if>
+    <xsl:if test="FilterWidth">
+      <P> FilterWidth = <xsl:value-of select="FilterWidth" /> </P>
+    </xsl:if>
+    <xsl:if test="Tolerance">
+      <P> TOL = <xsl:value-of select="Tolerance" /> </P>
     </xsl:if>
   </xsl:template>
 

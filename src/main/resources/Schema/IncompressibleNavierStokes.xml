@@ -75,7 +75,7 @@
   </ProblemSpecification>
 
   <NumericalSpecification>
-    <libhpc:documentation>
+     <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
@@ -169,7 +169,7 @@
       <tempss:item>UnsteadyStokes</tempss:item>
       <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyNavierStokes</tempss:item>
-    </Equation>  
+    </Equation>   
 
     <Projection paramType="choice">
       <libhpc:documentation>
@@ -181,6 +181,10 @@
       <DiscontinuousGalerkin/>
       <MixedGalerkin>
         <SubStepping optional="true"/>
+        <Scheme type="xs:string" inputType="choice" optional="true">
+          <tempss:item>ForwardEuler</tempss:item>
+          <tempss:item>RungeKutta2</tempss:item>
+        </Scheme>
       </MixedGalerkin>
     </Projection>
     

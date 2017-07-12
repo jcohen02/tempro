@@ -269,6 +269,16 @@
     <xsl:if test="Projection/MixedGalerkin/SubStepping">
       <I PROPERTY="Extrapolation" VALUE="SubStepping"/>
     </xsl:if>
+    <xsl:if test="Projection/MixedGalerkin/Scheme">
+      <xsl:choose>
+        <xsl:when test="Projection/MixedGalerkin/Scheme = 'ForwardEuler'">
+          <I PROPERTY="SubStepIntScheme" VALUE="ForwardEuler"/>
+        </xsl:when>
+        <xsl:when test="Projection/MixedGalerkin/Scheme = 'RungeKutta2'">
+          <I PROPERTY="SubStepIntScheme" VALUE="RungeKutta2_ImprovedEuler"/>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:if>
     <!-- Add time integration stuff into the domain -->
     <xsl:if test="SimulationType/DirectNumericalSimulation" >
       <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/TimeIntegration/TimeIntegrationMethod" mode="AddTiming"/>
@@ -280,11 +290,8 @@
 
   <xsl:template match="NumericalSpecification" mode="Parameters">
     <xsl:apply-templates select="SimulationType/*/EvolutionOperator/AdaptiveSFD" mode="AddSFDParams"/>
-<!--     <xsl:if test="SimulationType/*/EvolutionOperator/AdaptiveSFD">
-      <P PROPERTY="TEST">
-      </P>
-    </xsl:if>
- -->  </xsl:template>
+    <xsl:apply-templates select="SimulationType/*/EvolutionOperator/ClassicalSFD" mode="AddSFDParams"/>
+  </xsl:template>
 
   <xsl:template match ="Geometry" mode="ErrorChecks">
      <xsl:if test="not(NEKTAR/GEOMETRY)">

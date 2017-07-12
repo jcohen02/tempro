@@ -132,7 +132,13 @@
       <xs:element name="NonLinear"/>
       <xs:element name="SkewSymmetric"/>
       <xs:element name="TransientGrowth"/>
-      <xs:element name="UnadaptiveSFD"/>
+      <xs:element name="ClassicalSFD">
+        <xs:complexType>
+          <xs:element name="ControlCoefficient" type="xs:string"/>
+          <xs:element name="FilterWidth" type="xs:string"/>
+          <xs:element name="Tolerance" type="xs:string"/>
+        </xs:complexType>  
+      </xs:element>
       <xs:element name="AdaptiveSFD">
         <xs:complexType>
           <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>

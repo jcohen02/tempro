@@ -260,12 +260,15 @@
     <I PROPERTY="Projection">
       <xsl:attribute name="VALUE">
         <xsl:choose>
-          <xsl:when test="Projection = 'ContinuousGalerkin'">Continuous</xsl:when>
-          <xsl:when test="Projection = 'DiscontinuousGalerkin'">DisContinuous</xsl:when>
-          <xsl:when test="Projection = 'MixedGalerkin'">Mixed_CG_DisContinuous</xsl:when>
+          <xsl:when test="Projection/ContinuousGalerkin">Continuous</xsl:when>
+          <xsl:when test="Projection/DiscontinuousGalerkin">DisContinuous</xsl:when>
+          <xsl:when test="Projection/MixedGalerkin">Mixed_CG_DisContinuous</xsl:when>
         </xsl:choose>
       </xsl:attribute>
     </I>
+    <xsl:if test="Projection/MixedGalerkin/SubStepping">
+      <I PROPERTY="Extrapolation" VALUE="SubStepping"/>
+    </xsl:if>
     <!-- Add time integration stuff into the domain -->
     <xsl:if test="SimulationType/DirectNumericalSimulation" >
       <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/TimeIntegration/TimeIntegrationMethod" mode="AddTiming"/>
@@ -273,14 +276,15 @@
     <xsl:if test="SimulationType/StabilityAnalysis" >
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/TimeIntegration/TimeIntegrationMethod" mode="AddTiming"/>
     </xsl:if>
-    <xsl:if test="TimeIntegration/DiffusionAdvancement">
-      <I PROPERTY="DiffusionAdvancement">
-        <xsl:attribute name="VALUE">
-          <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
-        </xsl:attribute>
-      </I>
-    </xsl:if>
   </xsl:template>
+
+  <xsl:template match="NumericalSpecification" mode="Parameters">
+    <xsl:apply-templates select="SimulationType/*/EvolutionOperator/AdaptiveSFD" mode="AddSFDParams"/>
+<!--     <xsl:if test="SimulationType/*/EvolutionOperator/AdaptiveSFD">
+      <P PROPERTY="TEST">
+      </P>
+    </xsl:if>
+ -->  </xsl:template>
 
   <xsl:template match ="Geometry" mode="ErrorChecks">
      <xsl:if test="not(NEKTAR/GEOMETRY)">
@@ -343,7 +347,13 @@
     <xsl:if test="SpectralVanishingViscosity">
       <I PROPERTY="SpectralVanishingViscosity" VALUE="True" />
     </xsl:if>
-
+    <xsl:if test="TimeIntegration/DiffusionAdvancement">
+      <I PROPERTY="DiffusionAdvancement">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
     <xsl:if test="WeightPartitions">
       <I PROPERTY="WeightPartitions"> 
         <xsl:attribute name="VALUE">
@@ -381,13 +391,13 @@
   </xsl:template>
 
   <xsl:template match="MatrixInversion" mode="GlobalSysSoln">
-        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
-        <V>
-          <xsl:attribute name="VAR">
-            <xsl:value-of select="Field"/>
-          </xsl:attribute>
-          <xsl:apply-templates select="InversionType" mode="AddSoln"/>
-        </V>
+    <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
+    <V>
+      <xsl:attribute name="VAR">
+        <xsl:value-of select="Field"/>
+      </xsl:attribute>
+      <xsl:apply-templates select="InversionType" mode="AddSoln"/>
+    </V>
   </xsl:template>
 
   <xsl:template match="InversionType" mode="AddSoln">
@@ -741,6 +751,7 @@
 
         <PARAMETERS>
           <xsl:apply-templates select="ProblemSpecification" mode="NavierStokesParameters"/>
+          <xsl:apply-templates Select="NumericalSpecification" mode="Parameters"/>
           <xsl:apply-templates select="ProblemSpecification" mode="AddFFTWParam"/>
           <xsl:apply-templates select="AdvancedParameters" mode="AddCFL"/>
           <xsl:apply-templates select="AdvancedParameters" mode="Parameters"/>

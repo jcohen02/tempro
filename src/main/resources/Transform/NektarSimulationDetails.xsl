@@ -56,9 +56,25 @@
             <xsl:when test="SkewSymmetric">SkewSymmetric</xsl:when>
             <xsl:when test="TransientGrowth">TransientGrowth</xsl:when>
             <xsl:when test="AdaptiveSFD">AdaptiveSFD</xsl:when>
+            <xsl:when test="AdaptiveSFD">AdaptiveSFD</xsl:when>
           </xsl:choose>
         </xsl:attribute>
       </I>    
+  </xsl:template>
+
+  <xsl:template match="AdaptiveSFD" mode="AddSFDParams">
+    <xsl:if test="kdim">
+      <P> kdim = <xsl:value-of select="kdim" /> </P>
+    </xsl:if>
+    <xsl:if test="evtol">
+      <P> evtol = <xsl:value-of select="evtol" /> </P>
+    </xsl:if>
+    <xsl:if test="nvec">
+      <P> nvec = <xsl:value-of select="nvec" /> </P>
+    </xsl:if>
+    <xsl:if test="nits">
+      <P> nits = <xsl:value-of select="nits" /> </P>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="Advection" mode="AddAdvection">

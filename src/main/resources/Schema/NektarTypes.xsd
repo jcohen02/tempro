@@ -132,7 +132,15 @@
       <xs:element name="NonLinear"/>
       <xs:element name="SkewSymmetric"/>
       <xs:element name="TransientGrowth"/>
-      <xs:element name="AdaptiveSFD"/>
+      <xs:element name="UnadaptiveSFD"/>
+      <xs:element name="AdaptiveSFD">
+        <xs:complexType>
+          <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:complexType>  
+      </xs:element>
     </xs:choice>
   </xs:complexType>
 

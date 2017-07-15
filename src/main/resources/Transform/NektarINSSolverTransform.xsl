@@ -6,8 +6,6 @@
   
   <!-- Import templates for handling boundary region/condition generation -->
   <xsl:import href="NektarBoundaryDetails.xsl"/>
-
-  <!-- Import templates for handling simulation type generation -->
   <xsl:import href="NektarSimulationDetails.xsl"/>
   
   <xsl:output method="xml" indent="yes"/>
@@ -32,16 +30,22 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="ProblemSpecification" mode="NavierStokesParameters">
+  <xsl:template match="ProblemSpecification" mode ="NavierStokesParameters">
     <xsl:if test="ReynoldsNumber">
       <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
     </xsl:if>
     <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
   </xsl:template>
 
-  <xsl:template match="ProblemSpecification" mode="Variables">
+  <xsl:template match="ProblemSpecification" mode ="Variables">
     <VARIABLES> 
         <xsl:choose>
+          <xsl:when test="Dimensions/OneDimensional">
+            <V ID="0">u</V>
+            <xsl:if test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
+              <V ID="1">p</V>
+            </xsl:if>
+          </xsl:when>
           <xsl:when test="Dimensions/TwoDimensional">
             <V ID="0">u</V>
             <V ID="1">v</V>
@@ -61,7 +65,7 @@
     </VARIABLES>
   </xsl:template>
 
-  <xsl:template match="ProblemSpecification" mode="AddFFTW">
+  <xsl:template match="ProblemSpecification" mode ="AddFFTW">
     <xsl:if test="Dimensions/TwoDimensional/QuasiDimensions">
       <I PROPERTY="HOMOGENEOUS">
         <xsl:attribute name="VALUE">1D</xsl:attribute>
@@ -88,7 +92,7 @@
     </xsl:if>
   </xsl:template> 
 
-  <xsl:template match="ProblemSpecification" mode="AddFFTWParam">
+  <xsl:template match="ProblemSpecification" mode ="AddFFTWParam">
     <xsl:if test="Dimensions/TwoDimensional/QuasiDimensions">
       <P>LY = <xsl:value-of select="Dimensions/TwoDimensional/QuasiDimensions/LY"/></P>
       <P>HomModesY = <xsl:value-of select="Dimensions/TwoDimensional/QuasiDimensions/HomModesY"/></P>
@@ -105,7 +109,7 @@
     </xsl:if>
   </xsl:template> 
     
-  <xsl:template match="AdvancedParameters" mode="AddCFL">
+  <xsl:template match="AdvancedParameters" mode ="AddCFL">
     <xsl:choose>
       <xsl:when test="CFL">
         <P>CFL = <xsl:value-of select="CFL"/></P>
@@ -234,31 +238,7 @@
         <xsl:value-of select="Equation" />
       </xsl:attribute>
     </I>
-  </xsl:template>
 
-  <xsl:template match="NumericalSpecification" mode="Expansion">
-    <!-- We assume the composites required for the expansion match the domain -->
-    <xsl:attribute name="NUMMODES"><xsl:value-of select="Expansion/PolynomialOrder + 1"/></xsl:attribute>
-    <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
-    <xsl:attribute name="FIELDS">
-      <xsl:choose>
-        <xsl:when test="//NumericalSpecification/SolverType/CoupledLinearNS">
-          <xsl:choose>
-            <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v</xsl:when>
-            <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w</xsl:when>
-          </xsl:choose>
-        </xsl:when>
-        <xsl:when test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
-          <xsl:choose>
-            <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v,p</xsl:when>
-            <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w,p</xsl:when>
-          </xsl:choose>
-        </xsl:when>
-      </xsl:choose>
-    </xsl:attribute>
-  </xsl:template>
-
-  <xsl:template match="NumericalSpecification" mode="SolverInfo">
     <I PROPERTY="Projection">
       <xsl:attribute name="VALUE">
         <xsl:choose>
@@ -288,11 +268,38 @@
     <xsl:if test="SimulationType/StabilityAnalysis" >
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/TimeIntegration/TimeIntegrationMethod" mode="AddTiming"/>
     </xsl:if>
+    <xsl:if test="TimeIntegration/DiffusionAdvancement">
+      <I PROPERTY="DiffusionAdvancement">
+        <xsl:attribute name="VALUE">
+          <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
+        </xsl:attribute>
+      </I>
+    </xsl:if>
   </xsl:template>
 
-  <xsl:template match="NumericalSpecification" mode="Parameters">
-    <xsl:apply-templates select="SimulationType/*/EvolutionOperator/AdaptiveSFD" mode="AddSFDParams"/>
-    <xsl:apply-templates select="SimulationType/*/EvolutionOperator/ClassicalSFD" mode="AddSFDParams"/>
+    <xsl:template match="NumericalSpecification" mode ="SolverInfo">
+  </xsl:template>
+
+  <xsl:template match="NumericalSpecification" mode="Expansion">
+    <!-- We assume the composites required for the expansion match the domain -->
+    <xsl:attribute name="NUMMODES"><xsl:value-of select="Expansion/PolynomialOrder + 1"/></xsl:attribute>
+    <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
+    <xsl:attribute name="FIELDS">
+      <xsl:choose>
+        <xsl:when test="//NumericalSpecification/SolverType/CoupledLinearNS">
+          <xsl:choose>
+            <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v</xsl:when>
+            <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w</xsl:when>
+          </xsl:choose>
+        </xsl:when>
+        <xsl:when test="//NumericalSpecification/SolverType/VelocityCorrectionScheme">
+          <xsl:choose>
+            <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v,p</xsl:when>
+            <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w,p</xsl:when>
+          </xsl:choose>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:attribute>
   </xsl:template>
 
   <xsl:template match ="Geometry" mode="ErrorChecks">
@@ -306,12 +313,12 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="ProblemSpecification" mode="CompositeNavierStokes">
+  <xsl:template match="ProblemSpecification" mode ="CompositeNavierStokes">
     <!-- We assume the composites required for the expansion match the domain -->
     <xsl:attribute name="COMPOSITE"><xsl:value-of select="normalize-space(Geometry/NEKTAR/GEOMETRY/DOMAIN)"/></xsl:attribute>
   </xsl:template>
 
-  <xsl:template match="IOParams" mode="Parameters">
+  <xsl:template match="IOParams" mode ="Parameters">
     <P>IO_CheckSteps = <xsl:value-of select="IO_CheckSteps"/></P>
     <P>IO_InfoSteps = <xsl:value-of select="IO_InfoSteps"/></P>
     <xsl:choose>
@@ -321,7 +328,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="Timing" mode="Parameters">
+  <xsl:template match="Timing" mode ="Parameters">
     <xsl:choose>
       <xsl:when test="FinalTime">
         <P>FinTime = <xsl:value-of select="FinalTime"/></P>
@@ -339,30 +346,21 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="AdvancedParameters" mode="Parameters">
+  <xsl:template match="AdvancedParameters" mode ="Parameters">
     <xsl:if test="SpectralVanishingViscosity">
       <P>SVVDiffCoeff = <xsl:value-of select="SpectralVanishingViscosity/SVVDiffCoeff"/></P>
       <P>SVVCutoffRatio = <xsl:value-of select="SpectralVanishingViscosity/SVVCutoffRatio"/></P>
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="AdvancedParameters" mode="SolverInfo">
-    <xsl:if test="Dealiasing">
-      <I PROPERTY="DEALIASING" VALUE="True" />
-    </xsl:if>
+  <xsl:template match="AdvancedParameters" mode ="SolverInfo">
     <xsl:if test="SpectralhpDealiasing">
       <I PROPERTY="SPECTRALHPDEALIASING" VALUE="True" />
     </xsl:if>
     <xsl:if test="SpectralVanishingViscosity">
       <I PROPERTY="SpectralVanishingViscosity" VALUE="True" />
     </xsl:if>
-    <xsl:if test="TimeIntegration/DiffusionAdvancement">
-      <I PROPERTY="DiffusionAdvancement">
-        <xsl:attribute name="VALUE">
-          <xsl:value-of select="TimeIntegration/DiffusionAdvancement" />
-        </xsl:attribute>
-      </I>
-    </xsl:if>
+
     <xsl:if test="WeightPartitions">
       <I PROPERTY="WeightPartitions"> 
         <xsl:attribute name="VALUE">
@@ -377,7 +375,7 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="CustomExpression" mode="AddExpression">
+  <xsl:template match="CustomExpression" mode ="AddExpression">
     <I>
       <xsl:attribute name="PROPERTY">
         <xsl:value-of select="Name"/>
@@ -388,28 +386,28 @@
     </I>
   </xsl:template>
 
-  <xsl:template match="CustomParameter" mode="AddParameter">
+  <xsl:template match="CustomParameter" mode ="AddParameter">
     <P><xsl:value-of select="Name"/> = <xsl:value-of select="Value"/></P>
   </xsl:template>
 
-  <xsl:template match="GlobalSysSolution" mode="GlobalSysSoln">
+  <xsl:template match="GlobalSysSolution" mode ="GlobalSysSoln">
     <xsl:message>Processing function...</xsl:message>
     <GLOBALSYSSOLNINFO>
-      <xsl:apply-templates select="MatrixInversion" mode="GlobalSysSoln"/>
+      <xsl:apply-templates select="MatrixInversion" mode ="GlobalSysSoln"/>
     </GLOBALSYSSOLNINFO> 
   </xsl:template>
 
-  <xsl:template match="MatrixInversion" mode="GlobalSysSoln">
-    <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
-    <V>
-      <xsl:attribute name="VAR">
-        <xsl:value-of select="Field"/>
-      </xsl:attribute>
-      <xsl:apply-templates select="InversionType" mode="AddSoln"/>
-    </V>
+  <xsl:template match="MatrixInversion" mode ="GlobalSysSoln">
+        <xsl:message>Processing variable...<xsl:value-of select="Name"/></xsl:message>
+        <V>
+          <xsl:attribute name="VAR">
+            <xsl:value-of select="Field"/>
+          </xsl:attribute>
+          <xsl:apply-templates select="InversionType" mode ="AddSoln"/>
+        </V>
   </xsl:template>
 
-  <xsl:template match="InversionType" mode="AddSoln">
+  <xsl:template match="InversionType" mode ="AddSoln">
     <I PROPERTY="GlobalSysSoln">
       <xsl:attribute name="VALUE">
         <xsl:choose>
@@ -475,17 +473,17 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="Function" mode="AddFunctions">
+  <xsl:template match="Function" mode ="AddFunctions">
     <xsl:message>Processing function...</xsl:message>
     <FUNCTION>
       <xsl:attribute name="NAME">
         <xsl:value-of select="FunctionName"/>
       </xsl:attribute>
-      <xsl:apply-templates select="Expression" mode="AddNames"/>
+      <xsl:apply-templates select="Expression" mode ="AddNames"/>
     </FUNCTION> 
   </xsl:template>
 
-  <xsl:template match="Expression" mode="AddNames">
+  <xsl:template match="Expression" mode ="AddNames">
     <xsl:if test="ExpressionVar">
         <E>
           <xsl:attribute name="VAR">
@@ -498,34 +496,34 @@
     </xsl:if>    
   </xsl:template>
 
-  <xsl:template match="Force" mode="AddForces">
+  <xsl:template match="Force" mode ="AddForces">
       <FORCE>
         <xsl:if test="Absorption">
           <xsl:attribute name="TYPE">Absorption</xsl:attribute>
-          <xsl:apply-templates select="Absorption" mode="AddForces"/>
+          <xsl:apply-templates select="Absorption" mode ="AddForces"/>
         </xsl:if>
         <xsl:if test="Body">
           <xsl:attribute name="TYPE">Body</xsl:attribute>
-          <xsl:apply-templates select="Body" mode="AddForces"/>
+          <xsl:apply-templates select="Body" mode ="AddForces"/>
         </xsl:if>
         <xsl:if test="Noise">
           <xsl:attribute name="TYPE">Noise</xsl:attribute>
-          <xsl:apply-templates select="Noise" mode="AddForces"/>
+          <xsl:apply-templates select="Noise" mode ="AddForces"/>
         </xsl:if>
       </FORCE>
   </xsl:template>
 
-  <xsl:template match="Absorption" mode="AddForces">
+  <xsl:template match="Absorption" mode ="AddForces">
       <COEFF><xsl:value-of select="Coeff"/></COEFF>
       <REFFLOW><xsl:value-of select="RefFlow"/></REFFLOW>
       <REFFLOWTIME><xsl:value-of select="RefFlowTime"/></REFFLOWTIME>
   </xsl:template>
 
-  <xsl:template match="Body" mode="AddForces">
+  <xsl:template match="Body" mode ="AddForces">
       <BODYFORCE><xsl:value-of select="Body"/></BODYFORCE>
   </xsl:template>
 
-  <xsl:template match="Noise" mode="AddForces">
+  <xsl:template match="Noise" mode ="AddForces">
       <WHITENOISE><xsl:value-of select="Whitenoise"/></WHITENOISE>
       <xsl:if test="UpdateFreq">
         <UPDATEFREQ><xsl:value-of select="UpdateFreq"/></UPDATEFREQ>
@@ -535,50 +533,50 @@
       </xsl:if>
   </xsl:template>
 
-  <xsl:template match="Filter" mode="AddFilters">
+  <xsl:template match="Filter" mode ="AddFilters">
     <xsl:if test="FilterType">
       <FILTER>
         <xsl:if test="FilterType/AeroForces">
           <xsl:attribute name="NAME">AeroForces</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/AverageFields">
           <xsl:attribute name="NAME">AverageFields</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Checkpoint">
           <xsl:attribute name="NAME">Checkpoint</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Energy">
           <xsl:attribute name="NAME">ModalEnergy</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/HistoryPoints">
           <xsl:attribute name="NAME">HistoryPoints</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/MovingAverage">
           <xsl:attribute name="NAME">MovingAverage</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/ReynoldStresses">
           <xsl:attribute name="NAME">ReynoldStresses</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Threshold/Minimum">
           <xsl:attribute name="NAME">ThresholdMin</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Threshold/Maximum">
           <xsl:attribute name="NAME">ThresholdMax</xsl:attribute>
-          <xsl:apply-templates select="FilterType" mode="AddParams"/>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
       </FILTER>
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="FilterType" mode="AddParams">
+  <xsl:template match="FilterType" mode ="AddParams">
     <xsl:if test="AeroForces">
       <xsl:if test="AeroForces/OutputFile">
         <PARAM NAME="OutputFile"><xsl:value-of select="AeroForces/OutputFile/FileName"/></PARAM>
@@ -614,7 +612,7 @@
         <PARAM NAME="OutputFrequency"><xsl:value-of select="HistoryPoints/OutputFile/Frequency"/></PARAM>
       </xsl:if>  
       <PARAM NAME="Points">
-        <xsl:apply-templates select="HistoryPoints/Points" mode="AddHistPoints"/>
+        <xsl:apply-templates select="HistoryPoints/Points" mode ="AddHistPoints"/>
         <xsl:value-of select="concat( '&#160;', '&#xA;' )"/>
       </PARAM>
     </xsl:if>
@@ -669,11 +667,11 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="Points" mode="AddHistPoints">
+  <xsl:template match="Points" mode ="AddHistPoints">
     <xsl:value-of select="concat( '&#xA;', '&#160;', '&#160;', X, '&#160;', Y, '&#160;', Z, '&#160;')"/>
   </xsl:template>
 
-  <xsl:template match="Variable" mode="InitialConditionVars">
+  <xsl:template match="Variable" mode ="InitialConditionVars">
     <xsl:if test="VariableName">
         <xsl:choose>
           <xsl:when test="Type/Expression">
@@ -697,15 +695,15 @@
     </xsl:if>    
   </xsl:template>
   
-  <xsl:template match="InitialConditions" mode="HandleConditions">
+  <xsl:template match="InitialConditions" mode ="HandleConditions">
     <xsl:if test="Variable">
       <FUNCTION NAME="InitialConditions">
-        <xsl:apply-templates select="Variable" mode="InitialConditionVars"/>
+        <xsl:apply-templates select="Variable" mode ="InitialConditionVars"/>
       </FUNCTION>
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="Variable" mode="BaseflowVars">
+  <xsl:template match="Variable" mode ="BaseflowVars">
     <xsl:if test="VariableName">
         <xsl:choose>
           <xsl:when test="Type/Expression">
@@ -729,68 +727,63 @@
     </xsl:if>    
   </xsl:template>
   
-  <xsl:template match="BaseFlow" mode="BaseConditions">
+  <xsl:template match="BaseFlow" mode ="BaseConditions">
     <xsl:if test="Variable">
       <FUNCTION NAME="Baseflow">
-        <xsl:apply-templates select="Variable" mode="BaseflowVars"/>
+        <xsl:apply-templates select="Variable" mode ="BaseflowVars"/>
       </FUNCTION>
     </xsl:if>
   </xsl:template>
 
   <!-- Incompressible Navier-Stokes transform -->
   <xsl:template match="/IncompressibleNavierStokes">
-    <xsl:apply-templates select="ProblemSpecification/Geometry" mode="ErrorChecks"/>
+    <xsl:apply-templates select="ProblemSpecification/Geometry" mode ="ErrorChecks"/>
     <NEKTAR>
       <EXPANSIONS>
         <E>
-          <xsl:apply-templates select="ProblemSpecification" mode="CompositeNavierStokes"/>
-          <xsl:apply-templates select="NumericalSpecification" mode="Expansion"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="CompositeNavierStokes"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="Expansion"/>
         </E>
       </EXPANSIONS>
       
       <CONDITIONS>
         <SOLVERINFO>
-          <xsl:apply-templates select="NumericalSpecification" mode="SolverInfo"/>
-          <xsl:apply-templates select="AdvancedParameters" mode="SolverInfo"/>
-          <xsl:apply-templates select="NumericalSpecification" mode="NavierStokesSolverInfo"/>
-          <xsl:apply-templates select="ProblemSpecification" mode="AddFFTW"/>
-          <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomExpression" mode="AddExpression"/>
-          <xsl:apply-templates select="NumericalSpecification/SolverType/VelocityCorrectionScheme/Mapping" mode="AdvancedExpressions"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="NavierStokesSolverInfo"/>
+          <xsl:apply-templates select="AdvancedParameters" mode ="SolverInfo"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTW"/>
+          <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomExpression" mode ="AddExpression"/>
         </SOLVERINFO>
 
         <PARAMETERS>
-          <xsl:apply-templates select="ProblemSpecification" mode="NavierStokesParameters"/>
-          <xsl:apply-templates Select="NumericalSpecification" mode="Parameters"/>
-          <xsl:apply-templates select="ProblemSpecification" mode="AddFFTWParam"/>
-          <xsl:apply-templates select="AdvancedParameters" mode="AddCFL"/>
-          <xsl:apply-templates select="AdvancedParameters" mode="Parameters"/>
-          <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomParameter" mode="AddParameter"/>
-          <xsl:apply-templates select="NumericalSpecification/SimulationType/*/TimeIntegration/Timing" mode="Parameters"/>
-
-          <xsl:apply-templates select="AdditionalParameters/IOParams" mode="Parameters"/>
-          <xsl:apply-templates select="NumericalSpecification/SolverType/VelocityCorrectionScheme/Mapping" mode="AdvancedParameters"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTWParam"/>
+          <xsl:apply-templates select="NumericalSpecification/TimeIntegration/Timing" mode ="Parameters"/>
+          <xsl:apply-templates select="AdvancedParameters" mode ="AddCFL"/>
+          <xsl:apply-templates select="AdvancedParameters" mode ="Parameters"/>
+          <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomParameter" mode ="AddParameter"/>
+          <xsl:apply-templates select="AdditionalParameters/IOParams" mode ="Parameters"/>
         </PARAMETERS>
             
-        <xsl:apply-templates select="AdvancedParameters/GlobalSysSolution" mode="GlobalSysSoln"/>
-
+        <xsl:apply-templates select="Optimisation/GlobalSysSolution" mode ="GlobalSysSoln"/>
         
-        <xsl:apply-templates select="ProblemSpecification" mode="Variables"/>
+        <xsl:apply-templates select="ProblemSpecification" mode ="Variables"/>
         
         <xsl:apply-templates select="ProblemSpecification/BoundaryDetails" mode="BoundaryRegionsAndConditions"/>
 
-        <xsl:apply-templates select="ProblemSpecification/InitialConditions" mode="HandleConditions"/>  
+        <!-- <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"/> -->
 
-        <xsl:apply-templates select="NumericalSpecification/SimulationType/*/BaseFlow" mode="BaseConditions"/>  
+        <xsl:apply-templates select="ProblemSpecification/InitialConditions" mode ="HandleConditions"/>  
 
-        <xsl:apply-templates select="AdditionalParameters/Function" mode="AddFunctions"/>
+        <xsl:apply-templates select="NumericalSpecification/SimulationType/*/BaseFlow" mode="BaseConditions"/> 
+        <xsl:apply-templates select="AdditionalParameters/Function" mode ="AddFunctions"
+        />
         <xsl:apply-templates select="NumericalSpecification/SolverType/VelocityCorrectionScheme/Mapping" mode="MappingFunction"/>
-
-
+        
       </CONDITIONS>
 
-      <xsl:apply-templates select="AdditionalParameters/Force" mode="AddForces"/>
-      <xsl:apply-templates select="AdditionalParameters/Filter" mode="AddFilters"/>
-      <xsl:apply-templates select="NumericalSpecification" mode="AddMap"/>  
+      <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
+      <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
+      <xsl:apply-templates select="NumericalSpecification" mode ="AddMap"/>  
       
       <!-- Copy in the geometry -->
       <xsl:copy-of select="ProblemSpecification/Geometry/NEKTAR/GEOMETRY"/>

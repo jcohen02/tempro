@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <ProblemSpecification>
+<!--   <ProblemSpecification>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -72,10 +72,10 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </ProblemSpecification>
+  </ProblemSpecification> -->
 
   <NumericalSpecification>
-     <libhpc:documentation>
+    <libhpc:documentation>
       Specification of the particular problem to solve, including geometry, 
       initial conditions, boundary conditions, etc.
     </libhpc:documentation>
@@ -179,6 +179,7 @@
       </VelocityCorrectionScheme>
     </SolverType>
 
+
     <Equation type="xs:string"  inputType="choice">
       <libhpc:documentation>
         SteadyStokes
@@ -192,9 +193,10 @@
       <tempss:item>SteadyOseen</tempss:item>
       <tempss:item>UnsteadyStokes</tempss:item>
       <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
+      <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyNavierStokes</tempss:item>
-    </Equation>   
-
+    </Equation>
+    
     <Projection paramType="choice">
       <libhpc:documentation>
         ContinuousGalerkin: enforces continuity of solution across element boundaries
@@ -211,7 +213,7 @@
         </Scheme>
       </MixedGalerkin>
     </Projection>
-    
+
     <Expansion>
       <libhpc:documentation>Specify details of how the solution function 
       will be approximated.</libhpc:documentation>
@@ -221,6 +223,25 @@
           The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
       </PolynomialOrder>
       <BasisType type="xs:string" inputType="choice">
+        <libhpc:documentation>
+          The type of polynomials used as a basis to expand the solution 
+          function. There are two styles of basis polynomial: modal and nodal.
+           
+           Modal / hierarchical basis: don't need to redefine basis functions 
+           when increase the order (but have to be modified to get zero at boundary).
+           
+           Nodal: have to be redefined when the polynomial order is increased, 
+           but are naturally zero at the boundaries.
+           
+           Available choices:
+             MODIFIED: Legendre polynomials (modal) that have been multiplied 
+                       by two linear functions to make them zero at the boundaries.
+             GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+             GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
+                           Gauss-Lobatto-Legendre
+             GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+             CHEBYSHEV: another modal approach (similar to Fourier modes).
+        </libhpc:documentation>
         <tempss:item>MODIFIED</tempss:item>
         <tempss:item>GAUSS_LAGRANGE</tempss:item>
         <tempss:item>GLL_LAGRANGE</tempss:item>
@@ -378,6 +399,41 @@
 
   <AdvancedParameters>
     <CFL type="xs:string" optional="true"/>
+    <Dealiasing optional="true"/>
+    <SpectralhpDealiasing optional="true">
+      <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
+        can stablise certain simulations through the use of additional 
+        integration of the nonlinear convective terms.
+      </libhpc:documentation>
+    </SpectralhpDealiasing>
+    <SpectralVanishingViscosity optional="true">
+      <libhpc:documentation>Adds additional damping for high-frequency modes 
+        which may help in stabilising underresolved simulations.
+      </libhpc:documentation>
+      <SVVDiffCoeff type="positiveIncDouble">
+        <libhpc:documentation>Adds additional damping for high-frequency modes 
+          which may help in stabilising underresolved simulations.
+        </libhpc:documentation>
+      </SVVDiffCoeff>
+      <SVVCutoffRatio type="positiveIncDouble01">
+        <libhpc:documentation>Dictates the frequencies of the coefficients to 
+          be damped. i.e. for polynomial order 7, a value of 0.75 means 
+          damping is only applied to modes 6 and 7.
+        </libhpc:documentation>
+      </SVVCutoffRatio>
+    </SpectralVanishingViscosity>
+    <WeightPartitions type="xs:string" inputType="choice" optional="true">
+      <libhpc:documentation>If using a hybrid mesh of more than one element type 
+        , this should be set to NonUniform to give better parallel partitions.
+      </libhpc:documentation>
+      <tempss:item>Uniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
+    </WeightPartitions>
+  </AdvancedParameters>
+
+  <Optimisation>
     <GlobalSysSolution repeatable="true" optional="true">
       <MatrixInversion repeatable="true">
         <Field type="xs:string"/>
@@ -435,46 +491,6 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
-    <Dealiasing optional="true"/>
-    <DiffusionAdvancement type="xs:string"  inputType="choice" optional="true">
-      <libhpc:documentation>
-        Specifies whether diffusion is handled implicitly or explicitly in 
-        the time integration scheme. 
-      </libhpc:documentation>
-      <tempss:item>Implicit</tempss:item>
-      <tempss:item>Explicit</tempss:item>
-    </DiffusionAdvancement>
-    <SpectralhpDealiasing optional="true">
-      <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
-        can stablise certain simulations through the use of additional 
-        integration of the nonlinear convective terms.
-      </libhpc:documentation>
-    </SpectralhpDealiasing>
-    <SpectralVanishingViscosity optional="true">
-      <libhpc:documentation>Adds additional damping for high-frequency modes 
-        which may help in stabilising underresolved simulations.
-      </libhpc:documentation>
-      <SVVDiffCoeff type="positiveIncDouble">
-        <libhpc:documentation>Adds additional damping for high-frequency modes 
-          which may help in stabilising underresolved simulations.
-        </libhpc:documentation>
-      </SVVDiffCoeff>
-      <SVVCutoffRatio type="positiveIncDouble01">
-        <libhpc:documentation>Dictates the frequencies of the coefficients to 
-          be damped. i.e. for polynomial order 7, a value of 0.75 means 
-          damping is only applied to modes 6 and 7.
-        </libhpc:documentation>
-      </SVVCutoffRatio>
-    </SpectralVanishingViscosity>
-    <WeightPartitions type="xs:string" inputType="choice" optional="true">
-      <libhpc:documentation>If using a hybrid mesh of more than one element type 
-        , this should be set to NonUniform to give better parallel partitions.
-      </libhpc:documentation>
-      <tempss:item>Uniform</tempss:item>
-      <tempss:item>NonUniform - DoF</tempss:item>
-      <tempss:item>NonUniform - Boundary</tempss:item>
-      <tempss:item>NonUniform - Both</tempss:item>
-    </WeightPartitions>
-  </AdvancedParameters>
+  </Optimisation>
 
 </IncompressibleNavierStokes>

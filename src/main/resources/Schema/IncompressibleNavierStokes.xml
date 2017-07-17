@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-<!--   <ProblemSpecification>
+  <ProblemSpecification>
     <libhpc:documentation>This section contains the parameters that define the 
       physics of the problem or, equivalently, the PDE coefficients. When 
       running a specific problem through the solver, the incompressible 
@@ -72,7 +72,7 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </ProblemSpecification> -->
+  </ProblemSpecification>
 
   <NumericalSpecification>
     <libhpc:documentation>

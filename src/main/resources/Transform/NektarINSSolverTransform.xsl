@@ -390,6 +390,53 @@
     <P><xsl:value-of select="Name"/> = <xsl:value-of select="Value"/></P>
   </xsl:template>
 
+  <xsl:template match="Collections" mode ="Collection">
+    <xsl:message>Processing function...</xsl:message>
+    <COLLECTIONS>
+      <xsl:if test="NoCollection">
+        <xsl:attribute name="DEFAULT">NoCollection</xsl:attribute>
+      </xsl:if>
+      <xsl:if test="AutoTuning">
+        <xsl:attribute name="DEFAULT">AutoTuning</xsl:attribute>
+      </xsl:if>
+      <xsl:if test="StdMat">
+        <xsl:attribute name="DEFAULT">StdMat</xsl:attribute>
+      </xsl:if>
+      <xsl:if test="SumFac">
+        <xsl:attribute name="DEFAULT">SumFac</xsl:attribute>
+      </xsl:if>
+      <xsl:if test="IterPerExp">
+        <xsl:attribute name="DEFAULT">IterPerExp</xsl:attribute>
+      </xsl:if>
+      <xsl:if test="Manual">
+        <xsl:apply-templates select="Manual/Operator" mode="Collection"/>
+      </xsl:if>
+    </COLLECTIONS> 
+  </xsl:template>
+
+  <xsl:template match="Operator" mode ="Collection">
+        <OPERATOR>
+          <xsl:attribute name="TYPE">
+            <xsl:value-of select="OperatorType"/>
+          </xsl:attribute>
+          <xsl:apply-templates select="Element" mode="Collection"/>
+        </OPERATOR>
+  </xsl:template>
+
+  <xsl:template match="Element" mode ="Collection">
+        <ELEMENT>
+          <xsl:attribute name="TYPE">
+            <xsl:value-of select="ElementType"/>
+          </xsl:attribute>
+          <xsl:attribute name="ORDER">
+            <xsl:value-of select="Order"/>
+          </xsl:attribute>
+          <xsl:attribute name="IMPTYPE">
+            <xsl:value-of select="Implementation"/>
+          </xsl:attribute>
+        </ELEMENT>
+  </xsl:template>
+
   <xsl:template match="GlobalSysSolution" mode ="GlobalSysSoln">
     <xsl:message>Processing function...</xsl:message>
     <GLOBALSYSSOLNINFO>
@@ -765,6 +812,7 @@
         </PARAMETERS>
             
         <xsl:apply-templates select="Optimisation/GlobalSysSolution" mode ="GlobalSysSoln"/>
+        <xsl:apply-templates select="Optimisation/Collections" mode ="Collection"/>
         
         <xsl:apply-templates select="ProblemSpecification" mode ="Variables"/>
         

@@ -450,13 +450,7 @@
               <tempss:item>StaticCondensation</tempss:item>
             </SubStructuring>
             <Preconditioner type="xs:string"  inputType="choice" optional="true">
-              <tempss:item>Diagonal</tempss:item>
-              <tempss:item>FullLinearSpace</tempss:item>
-              <tempss:item>LowEnergyBlock</tempss:item>
-              <tempss:item>Block</tempss:item>
-              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
-              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
-              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+
             </Preconditioner>
             <SuccessiveRHS type="positiveIncDouble" optional="true">
             </SuccessiveRHS>
@@ -476,7 +470,7 @@
               <tempss:item>StaticCondensation</tempss:item>
               <tempss:item>MultiLevelStaticCondensation</tempss:item>
             </SubStructuring>
-            <Preconditioner type="xs:string"  inputType="choice" optional="true">
+            <Preconditioner type="xs:string" inputType="choice" optional="true">
               <tempss:item>Diagonal</tempss:item>
               <tempss:item>FullLinearSpace</tempss:item>
               <tempss:item>LowEnergyBlock</tempss:item>
@@ -491,6 +485,41 @@
         </InversionType>
       </MatrixInversion>
     </GlobalSysSolution>
+
+    <Collections paramType="choice" optional="true">
+      <NoCollection/>
+      <AutoTuning/>
+      <StdMat/>
+      <SumFac/>
+      <IterPerExp/>
+      <Manual>
+        <Operator repeatable="true">
+          <OperatorType type="xs:string" inputType="choice">
+            <tempss:item>BWDTrans</tempss:item>
+            <tempss:item>IProductWRTBase</tempss:item>
+            <tempss:item>IProductWRTDerivBase</tempss:item>
+            <tempss:item>PhysDeriv</tempss:item>
+          </OperatorType>
+          <Element repeatable="true">
+            <ElementType type="xs:string" inputType="choice">
+              <tempss:item>Segment</tempss:item>
+              <tempss:item>Quadrilateral</tempss:item>
+              <tempss:item>Triangle</tempss:item>
+              <tempss:item>Hexahedron</tempss:item>
+              <tempss:item>Tetrahedron</tempss:item>
+              <tempss:item>Prism</tempss:item>
+              <tempss:item>Pyramid</tempss:item>
+            </ElementType>
+            <Order type="xs:string"/>
+            <Implementation type="xs:string" inputType="choice">
+              <tempss:item>StdMat</tempss:item>
+              <tempss:item>SumFac</tempss:item>
+              <tempss:item>IterPerExp</tempss:item>
+            </Implementation>
+          </Element>
+        </Operator>
+      </Manual>
+    </Collections>
   </Optimisation>
 
 </IncompressibleNavierStokes>

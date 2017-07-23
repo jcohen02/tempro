@@ -199,14 +199,14 @@
       <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/Driver" mode="AddDriver"/>
       <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/Driver" mode="AddArpackType"/>
     </xsl:if>
-    <xsl:if test="SimulationType/SteadyStateSimulation" >
-      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/Driver" mode="AddDriver"/>
-      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/ModeType" mode="AddModes"/>
-      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/Driver" mode="AddArpackType"/>
+    <xsl:if test="SimulationType/SteadyStateStability" >
+      <xsl:apply-templates select="SimulationType/SteadyStateStability/Driver" mode="AddDriver"/>
+      <xsl:apply-templates select="SimulationType/SteadyStateStability/ModeType" mode="AddModes"/>
+      <xsl:apply-templates select="SimulationType/SteadyStateStability/Driver" mode="AddArpackType"/>
     </xsl:if>
     <xsl:if test="SimulationType/StabilityAnalysis" >
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddDriver"/>
-      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/ModeType" mode="AddModes"/>
+      <xsl:apply-templates select="SimulationType/SteadyStateStability/ModeType" mode="AddModes"/>
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddArpackType"/>
     </xsl:if>
 
@@ -219,8 +219,8 @@
     <xsl:if test="SimulationType/StabilityAnalysis" >
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/EvolutionOperator" mode="AddEvolution"/>
     </xsl:if>
-    <xsl:if test="SimulationType/SteadyStateSimulation" >
-      <xsl:apply-templates select="SimulationType/SteadyStateSimulation/EvolutionOperator" mode="AddEvolution"/>
+    <xsl:if test="SimulationType/SteadyStateStability" >
+      <xsl:apply-templates select="SimulationType/SteadyStateStability/EvolutionOperator" mode="AddEvolution"/>
     </xsl:if>
 
     <I PROPERTY="SolverType">

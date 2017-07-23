@@ -76,10 +76,12 @@
 
   <NumericalSpecification>
     <libhpc:documentation>
-      Specification of the particular problem to solve, including geometry, 
-      initial conditions, boundary conditions, etc.
+      Specification of the numerical domain, i.e. solver and equation types.
     </libhpc:documentation>
     <SimulationType paramType="choice">
+      <libhpc:documentation>
+
+      </libhpc:documentation>
       <DirectNumericalSimulation>
         <TimeIntegration>
           <Timing>
@@ -89,7 +91,7 @@
           </Timing>
           <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>
-        <Driver type="DriverType" optional="true"/>
+        <Driver type="DNSDriverType" optional="true"/>
         <Advection type="AdvectionType"/>
       </DirectNumericalSimulation>
       <StabilityAnalysis>
@@ -101,8 +103,8 @@
           </Timing>
           <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>
-        <Driver type="DriverType" optional="true"/>
-        <EvolutionOperator type="EvolutionType"/>
+        <Driver type="StabilityDriverType" optional="true"/>
+        <EvolutionOperator type="StabilityEvolutionType"/>
         <BaseFlow optional="true">
           <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
           <Variable repeatable="true">
@@ -116,9 +118,9 @@
         </BaseFlow>
         <ModeType type="ModeType"/>
       </StabilityAnalysis>
-      <SteadyStateSimulation>
-        <Driver type="DriverType" optional="true"/>
-        <EvolutionOperator type="EvolutionType"/>
+      <SteadyStateStability>
+        <Driver type="SteadyStateDriverType" optional="true"/>
+        <EvolutionOperator type="SteadyStateEvolutionType"/>
         <BaseFlow optional="true">
           <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
           <Variable repeatable="true">
@@ -131,13 +133,13 @@
           </Variable>
         </BaseFlow>
         <ModeType type="ModeType"/>
-      </SteadyStateSimulation>
+      </SteadyStateStability>
     </SimulationType>
 
     <SolverType paramType="choice">
-      <libhpc:documentation>See: http://www.nektar.info/wiki/3.3/UserGuide/Tutorial/IncNavierStokesSolver
-        VelocityCorrectionScheme: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/VCS
-        DirectSolver: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver/DirectSolver
+      <libhpc:documentation>
+        DirectNumericalSimulation: for standard flow problems
+        StabilityAnalysis: stability problems
       </libhpc:documentation>
       <CoupledLinearNS>
       </CoupledLinearNS>
@@ -179,21 +181,18 @@
       </VelocityCorrectionScheme>
     </SolverType>
 
-
     <Equation type="xs:string"  inputType="choice">
       <libhpc:documentation>
         SteadyStokes
         SteadyOseen
         UnsteadyStokes
         SteadyLinearisedNavierStokes
-        UnsteadyLinearisedNavierStokes
         UnsteadyNavierStokes
       </libhpc:documentation>
       <tempss:item>SteadyStokes</tempss:item>
       <tempss:item>SteadyOseen</tempss:item>
       <tempss:item>UnsteadyStokes</tempss:item>
       <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
-      <tempss:item>UnsteadyLinearisedNavierStokes</tempss:item>
       <tempss:item>UnsteadyNavierStokes</tempss:item>
     </Equation>
     
@@ -257,7 +256,7 @@
       algorithm for solving the problem.
     </libhpc:documentation>
     
-    <IOParams optional="true">
+    <IOParams>
       <libhpc:documentation>
         This section contains parameters that specify administrative details.
       </libhpc:documentation>

@@ -228,8 +228,17 @@
         <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
           <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
         </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'MovingBody'">
+          <xsl:attribute name="USERDEFINEDTYPE">MovingBody</xsl:attribute>
+        </xsl:if>
         <xsl:if test="UserDefinedType/ExistingType = 'TimeDependent'">
           <xsl:attribute name="USERDEFINEDTYPE">T</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'Radiation'">
+          <xsl:attribute name="USERDEFINEDTYPE">Radiation</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'Wormesley'">
+          <xsl:attribute name="USERDEFINEDTYPE">Wormesley</xsl:attribute>
         </xsl:if>
       </xsl:when>
     </xsl:choose>

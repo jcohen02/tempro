@@ -28,9 +28,44 @@
         </domain>
       </variable>           
 
+      <variable path="NumericalSpecification.SimulationType" name="SimulationType">
+        <domain>
+          <value>DirectNumericalSimulation</value>
+          <value>StabilityAnalysis</value>
+          <value>SteadyStateStability</value>
+        </domain>
+      </variable>              
+
+      <variable path="NumericalSpecification.Equation" name="Equation">
+        <domain>
+          <value>SteadyOseen</value>
+          <value>SteadyStokes</value>
+          <value>UnsteadyStokes</value>
+          <value>SteadyLinearisedNavierStokes</value>
+          <value>UnsteadyNavierStokes</value>
+        </domain>
+      </variable>              
+
     </variables>
     
     <constraints>
+      <!-- Mapping of simulation type with equation type -->
+      <mapping variable="SimulationType" varvalue="DirectNumericalSimulation" targetVariable="Equation">
+        <targetValue>UnsteadyNavierStokes</targetValue>
+        <targetValue>UnsteadyStokes</targetValue>
+      </mapping>
+      <mapping variable="SimulationType" varvalue="StabilityAnalysis" targetVariable="Equation">
+        <targetValue>SteadyOseen</targetValue>
+        <targetValue>SteadyStokes</targetValue>
+        <targetValue>SteadyLinearisedNavierStokes</targetValue>
+      </mapping>
+      <mapping variable="SimulationType" varvalue="SteadyStateStability" targetVariable="Equation">
+        <targetValue>SteadyOseen</targetValue>
+        <targetValue>SteadyStokes</targetValue>
+        <targetValue>SteadyLinearisedNavierStokes</targetValue>
+      </mapping>
+
+      
       <!-- Mapping of solver type with projection type -->
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>

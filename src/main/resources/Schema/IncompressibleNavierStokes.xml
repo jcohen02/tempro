@@ -45,7 +45,6 @@
       </ThreeDimensional>
     </Dimensions>
     <ReynoldsNumber type="positiveDouble" optional="true" />
-    <KinematicViscosity type="xs:string"/>
     <Geometry type="geometryFileName" inputType="file">
       <libhpc:documentation>
         The geometry on which the problem is being solved . Provide a Nektar 
@@ -101,7 +100,6 @@
             <NumSteps type="xs:string" optional="true"/>
             <FinalTime type="xs:string" optional="true"/>
           </Timing>
-          <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>
         <Driver type="StabilityDriverType" optional="true"/>
         <EvolutionOperator type="StabilityEvolutionType"/>
@@ -255,7 +253,8 @@
       This section contains all the parameters that specify the numerical 
       algorithm for solving the problem.
     </libhpc:documentation>
-    
+    <KinematicViscosity type="xs:string"/>
+
     <IOParams>
       <libhpc:documentation>
         This section contains parameters that specify administrative details.

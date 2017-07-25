@@ -34,6 +34,9 @@
     <xsl:if test="ReynoldsNumber">
       <P>Re = <xsl:value-of select="ReynoldsNumber"/></P>
     </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="AdditionalParameters" mode ="NavierStokesParameters">
     <P>Kinvis = <xsl:value-of select="KinematicViscosity"/></P>
   </xsl:template>
 
@@ -803,6 +806,7 @@
 
         <PARAMETERS>
           <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="AdditionalParameters" mode ="NavierStokesParameters"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTWParam"/>
           <xsl:apply-templates select="NumericalSpecification/TimeIntegration/Timing" mode ="Parameters"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="AddCFL"/>

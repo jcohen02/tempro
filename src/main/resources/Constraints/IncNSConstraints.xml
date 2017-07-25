@@ -13,58 +13,12 @@
     <solver>IncompressibleNavierStokes</solver>
     
     <variables>
-      <variable path="ProblemSpecification.Dimensions" name="Dimensions">
-        <domain>
-          <value>TwoDimensional</value>
-          <value>ThreeDimensional</value>
-        </domain>
-      </variable>      
-
       <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
           <value>CoupledLinearNS</value>
           <value>VelocityCorrectionScheme</value>
         </domain>
-      </variable>      
-
-      <variable path="NumericalSpecification.SolverType.VelocityCorrectionScheme" name="VelocityCorrectionScheme">
-        <domain>
-          <value>Standard</value>
-          <value>WeakPressure</value>
-          <value>Mapping</value>
-        </domain>
-      </variable>      
-
-      <variable path="NumericalSpecification.TimeIntegration.TimeIntegrationMethod" 
-                name="TimeIntegrationMethod">
-        <domain>
-          <value>NotProvided</value>
-          <value>IMEXOrder1</value>
-          <value>IMEXOrder2</value>
-          <value>IMEXOrder3</value>
-          <value>DIRKOrder1</value>
-          <value>ForwardEuler</value>
-          <value>BackwardEuler</value>
-          <value>ClassicalRungeKutta4</value>
-          <value>BDFImplicitOrder1</value>
-          <value>BDFImplicitOrder2</value>
-        </domain>
-      </variable>
-      
-      <variable path="NumericalSpecification.SimulationType" name="SimulationType">
-        <domain>
-          <value>DirectNumericalSimulation</value>
-          <value>StabilityAnalysis</value>
-          <value>SteadyStateStability</value>
-        </domain>
-      </variable>           
-
-      <variable path="NumericalSpecification.SimulationType.DirectNumericalSimulation.Driver" name="Driver">
-        <domain>
-          <value>Adaptive</value>
-          <value>Standard</value>
-        </domain>
-      </variable>           
+      </variable>              
 
       <variable path="NumericalSpecification.Projection" name="Projection">
         <domain>
@@ -77,28 +31,6 @@
     </variables>
     
     <constraints>
-      <!-- Mapping of driverType with mapping -->
-      <mapping variable="Driver" varvalue="Adaptive" targetVariable="VelocityCorrectionScheme">
-        <targetValue>Mapping</targetValue>
-      </mapping>
-      
-
-      <!-- Mapping of solver type with time integration type -->
-      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="TimeIntegrationMethod">
-        <targetValue>IMEXOrder1</targetValue>
-        <targetValue>IMEXOrder2</targetValue>
-        <targetValue>IMEXOrder3</targetValue>
-        <targetValue>DIRKOrder1</targetValue>
-        <targetValue>ForwardEuler</targetValue>
-        <targetValue>BackwardEuler</targetValue>
-        <targetValue>ClassicalRungeKutta4</targetValue>
-        <targetValue>BDFImplicitOrder1</targetValue>
-        <targetValue>BDFImplicitOrder2</targetValue>
-      </mapping>
-      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="TimeIntegrationMethod">
-        <targetValue>NotProvided</targetValue>
-      </mapping>
-
       <!-- Mapping of solver type with projection type -->
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>

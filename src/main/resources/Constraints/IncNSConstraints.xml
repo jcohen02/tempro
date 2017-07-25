@@ -13,6 +13,22 @@
     <solver>IncompressibleNavierStokes</solver>
     
     <variables>
+      <variable path="ProblemSpecification.Dimensions" name="Dimensions">
+        <domain>
+          <value>TwoDimensional</value>
+          <value>ThreeDimensional</value>
+        </domain>
+      </variable>              
+
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variable" name="Variable">
+        <domain>
+          <value>CoupledLinearNS-2D</value>
+          <value>VCS-2D</value>
+          <value>CoupledLinearNS-3D</value>
+          <value>VCS-3D</value>
+        </domain>
+      </variable>              
+
       <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
           <value>CoupledLinearNS</value>
@@ -49,6 +65,26 @@
     </variables>
     
     <constraints>
+      <!-- Mapping of dimensions with boundary conditions -->
+      <mapping variable="Dimensions" varvalue="TwoDimensional" targetVariable="Variable">
+        <targetValue>VCS-2D</targetValue>
+        <targetValue>CoupledLinearNS-2D</targetValue>
+      </mapping>
+      <mapping variable="Dimensions" varvalue="ThreeDimensional" targetVariable="Variable">
+        <targetValue>VCS-3D</targetValue>
+        <targetValue>CoupledLinearNS-3D</targetValue>
+      </mapping>
+
+      <!-- Mapping of boundary conditions with solvertype -->
+      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Variable">
+        <targetValue>CoupledLinearNS-2D</targetValue>
+        <targetValue>CoupledLinearNS-3D</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Variable">
+        <targetValue>VCS-2D</targetValue>
+        <targetValue>VCS-3D</targetValue>
+      </mapping>
+
       <!-- Mapping of simulation type with equation type -->
       <mapping variable="SimulationType" varvalue="DirectNumericalSimulation" targetVariable="Equation">
         <targetValue>UnsteadyNavierStokes</targetValue>

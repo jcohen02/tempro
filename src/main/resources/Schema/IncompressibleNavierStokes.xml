@@ -12,16 +12,10 @@
   </libhpc:documentation>
   
   <ProblemSpecification>
-    <libhpc:documentation>This section contains the parameters that define the 
-      physics of the problem or, equivalently, the PDE coefficients. When 
-      running a specific problem through the solver, the incompressible 
-      Navier-Stokes equation should be re-scaled so that the only parameter 
-      is the kinematic velocity. For this reason, units are not displayed, 
-      since they depend onthere-scaling of the original problem.
+    <libhpc:documentation>ProblemSpecification defines the descriptive parameters of a simulation.
     </libhpc:documentation>
     <Dimensions paramType="choice">
-      <libhpc:documentation>Dimensions define the "real" mesh dimensions and not
-        the augmentation with quasi-dimensions.
+      <libhpc:documentation>
       </libhpc:documentation>
       <TwoDimensional>
         <QuasiDimensions optional="true">
@@ -102,7 +96,7 @@
           </Timing>
         </TimeIntegration>
         <Driver type="StabilityDriverType" optional="true"/>
-        <EvolutionOperator type="StabilityEvolutionType"/>
+        <EvolutionOperator type="EvolutionType"/>
         <BaseFlow optional="true">
           <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
           <Variable repeatable="true">
@@ -118,7 +112,7 @@
       </StabilityAnalysis>
       <SteadyStateStability>
         <Driver type="SteadyStateDriverType" optional="true"/>
-        <EvolutionOperator type="SteadyStateEvolutionType"/>
+        <EvolutionOperator type="SteadyEvolutionType"/>
         <BaseFlow optional="true">
           <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
           <Variable repeatable="true">
@@ -250,8 +244,7 @@
 
   <AdditionalParameters>
     <libhpc:documentation>
-      This section contains all the parameters that specify the numerical 
-      algorithm for solving the problem.
+      Commonly used parameters can be found here.
     </libhpc:documentation>
     <KinematicViscosity type="xs:string"/>
 
@@ -273,6 +266,9 @@
     </IOParams>
 
     <CustomInputs optional="true">
+      <libhpc:documentation>
+        Add custom expressions and parameters.
+      </libhpc:documentation>
       <CustomExpression repeatable="true" optional="true">
         <Name type="xs:string"/>
         <Value type="xs:string"/>
@@ -390,12 +386,14 @@
       <FunctionName type="xs:string"/>
         <Expression repeatable="true">
           <ExpressionVar type="xs:string" />
-          <ExpressionName type="xs:string"/>
+          <ExpressionValue type="xs:string"/>
         </Expression>
     </Function>
   </AdditionalParameters>
 
   <AdvancedParameters>
+    <libhpc:documentation>
+    </libhpc:documentation>
     <CFL type="xs:string" optional="true"/>
     <Dealiasing optional="true"/>
     <SpectralhpDealiasing optional="true">
@@ -448,7 +446,13 @@
               <tempss:item>StaticCondensation</tempss:item>
             </SubStructuring>
             <Preconditioner type="xs:string"  inputType="choice" optional="true">
-
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
             </Preconditioner>
             <SuccessiveRHS type="positiveIncDouble" optional="true">
             </SuccessiveRHS>

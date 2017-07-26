@@ -78,16 +78,16 @@
           <xsl:apply-templates select="Variable/CoupledLinearNS-3D/v-velocity" mode ="BCVariable"/>
           <xsl:apply-templates select="Variable/CoupledLinearNS-3D/w-velocity" mode ="BCVariable"/>
         </xsl:when>
-        <xsl:when  test="Variable/VCS-2D">
-          <xsl:apply-templates select="Variable/VCS-2D/u-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/VCS-2D/v-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/VCS-2D/p-pressure" mode ="BCVariable"/>
+        <xsl:when  test="Variable/VelocityCorrectionScheme-2D">
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-2D/u-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-2D/v-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-2D/p-pressure" mode ="BCVariable"/>
         </xsl:when>
-        <xsl:when  test="Variable/VCS-3D">
-          <xsl:apply-templates select="Variable/VCS-3D/u-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/VCS-3D/v-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/VCS-3D/w-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/VCS-3D/p-pressure" mode ="BCVariable"/>
+        <xsl:when  test="Variable/VelocityCorrectionScheme-3D">
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-3D/u-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-3D/v-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-3D/w-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/VelocityCorrectionScheme-3D/p-pressure" mode ="BCVariable"/>
         </xsl:when>
       </xsl:choose>
     </REGION>
@@ -262,13 +262,40 @@
     <xsl:choose>
       <xsl:when test="Expression">
         <xsl:attribute name="VALUE">
-          <xsl:value-of select="Expression"/>
+          [<xsl:value-of select="Expression"/>]
         </xsl:attribute>
       </xsl:when>
       <xsl:otherwise>
         <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:choose>
+      <xsl:when test="UserDefinedType/ExistingType">
+        <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
+          <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'MovingBody'">
+          <xsl:attribute name="USERDEFINEDTYPE">MovingBody</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'TimeDependent'">
+          <xsl:attribute name="USERDEFINEDTYPE">T</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'Radiation'">
+          <xsl:attribute name="USERDEFINEDTYPE">Radiation</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'Wormesley'">
+          <xsl:attribute name="USERDEFINEDTYPE">Wormesley</xsl:attribute>
+        </xsl:if>
+      </xsl:when>
+    </xsl:choose>
+    <xsl:choose>
+      <xsl:when test="UserDefinedType/CustomExpression">
+        <xsl:attribute name="USERDEFINEDTYPE">
+          <xsl:value-of select="UserDefinedType/CustomExpression"/>
+        </xsl:attribute>
+      </xsl:when>
+    </xsl:choose>
+    
   </xsl:template>
   
   <xsl:template match="BoundaryRegion" mode="BuildBoundaryRegion">

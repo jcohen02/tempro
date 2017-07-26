@@ -133,7 +133,17 @@
     </xs:choice>
   </xs:complexType>
 
-  <xs:complexType name="SteadyStateEvolutionType">
+  <xs:complexType name="EvolutionType">
+    <xs:choice>
+      <xs:element name="Direct"/>
+      <xs:element name="Adjoint"/>
+      <xs:element name="NonLinear"/>
+      <xs:element name="SkewSymmetric"/>
+      <xs:element name="TransientGrowth"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="SteadyEvolutionType">
     <xs:choice>
       <xs:element name="ClassicalSFD">
         <xs:complexType>
@@ -150,16 +160,6 @@
           <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
         </xs:complexType>  
       </xs:element>
-    </xs:choice>
-  </xs:complexType>
-
-  <xs:complexType name="StabilityEvolutionType">
-    <xs:choice>
-      <xs:element name="Direct"/>
-      <xs:element name="Adjoint"/>
-      <xs:element name="NonLinear"/>
-      <xs:element name="SkewSymmetric"/>
-      <xs:element name="TransientGrowth"/>
     </xs:choice>
   </xs:complexType>
 
@@ -231,8 +231,8 @@
                 <xs:choice>
                   <xs:element name="CoupledLinearNS-2D" type="CoupledLinearNS-2D"/>
                   <xs:element name="CoupledLinearNS-3D" type="CoupledLinearNS-3D"/>
-                  <xs:element name="VCS-2D" type="VCS-2D"/>
-                  <xs:element name="VCS-3D" type="VCS-3D"/>
+                  <xs:element name="VelocityCorrectionScheme-2D" type="VelocityCorrectionScheme-2D"/>
+                  <xs:element name="VelocityCorrectionScheme-3D" type="VelocityCorrectionScheme-3D"/>
                 </xs:choice>
               </xs:complexType>
           </xs:element>
@@ -247,7 +247,7 @@
     <xs:element name="v-velocity" type="BoundaryType"/>
   </xs:complexType>
 
-  <xs:complexType name="VCS-2D">
+  <xs:complexType name="VelocityCorrectionScheme-2D">
     <xs:element name="u-velocity" type="BoundaryType"/>
     <xs:element name="v-velocity" type="BoundaryType"/>
     <xs:element name="p-pressure" type="BoundaryType"/>
@@ -259,7 +259,7 @@
     <xs:element name="w-velocity" type="BoundaryType"/>
   </xs:complexType>
 
-  <xs:complexType name="VCS-3D">
+  <xs:complexType name="VelocityCorrectionScheme-3D">
     <xs:element name="u-velocity" type="BoundaryType"/>
     <xs:element name="v-velocity" type="BoundaryType"/>
     <xs:element name="w-velocity" type="BoundaryType"/>
@@ -365,6 +365,32 @@
               </libhpc:documentation>
             </xs:appinfo>
           </xs:annotation>
+        </xs:element>
+        <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:choice>
+              <xs:element name="ExistingType">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="HighOrderPressure"/>
+                    <xs:enumeration value="MovingBody"/>
+                    <xs:enumeration value="TimeDependent"/>
+                    <xs:enumeration value="Radiation"/>
+                    <xs:enumeration value="Wormesley"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CustomExpression" type="xs:string">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>
+                      Provide a function describing this boundary condition.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
         </xs:element>
       </xs:sequence>
     </xs:element>

@@ -540,7 +540,7 @@
             <xsl:value-of select="ExpressionVar"/>
           </xsl:attribute>
           <xsl:attribute name="VALUE">
-            <xsl:value-of select="ExpressionName"/>
+            <xsl:value-of select="ExpressionValue"/>
           </xsl:attribute>
         </E>
     </xsl:if>    

@@ -41,17 +41,17 @@
     <ReynoldsNumber type="positiveDouble" optional="true" />
     <Geometry type="geometryFileName" inputType="file">
       <libhpc:documentation>
-        The geometry on which the problem is being solved . Provide a Nektar 
-        XML (with root NEKTAR element) containing a GEOMETRY element that will 
-        be parsed to identify boundary regions.
+        The geometry on which the problem is being solved. Provide a Nektar 
+        XML (with root NEKTAR element) containing a GEOMETRY element that
+        will be parsed to identify boundary regions.
       </libhpc:documentation>
     </Geometry>
     <BoundaryDetails type="BoundaryDetails">
-      <libhpc:documentation>
-        Here you can set up your boundary conditions and name them. When you 
-        add a geometry file, this will be parsed to identify and build the 
-        boundary regions which will appear here automatically. You can then 
-        assign one of your boundary conditions to each region as required. 
+      <libhpc:documentation>Here you can set up your boundary conditions and name them.
+        When you add a geometry file, this will be parsed to identify and
+        build the boundary regions which will appear here automatically.
+        You can then Assign one of your boundary conditions to each region
+        as required. 
       </libhpc:documentation>
     </BoundaryDetails>
     <InitialConditions optional="true">
@@ -73,7 +73,7 @@
     </libhpc:documentation>
     <SimulationType paramType="choice">
       <libhpc:documentation>
-
+        Dummy parameter which defines what kind of analysis you are performing.
       </libhpc:documentation>
       <DirectNumericalSimulation>
         <TimeIntegration>
@@ -132,6 +132,7 @@
       <libhpc:documentation>
         DirectNumericalSimulation: for standard flow problems
         StabilityAnalysis: stability problems
+        SteadyStateStability: steady state stability problems
       </libhpc:documentation>
       <CoupledLinearNS>
       </CoupledLinearNS>
@@ -174,8 +175,7 @@
     </SolverType>
 
     <Equation type="xs:string"  inputType="choice">
-      <libhpc:documentation>
-        SteadyStokes
+      <libhpc:documentation>SteadyStokes
         SteadyOseen
         UnsteadyStokes
         SteadyLinearisedNavierStokes
@@ -281,6 +281,12 @@
     </CustomInputs>
 
     <Filter repeatable="true" optional="true">
+      <libhpc:documentation>
+        Filters are a method for calculating a variety of useful quantities
+        from the field variables as the solution evolves in time, such as
+        time-averaged fields and extracting the field variables at certain
+        points inside the domain.
+      </libhpc:documentation>
       <FilterType paramType="choice">
         <AeroForces>
           <OutputFile optional="true">
@@ -367,6 +373,9 @@
     </Filter>
 
     <Force repeatable="true" paramType="choice" optional="true">
+      <libhpc:documentation>
+        An optional section of the file allows forcing functions to be defined.
+      </libhpc:documentation>
       <Absorption>
         <Coeff type="xs:string"/>
         <RefFlow type="xs:string"/>
@@ -383,6 +392,9 @@
     </Force>
 
     <Function repeatable="true" optional="true">
+      <libhpc:documentation>
+        Add in custom functions .
+      </libhpc:documentation>
       <FunctionName type="xs:string"/>
         <Expression repeatable="true">
           <ExpressionVar type="xs:string" />
@@ -393,6 +405,7 @@
 
   <AdvancedParameters>
     <libhpc:documentation>
+      Advanced parameters which may improve results or numerical stability.
     </libhpc:documentation>
     <CFL type="xs:string" optional="true"/>
     <Dealiasing optional="true"/>
@@ -407,9 +420,6 @@
         which may help in stabilising underresolved simulations.
       </libhpc:documentation>
       <SVVDiffCoeff type="positiveIncDouble">
-        <libhpc:documentation>Adds additional damping for high-frequency modes 
-          which may help in stabilising underresolved simulations.
-        </libhpc:documentation>
       </SVVDiffCoeff>
       <SVVCutoffRatio type="positiveIncDouble01">
         <libhpc:documentation>Dictates the frequencies of the coefficients to 
@@ -430,7 +440,16 @@
   </AdvancedParameters>
 
   <Optimisation>
+    <libhpc:documentation>
+      Options to aid the computational performance of the simulation - performance
+      decreases may occur if improperly utilised!
+    </libhpc:documentation>
+
     <GlobalSysSolution repeatable="true" optional="true">
+      <libhpc:documentation>
+        Global system solution parameters, dictate the type of solver
+        to be used for any implicit systems that are constructed.
+      </libhpc:documentation>
       <MatrixInversion repeatable="true">
         <Field type="xs:string"/>
         <InversionType paramType="choice">
@@ -489,6 +508,9 @@
     </GlobalSysSolution>
 
     <Collections paramType="choice" optional="true">
+      <libhpc:documentation>
+        The Collections library adds optimisations to perform certain elemental operations collectively by applying an operator using a matrix-matrix operation, rather than a sequence of matrix-vector multiplications.
+      </libhpc:documentation>
       <NoCollection/>
       <AutoTuning/>
       <StdMat/>

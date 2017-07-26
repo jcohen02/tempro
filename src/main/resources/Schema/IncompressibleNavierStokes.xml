@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-<!--   <ProblemSpecification>
+  <ProblemSpecification>
     <libhpc:documentation>ProblemSpecification defines the descriptive parameters of a simulation.
     </libhpc:documentation>
     <Dimensions paramType="choice">
@@ -65,7 +65,7 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </ProblemSpecification> -->
+  </ProblemSpecification>
 
   <NumericalSpecification>
     <libhpc:documentation>
@@ -246,7 +246,7 @@
     <libhpc:documentation>
       Commonly used parameters can be found here.
     </libhpc:documentation>
-<!--     <KinematicViscosity type="xs:string"/>
+    <KinematicViscosity type="xs:string"/>
 
     <IOParams>
       <libhpc:documentation>
@@ -265,7 +265,7 @@
       </IO_InfoSteps>
     </IOParams>
 
- -->    <CustomInputs optional="true">
+    <CustomInputs optional="true">
       <libhpc:documentation>
         Add custom expressions and parameters.
       </libhpc:documentation>

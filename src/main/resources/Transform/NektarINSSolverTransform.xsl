@@ -331,22 +331,25 @@
     </xsl:choose>
   </xsl:template>
 
+  <xsl:template match="NumericalSpecification" mode ="Parameters">
+    <xsl:if test="SimulationType/DirectNumericalSimulation" >
+      <xsl:apply-templates select="SimulationType/DirectNumericalSimulation/TimeIntegration/Timing" mode="Parameters"/>
+    </xsl:if>
+    <xsl:if test="SimulationType/StabilityAnalysis" >
+      <xsl:apply-templates select="SimulationType/StabilityAnalysis/TimeIntegration/Timing" mode="Parameters"/>
+    </xsl:if>
+  </xsl:template>
+
   <xsl:template match="Timing" mode ="Parameters">
-    <xsl:choose>
-      <xsl:when test="FinalTime">
-        <P>FinTime = <xsl:value-of select="FinalTime"/></P>
-      </xsl:when>
-    </xsl:choose>
-    <xsl:choose>
-      <xsl:when test="TimeStep">
-        <P>TimeStep = <xsl:value-of select="TimeStep"/></P>
-      </xsl:when>
-    </xsl:choose>
-    <xsl:choose>
-      <xsl:when test="NumSteps">
-        <P>NumSteps = <xsl:value-of select="NumSteps"/></P>
-      </xsl:when>
-    </xsl:choose>
+    <xsl:if test="FinalTime">
+      <P>FinTime = <xsl:value-of select="FinalTime"/></P>
+    </xsl:if>
+    <xsl:if test="TimeStep">
+      <P>TimeStep = <xsl:value-of select="TimeStep"/></P>
+    </xsl:if>
+    <xsl:if test="NumSteps">
+      <P>NumSteps = <xsl:value-of select="NumSteps"/></P>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="AdvancedParameters" mode ="Parameters">
@@ -640,7 +643,9 @@
         <PARAM NAME="OutputFrequency"><xsl:value-of select="AverageFields/OutputFile/Frequency"/></PARAM>
       </xsl:if>
       <xsl:if test="AverageFields/SampleFile">
+        <xsl:if test="AverageFields/SampleFile/SampleFilename">
         <PARAM NAME="SampleFilename"><xsl:value-of select="AverageFields/SampleFile/File"/></PARAM>
+        </xsl:if>
         <PARAM NAME="SampleFrequency"><xsl:value-of select="AverageFields/SampleFile/Frequency"/></PARAM>
       </xsl:if>
     </xsl:if>
@@ -806,9 +811,9 @@
 
         <PARAMETERS>
           <xsl:apply-templates select="ProblemSpecification" mode ="NavierStokesParameters"/>
-          <xsl:apply-templates select="AdditionalParameters" mode ="NavierStokesParameters"/>
           <xsl:apply-templates select="ProblemSpecification" mode ="AddFFTWParam"/>
-          <xsl:apply-templates select="NumericalSpecification/TimeIntegration/Timing" mode ="Parameters"/>
+          <xsl:apply-templates select="AdditionalParameters" mode ="NavierStokesParameters"/>
+          <xsl:apply-templates select="NumericalSpecification" mode ="Parameters"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="AddCFL"/>
           <xsl:apply-templates select="AdvancedParameters" mode ="Parameters"/>
           <xsl:apply-templates select="AdditionalParameters/CustomInputs/CustomParameter" mode ="AddParameter"/>

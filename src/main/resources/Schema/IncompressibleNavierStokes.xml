@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <ProblemSpecification>
+<!--   <ProblemSpecification>
     <libhpc:documentation>ProblemSpecification defines the descriptive parameters of a simulation.
     </libhpc:documentation>
     <Dimensions paramType="choice">
@@ -65,7 +65,7 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </ProblemSpecification>
+  </ProblemSpecification> -->
 
   <NumericalSpecification>
     <libhpc:documentation>
@@ -85,7 +85,7 @@
           <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>
         <Driver type="DNSDriverType" optional="true"/>
-        <Advection type="AdvectionType"/>
+        <Advection type="AdvectionType" optional="true"/>
       </DirectNumericalSimulation>
       <StabilityAnalysis>
         <TimeIntegration>
@@ -246,7 +246,7 @@
     <libhpc:documentation>
       Commonly used parameters can be found here.
     </libhpc:documentation>
-    <KinematicViscosity type="xs:string"/>
+<!--     <KinematicViscosity type="xs:string"/>
 
     <IOParams>
       <libhpc:documentation>
@@ -265,7 +265,7 @@
       </IO_InfoSteps>
     </IOParams>
 
-    <CustomInputs optional="true">
+ -->    <CustomInputs optional="true">
       <libhpc:documentation>
         Add custom expressions and parameters.
       </libhpc:documentation>
@@ -301,8 +301,7 @@
             <Frequency type="xs:string"/>
           </OutputFile>          
           <SampleFile optional="true">
-            <File type="fieldNameString" inputType="file">
-            </File>
+            <File type="fieldNameString" inputType="file" optional="true"/>
             <Frequency type="xs:string"/>
           </SampleFile>          
         </AverageFields>
@@ -451,7 +450,11 @@
         to be used for any implicit systems that are constructed.
       </libhpc:documentation>
       <MatrixInversion repeatable="true">
-        <Field type="xs:string"/>
+        <Field type="xs:string">
+          <libhpc:documentation>
+            Choose the field e.g. pressure (p) or velocity (u,v).
+          </libhpc:documentation>
+        </Field>
         <InversionType paramType="choice">
           <Direct>
             <SubStructuring type="xs:string"  inputType="choice">

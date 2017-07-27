@@ -94,6 +94,7 @@
             <NumSteps type="xs:string" optional="true"/>
             <FinalTime type="xs:string" optional="true"/>
           </Timing>
+          <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>
         <Driver type="StabilityDriverType" optional="true"/>
         <EvolutionOperator type="EvolutionType"/>

@@ -73,6 +73,33 @@
       </I>    
   </xsl:template>
 
+  <xsl:template match="Driver" mode="AddDriverParams">
+    <xsl:if test="Arpack/kdim">
+      <P> kdim = <xsl:value-of select="Arpack/kdim" /> </P>
+    </xsl:if>
+    <xsl:if test="Arpack/evtol">
+      <P> evtol = <xsl:value-of select="Arpack/evtol" /> </P>
+    </xsl:if>
+    <xsl:if test="Arpack/nvec">
+      <P> nvec = <xsl:value-of select="Arpack/nvec" /> </P>
+    </xsl:if>
+    <xsl:if test="Arpack/nits">
+      <P> nits = <xsl:value-of select="Arpack/nits" /> </P>
+    </xsl:if>
+    <xsl:if test="ModifiedArnoldi/kdim">
+      <P> kdim = <xsl:value-of select="ModifiedArnoldi/kdim" /> </P>
+    </xsl:if>
+    <xsl:if test="ModifiedArnoldi/evtol">
+      <P> evtol = <xsl:value-of select="ModifiedArnoldi/evtol" /> </P>
+    </xsl:if>
+    <xsl:if test="ModifiedArnoldi/nvec">
+      <P> nvec = <xsl:value-of select="ModifiedArnoldi/nvec" /> </P>
+    </xsl:if>
+    <xsl:if test="ModifiedArnoldi/nits">
+      <P> nits = <xsl:value-of select="ModifiedArnoldi/nits" /> </P>
+    </xsl:if>
+  </xsl:template>
+
   <xsl:template match="AdaptiveSFD" mode="AddSFDParams">
     <xsl:if test="kdim">
       <P> kdim = <xsl:value-of select="kdim" /> </P>

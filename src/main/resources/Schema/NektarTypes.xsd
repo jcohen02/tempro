@@ -179,7 +179,14 @@
   <xs:complexType name="StabilityDriverType">
     <xs:choice>
       <xs:element name="Standard"/>
-      <xs:element name="ModifiedArnoldi"/>
+      <xs:element name="ModifiedArnoldi">
+        <xs:complexType>
+          <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:complexType>  
+      </xs:element>
       <xs:element name="Arpack">
         <xs:simpleType>
           <xs:restriction base="xs:string">
@@ -191,6 +198,12 @@
             <xs:enumeration value="SmallestImag"/>
           </xs:restriction>
         </xs:simpleType>        
+        <xs:complexType>
+          <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:complexType>  
       </xs:element>
     </xs:choice>
   </xs:complexType>

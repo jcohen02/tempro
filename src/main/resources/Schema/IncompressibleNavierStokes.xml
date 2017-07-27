@@ -11,7 +11,7 @@
     http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf
   </libhpc:documentation>
   
-  <ProblemSpecification>
+<!--   <ProblemSpecification>
     <libhpc:documentation>ProblemSpecification defines the descriptive parameters of a simulation.
     </libhpc:documentation>
     <Dimensions paramType="choice">
@@ -65,7 +65,7 @@
         </Type>
       </Variable>
     </InitialConditions>
-  </ProblemSpecification>
+  </ProblemSpecification> -->
 
   <NumericalSpecification>
     <libhpc:documentation>
@@ -129,7 +129,7 @@
       </SteadyStateStability>
     </SimulationType>
 
-    <SolverType paramType="choice">
+<!--     <SolverType paramType="choice">
       <libhpc:documentation>
         DirectNumericalSimulation: for standard flow problems
         StabilityAnalysis: stability problems
@@ -240,14 +240,14 @@
         <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
         <tempss:item>CHEBYSHEV</tempss:item>
       </BasisType>
-    </Expansion>
+    </Expansion> -->
   </NumericalSpecification>
 
   <AdditionalParameters>
     <libhpc:documentation>
       Commonly used parameters can be found here.
     </libhpc:documentation>
-    <KinematicViscosity type="xs:string"/>
+<!--     <KinematicViscosity type="xs:string"/>
 
     <IOParams>
       <libhpc:documentation>
@@ -264,7 +264,7 @@
         <libhpc:documentation>Specify the interval in time steps between each 
         print out of the current solution time.</libhpc:documentation>
       </IO_InfoSteps>
-    </IOParams>
+    </IOParams> -->
 
     <CustomInputs optional="true">
       <libhpc:documentation>

@@ -337,6 +337,7 @@
     </xsl:if>
     <xsl:if test="SimulationType/StabilityAnalysis" >
       <xsl:apply-templates select="SimulationType/StabilityAnalysis/TimeIntegration/Timing" mode="Parameters"/>
+      <xsl:apply-templates select="SimulationType/StabilityAnalysis/Driver" mode="AddDriverParams"/>
     </xsl:if>
   </xsl:template>
 

@@ -229,7 +229,7 @@
     <I PROPERTY="SolverType">
       <xsl:attribute name="VALUE">
         <xsl:choose>
-          <xsl:when test="SolverType/CoupledLinearNS">CoupledLinearNS</xsl:when>
+          <xsl:when test="SolverType/CoupledLinearisedNS">CoupledLinearisedNS</xsl:when>
           <xsl:when test="SolverType/VelocityCorrectionScheme/Standard">VelocityCorrectionScheme</xsl:when>
           <xsl:when test="SolverType/VelocityCorrectionScheme/WeakPressure">VCSWeakPressure</xsl:when>
           <xsl:when test="SolverType/VelocityCorrectionScheme/Mapping">VCSMapping</xsl:when>
@@ -289,7 +289,7 @@
     <xsl:attribute name="TYPE"><xsl:value-of select="Expansion/BasisType"/></xsl:attribute>
     <xsl:attribute name="FIELDS">
       <xsl:choose>
-        <xsl:when test="//NumericalSpecification/SolverType/CoupledLinearNS">
+        <xsl:when test="//NumericalSpecification/SolverType/CoupledLinearisedNS">
           <xsl:choose>
             <xsl:when test="//ProblemSpecification/Dimensions/TwoDimensional">u,v</xsl:when>
             <xsl:when test="//ProblemSpecification/Dimensions/ThreeDimensional">u,v,w</xsl:when>

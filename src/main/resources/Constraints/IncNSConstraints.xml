@@ -22,16 +22,16 @@
 
       <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variable" name="Variable">
         <domain>
-          <value>CoupledLinearNS-2D</value>
+          <value>CoupledLinearisedNS-2D</value>
           <value>VelocityCorrectionScheme-2D</value>
-          <value>CoupledLinearNS-3D</value>
+          <value>CoupledLinearisedNS-3D</value>
           <value>VelocityCorrectionScheme-3D</value>
         </domain>
       </variable>              
 
       <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
-          <value>CoupledLinearNS</value>
+          <value>CoupledLinearisedNS</value>
           <value>VelocityCorrectionScheme</value>
         </domain>
       </variable>              
@@ -98,17 +98,17 @@
       <!-- Mapping of dimensions with boundary conditions -->
       <mapping variable="Dimensions" varvalue="TwoDimensional" targetVariable="Variable">
         <targetValue>VelocityCorrectionScheme-2D</targetValue>
-        <targetValue>CoupledLinearNS-2D</targetValue>
+        <targetValue>CoupledLinearisedNS-2D</targetValue>
       </mapping>
       <mapping variable="Dimensions" varvalue="ThreeDimensional" targetVariable="Variable">
         <targetValue>VelocityCorrectionScheme-3D</targetValue>
-        <targetValue>CoupledLinearNS-3D</targetValue>
+        <targetValue>CoupledLinearisedNS-3D</targetValue>
       </mapping>
 
       <!-- Mapping of boundary conditions with solvertype -->
-      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Variable">
-        <targetValue>CoupledLinearNS-2D</targetValue>
-        <targetValue>CoupledLinearNS-3D</targetValue>
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Variable">
+        <targetValue>CoupledLinearisedNS-2D</targetValue>
+        <targetValue>CoupledLinearisedNS-3D</targetValue>
       </mapping>
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Variable">
         <targetValue>VelocityCorrectionScheme-2D</targetValue>
@@ -139,7 +139,7 @@
         <targetValue>DiscontinuousGalerkin</targetValue>
         <targetValue>MixedGalerkin</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="Projection">
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>
       </mapping>
       
@@ -155,7 +155,7 @@
         <targetValue>BDFImplicitOrder1</targetValue>
         <targetValue>BDFImplicitOrder2</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="TimeIntegrationMethod">
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="TimeIntegrationMethod">
         <targetValue>NotProvided</targetValue>
       </mapping>
       <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="StabilityTimeIntegrationMethod">
@@ -169,7 +169,7 @@
         <targetValue>BDFImplicitOrder1</targetValue>
         <targetValue>BDFImplicitOrder2</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="CoupledLinearNS" targetVariable="StabilityTimeIntegrationMethod">
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="StabilityTimeIntegrationMethod">
         <targetValue>NotProvided</targetValue>
       </mapping>
 

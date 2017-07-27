@@ -244,8 +244,8 @@
             <xs:element name="Variable">
               <xs:complexType>
                 <xs:choice>
-                  <xs:element name="CoupledLinearNS-2D" type="CoupledLinearNS-2D"/>
-                  <xs:element name="CoupledLinearNS-3D" type="CoupledLinearNS-3D"/>
+                  <xs:element name="CoupledLinearisedNS-2D" type="CoupledLinearisedNS-2D"/>
+                  <xs:element name="CoupledLinearisedNS-3D" type="CoupledLinearisedNS-3D"/>
                   <xs:element name="VelocityCorrectionScheme-2D" type="VelocityCorrectionScheme-2D"/>
                   <xs:element name="VelocityCorrectionScheme-3D" type="VelocityCorrectionScheme-3D"/>
                 </xs:choice>
@@ -257,7 +257,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="CoupledLinearNS-2D">
+  <xs:complexType name="CoupledLinearisedNS-2D">
     <xs:element name="u-velocity" type="BoundaryType"/>
     <xs:element name="v-velocity" type="BoundaryType"/>
   </xs:complexType>
@@ -268,7 +268,7 @@
     <xs:element name="p-pressure" type="BoundaryType"/>
   </xs:complexType>
 
-  <xs:complexType name="CoupledLinearNS-3D">
+  <xs:complexType name="CoupledLinearisedNS-3D">
     <xs:element name="u-velocity" type="BoundaryType"/>
     <xs:element name="v-velocity" type="BoundaryType"/>
     <xs:element name="w-velocity" type="BoundaryType"/>

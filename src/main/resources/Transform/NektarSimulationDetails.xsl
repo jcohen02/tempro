@@ -143,21 +143,27 @@
   </xsl:template>
 
   <xsl:template match="TimeIntegrationMethod" mode="AddTiming">
-      <I PROPERTY="TimeIntegrationMethod">
-        <xsl:attribute name="VALUE">
-          <xsl:choose>
-            <xsl:when test="IMEXOrder1">IMEXOrder1</xsl:when>
-            <xsl:when test="IMEXOrder2">IMEXOrder2</xsl:when>
-            <xsl:when test="IMEXOrder3">IMEXOrder3</xsl:when>
-            <xsl:when test="DIRKOrder1">DIRKOrder1</xsl:when>
-            <xsl:when test="ForwardEuler">ForwardEuler</xsl:when>
-            <xsl:when test="BackwardEuler">BackwardEuler</xsl:when>
-            <xsl:when test="ClassicalRungeKutta4">ClassicalRungeKutta4</xsl:when>
-            <xsl:when test="BDFImplicitOrder1">BDFImplicitOrder1</xsl:when>
-            <xsl:when test="BDFImplicitOrder2">BDFImplicitOrder2</xsl:when>
-          </xsl:choose>
-        </xsl:attribute>
-      </I>    
+    <xsl:choose>
+      <xsl:when test="NotProvided">
+      </xsl:when>
+      <xsl:otherwise>
+        <I PROPERTY="TimeIntegrationMethod">
+          <xsl:attribute name="VALUE">
+            <xsl:choose>
+              <xsl:when test="IMEXOrder1">IMEXOrder1</xsl:when>
+              <xsl:when test="IMEXOrder2">IMEXOrder2</xsl:when>
+              <xsl:when test="IMEXOrder3">IMEXOrder3</xsl:when>
+              <xsl:when test="DIRKOrder1">DIRKOrder1</xsl:when>
+              <xsl:when test="ForwardEuler">ForwardEuler</xsl:when>
+              <xsl:when test="BackwardEuler">BackwardEuler</xsl:when>
+              <xsl:when test="ClassicalRungeKutta4">ClassicalRungeKutta4</xsl:when>
+              <xsl:when test="BDFImplicitOrder1">BDFImplicitOrder1</xsl:when>
+              <xsl:when test="BDFImplicitOrder2">BDFImplicitOrder2</xsl:when>
+            </xsl:choose>
+          </xsl:attribute>
+        </I>    
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
 </xsl:stylesheet>

@@ -69,14 +69,14 @@
       <xsl:attribute name="REF"><xsl:value-of select="BoundaryConditionReference"/></xsl:attribute>
       <!-- <xsl:apply-templates select="Variable" mode ="BCVariable"/> -->
       <xsl:choose>
-        <xsl:when  test="Variable/CoupledLinearNS-2D">
-          <xsl:apply-templates select="Variable/CoupledLinearNS-2D/u-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/CoupledLinearNS-2D/v-velocity" mode ="BCVariable"/>
+        <xsl:when  test="Variable/CoupledLinearisedNS-2D">
+          <xsl:apply-templates select="Variable/CoupledLinearisedNS-2D/u-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/CoupledLinearisedNS-2D/v-velocity" mode ="BCVariable"/>
         </xsl:when>
-        <xsl:when  test="Variable/CoupledLinearNS-3D">
-          <xsl:apply-templates select="Variable/CoupledLinearNS-3D/u-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/CoupledLinearNS-3D/v-velocity" mode ="BCVariable"/>
-          <xsl:apply-templates select="Variable/CoupledLinearNS-3D/w-velocity" mode ="BCVariable"/>
+        <xsl:when  test="Variable/CoupledLinearisedNS-3D">
+          <xsl:apply-templates select="Variable/CoupledLinearisedNS-3D/u-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/CoupledLinearisedNS-3D/v-velocity" mode ="BCVariable"/>
+          <xsl:apply-templates select="Variable/CoupledLinearisedNS-3D/w-velocity" mode ="BCVariable"/>
         </xsl:when>
         <xsl:when  test="Variable/VelocityCorrectionScheme-2D">
           <xsl:apply-templates select="Variable/VelocityCorrectionScheme-2D/u-velocity" mode ="BCVariable"/>

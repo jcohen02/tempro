@@ -135,8 +135,8 @@
         StabilityAnalysis: stability problems
         SteadyStateStability: steady state stability problems
       </libhpc:documentation>
-      <CoupledLinearNS>
-      </CoupledLinearNS>
+      <CoupledLinearisedNS>
+      </CoupledLinearisedNS>
       <VelocityCorrectionScheme paramType="choice">
         <Standard></Standard>
         <WeakPressure></WeakPressure>

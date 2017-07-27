@@ -228,6 +228,9 @@
         <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
           <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
         </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'HOutflow'">
+          <xsl:attribute name="USERDEFINEDTYPE">HOutflow</xsl:attribute>
+        </xsl:if>
         <xsl:if test="UserDefinedType/ExistingType = 'MovingBody'">
           <xsl:attribute name="USERDEFINEDTYPE">MovingBody</xsl:attribute>
         </xsl:if>
@@ -273,6 +276,9 @@
       <xsl:when test="UserDefinedType/ExistingType">
         <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
           <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="UserDefinedType/ExistingType = 'HOutflow'">
+          <xsl:attribute name="USERDEFINEDTYPE">HOutflow</xsl:attribute>
         </xsl:if>
         <xsl:if test="UserDefinedType/ExistingType = 'MovingBody'">
           <xsl:attribute name="USERDEFINEDTYPE">MovingBody</xsl:attribute>

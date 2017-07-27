@@ -318,9 +318,10 @@
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:enumeration value="HighOrderPressure"/>
+                    <xs:enumeration value="HOutflow"/>
                     <xs:enumeration value="MovingBody"/>
-                    <xs:enumeration value="TimeDependent"/>
                     <xs:enumeration value="Radiation"/>
+                    <xs:enumeration value="TimeDependent"/>
                     <xs:enumeration value="Wormesley"/>
                   </xs:restriction>
                 </xs:simpleType>
@@ -373,9 +374,10 @@
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:enumeration value="HighOrderPressure"/>
+                    <xs:enumeration value="HOutflow"/>
                     <xs:enumeration value="MovingBody"/>
-                    <xs:enumeration value="TimeDependent"/>
                     <xs:enumeration value="Radiation"/>
+                    <xs:enumeration value="TimeDependent"/>
                     <xs:enumeration value="Wormesley"/>
                   </xs:restriction>
                 </xs:simpleType>

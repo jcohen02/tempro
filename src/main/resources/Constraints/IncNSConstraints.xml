@@ -121,6 +121,8 @@
         <targetValue>UnsteadyStokes</targetValue>
       </mapping>
       <mapping variable="SimulationType" varvalue="StabilityAnalysis" targetVariable="Equation">
+        <targetValue>UnsteadyNavierStokes</targetValue>
+        <targetValue>UnsteadyStokes</targetValue>
         <targetValue>SteadyOseen</targetValue>
         <targetValue>SteadyStokes</targetValue>
         <targetValue>SteadyLinearisedNavierStokes</targetValue>

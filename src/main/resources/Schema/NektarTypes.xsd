@@ -148,7 +148,7 @@
       <xs:element name="ClassicalSFD">
         <xs:complexType>
           <xs:element name="ControlCoefficient" type="xs:string"/>
-          <xs:element name="FilterWidth" type="xs:string"/>
+          <xs:element name="FilterWidth" type="xs:string"/>http://localhost:8080/tempss/profiles/
           <xs:element name="Tolerance" type="xs:string"/>
         </xs:complexType>  
       </xs:element>
@@ -188,17 +188,19 @@
         </xs:complexType>  
       </xs:element>
       <xs:element name="Arpack">
-        <xs:simpleType>
-          <xs:restriction base="xs:string">
-            <xs:enumeration value="LargestMag"/>
-            <xs:enumeration value="SmallestMag"/>
-            <xs:enumeration value="LargestReal"/>
-            <xs:enumeration value="SmallestReal"/>
-            <xs:enumeration value="LargestImag"/>
-            <xs:enumeration value="SmallestImag"/>
-          </xs:restriction>
-        </xs:simpleType>        
         <xs:complexType>
+          <xs:element name="ArpackType">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="LargestMag"/>
+                <xs:enumeration value="SmallestMag"/>
+                <xs:enumeration value="LargestReal"/>
+                <xs:enumeration value="SmallestReal"/>
+                <xs:enumeration value="LargestImag"/>
+                <xs:enumeration value="SmallestImag"/>
+              </xs:restriction>
+            </xs:simpleType>        
+          </xs:element>
           <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
           <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
           <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>

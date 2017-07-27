@@ -42,16 +42,16 @@
   </xsl:template>
 
   <xsl:template match="Driver" mode="AddArpackType">
-    <xsl:if test="Arpack">
+    <xsl:if test="Arpack/ArpackType">
       <I PROPERTY="ArpackProblemType">
         <xsl:attribute name="VALUE">
           <xsl:choose>
-              <xsl:when test="Arpack = 'LargestMag'">LargestMag</xsl:when>
-              <xsl:when test="Arpack = 'SmallestMag'">SmallestMag</xsl:when>
-              <xsl:when test="Arpack = 'LargestReal'">LargestReal</xsl:when>
-              <xsl:when test="Arpack = 'SmallestReal'">SmallestReal</xsl:when>
-              <xsl:when test="Arpack = 'LargestImag'">LargestImag</xsl:when>
-              <xsl:when test="Arpack = 'SmallestImag'">SmallestImag</xsl:when>
+              <xsl:when test="Arpack/ArpackType = 'LargestMag'">LargestMag</xsl:when>
+              <xsl:when test="Arpack/ArpackType = 'SmallestMag'">SmallestMag</xsl:when>
+              <xsl:when test="Arpack/ArpackType = 'LargestReal'">LargestReal</xsl:when>
+              <xsl:when test="Arpack/ArpackType = 'SmallestReal'">SmallestReal</xsl:when>
+              <xsl:when test="Arpack/ArpackType = 'LargestImag'">LargestImag</xsl:when>
+              <xsl:when test="Arpack/ArpackType = 'SmallestImag'">SmallestImag</xsl:when>
           </xsl:choose>
         </xsl:attribute>
       </I>        

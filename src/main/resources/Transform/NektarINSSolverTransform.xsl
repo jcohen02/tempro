@@ -727,12 +727,12 @@
   </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">
-    <xsl:if test="VariableName">
+    <xsl:if test="Field">
         <xsl:choose>
           <xsl:when test="Type/Expression">
             <E> 
               <xsl:attribute name="VAR">
-                <xsl:value-of select="VariableName"/>
+                <xsl:value-of select="Field"/>
               </xsl:attribute>
               <xsl:attribute name="VALUE">
                 <xsl:value-of select="Type/Expression"/>

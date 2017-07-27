@@ -57,7 +57,7 @@
     <InitialConditions optional="true">
       <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
       <Variable repeatable="true">
-        <VariableName type="xs:string"/>
+        <Field type="xs:string"/>
         <Type paramType="choice">
           <Expression type="xs:string" />
           <File type="inputNameString" inputType="file">
@@ -109,7 +109,7 @@
             </Type>
           </Variable>
         </BaseFlow>
-        <ModeType type="ModeType"/>
+        <ModeType type="ModeType" optional="true"/>
       </StabilityAnalysis>
       <SteadyStateStability>
         <Driver type="SteadyStateDriverType" optional="true"/>
@@ -125,7 +125,7 @@
             </Type>
           </Variable>
         </BaseFlow>
-        <ModeType type="ModeType"/>
+        <ModeType type="ModeType" optional="true"/>
       </SteadyStateStability>
     </SimulationType>
 

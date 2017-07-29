@@ -342,8 +342,8 @@
   </xsl:template>
 
   <xsl:template match="Timing" mode ="Parameters">
-    <xsl:if test="FinalTime">
-      <P>FinTime = <xsl:value-of select="FinalTime"/></P>
+    <xsl:if test="FinTime">
+      <P>FinTime = <xsl:value-of select="FinTime"/></P>
     </xsl:if>
     <xsl:if test="TimeStep">
       <P>TimeStep = <xsl:value-of select="TimeStep"/></P>

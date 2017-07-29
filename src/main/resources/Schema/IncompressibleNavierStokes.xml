@@ -80,7 +80,7 @@
           <Timing>
             <TimeStep type="xs:string" optional="true"/>
             <NumSteps type="xs:string" optional="true"/>
-            <FinalTime type="xs:string" optional="true"/>
+            <FinTime type="xs:string" optional="true"/>
           </Timing>
           <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>
@@ -92,7 +92,7 @@
           <Timing>
             <TimeStep type="xs:string" optional="true"/>
             <NumSteps type="xs:string" optional="true"/>
-            <FinalTime type="xs:string" optional="true"/>
+            <FinTime type="xs:string" optional="true"/>
           </Timing>
           <TimeIntegrationMethod type="TimingType"/>
         </TimeIntegration>

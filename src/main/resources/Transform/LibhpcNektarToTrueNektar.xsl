@@ -141,7 +141,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:if test="TimeStep='0'">    
     <P>CFL = <xsl:value-of select="CFL"/></P>
     </xsl:if>
-    <P>FinTime = <xsl:value-of select="FinalTime"/></P>
+    <P>FinTime = <xsl:value-of select="FinTime"/></P>
   </xsl:template>
 
   <xsl:template match="NumericalAlgorithm" mode ="Parameters">

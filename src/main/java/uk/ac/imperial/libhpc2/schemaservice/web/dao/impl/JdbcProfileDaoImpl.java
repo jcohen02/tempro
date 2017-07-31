@@ -91,6 +91,12 @@ public class JdbcProfileDaoImpl implements ProfileDao {
 	}
 	
 	@Override
+	public int update(Profile pProfile) {
+		int rowsAffected = _jdbcTemplate.update("UPDATE profile SET profileXml = ? WHERE name = ? and templateId = ? and owner = ?", pProfile.getProfileXml(), pProfile.getName(), pProfile.getTemplateId(), pProfile.getOwner());
+		return rowsAffected;
+	}
+	
+	@Override
 	public int delete(String pTemplateId, String pProfileName, 
 			          TempssUser pUser) {
 

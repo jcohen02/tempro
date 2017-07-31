@@ -324,78 +324,6 @@ function disableGenerateInputButton(disable) {
     }
 }
 
-// Given a profile name entered by the user into a modal
-// pop up, save the profile, relating to the specified
-// template.
-function saveProfile(templateId, profileName) {
-    log('Request to save profile <' + profileName + '> for template <' + templateId + '>.');
-    var profileData = $templateContainer.data(treePluginName).getXmlProfile();
-    var profilePublic = $('#profile-public').prop('checked');
-	var csrfToken = $('input[name="_csrf"]').val();
-	var profileObject = {profile:profileData, profilePublic:profilePublic};
-    $("#profile-saving").show();
-    // Clear any existing error text
-    $('#profile-save-errors').html("");
-       
-	var saveProfileCall = $.ajax({
-        method:   'POST',
-        url:      '/tempss/api/profile/' + templateId + '/' + profileName,
-        dataType: 'json',
-        contentType: 'application/json',
-        beforeSend: function(jqxhr, settings) {
-        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
-        },
-        data:     JSON.stringify(profileObject)
-	});
-
-    saveProfileCall.then(
-	    // Success function
-	    function(data) {
-	        // Check if save succeeded
-	        if (data.status == 'OK') {
-	            // Close the modal and update the profile list since
-	            //save completed successfully.
-	            $('#save-profile-modal').modal('hide');
-	            updateProfileList(templateId);
-	        } else {
-	            $('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
-	        }
-	        $("#profile-saving").hide();
-	    },
-	    // Error function
-	    function(data) {
-	        var result = $.parseJSON(data.responseText);
-	        if (result.status == 'ERROR') {
-	            // Some error occurred, show the error message in the modal
-	            var errorText = "";
-	            switch(result.code) {
-	                case 'INVALID_TEMPLATE':
-	                    errorText = "An invalid template identifier has been specified.";
-	                    break;
-	                case 'PROFILE_NAME_EXISTS':
-	                    errorText = "The specified profile name already exists.";
-	                    break;
-	                case 'REQUEST_DATA':
-	                    errorText = "The JSON request data provided is invalid.";
-	                    break;
-	                case 'RESPONSE_DATA':
-	                    errorText = "Unable to prepare JSON response data. Profile may have saved successfully";
-	                    break;
-	                case 'PERMISSION_DENIED':
-	                    errorText = result.error;
-	                    break;
-	                default:
-	                    errorText = "An unknown error has occurred.";
-	            }
-	            $('#profile-save-errors').html("<h6>Unable to save profile: " + errorText + "</h6>");
-	        } else {
-	            $('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
-	        }
-	        $("#profile-saving").hide();
-	    }
-	);
-}
-
 // Before loading the profile, we need to clear any existing loaded  
 // profile from the tree and check that the user is happy with this.
 // Use the same approach as when loading a new tree - check that the current
@@ -477,6 +405,10 @@ function loadProfile(templateId, profileId) {
                     if ($('ul[role=tree]').hasClass('valid')) {
                         $('ul[role=tree]').trigger('nodeValid', $('ul[role=tree]'));
                     }
+                    // Add the saved data tag to the template-container node 
+                    // so that we get a prompt to overwrite the template when 
+                    // saving.
+                    $templateContainer.data('saved', true);
                 } else {
                     //$('#profile-delete-errors').html("<h6>An unknown error has occurred while trying to delete the profile.</h6>");
                 }
@@ -979,8 +911,9 @@ function getNodeFromPath(path, $rootNode) {
 }
 
 // Utility function for displaying log messages
-function log(message) {
+window.log = function(message) {
     if(console && console.log) {
         console.log(message);
     }
 }
+var log = window.log;

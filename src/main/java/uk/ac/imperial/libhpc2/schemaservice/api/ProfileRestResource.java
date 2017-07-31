@@ -87,10 +87,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -100,7 +97,6 @@ import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
-import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 /**
  * Jersey REST class representing the profile endpoint
@@ -296,7 +292,7 @@ public class ProfileRestResource {
             @PathParam("newState") String newState,
             @Context HttpServletRequest pRequest) {
     	
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
@@ -363,7 +359,7 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
@@ -421,7 +417,7 @@ public class ProfileRestResource {
         @RequestBody String profileJson,
         @Context HttpServletRequest pRequest) {
 
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	// Check that the user is authenticated
 		if(user == null) {
@@ -442,21 +438,9 @@ public class ProfileRestResource {
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
 		
-		// Now check if the specified profile name already exists
-		try {
-			if(!profileDao.profileNameAvailable(profileName, user)) {
-				String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
-						"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
-				return Response.status(Status.CONFLICT).entity(responseText).build();
-			}
-		} catch(AuthenticationException e) {
-			String responseText = "{\"status\":\"ERROR\", \"code\":\"AUTHENTICATION_REQUIRED\", \"error\":" +
-					"\"You must be authenticated to check if a profile name exists.\"}";
-			return Response.status(Status.FORBIDDEN).entity(responseText).build();
-		}
-
     	String profileXml = "";
     	int profilePublic = 0;
+    	boolean profileOverwrite = false;
     	JSONObject jsonResponse = new JSONObject();
  
     	// Get the profile XML string from the incoming request data
@@ -466,12 +450,29 @@ public class ProfileRestResource {
 			if(profileObj.getBoolean("profilePublic")) {
 				profilePublic = 1;
 			}
+			profileOverwrite = profileObj.getBoolean("profileOverwrite");
 			sLog.debug("Handling save request for profile name <" + profileName + "> for template <" 
 					  + templateId + "> with public flag <" + profilePublic + ">:\n" + profileXml);
 		} catch (JSONException e) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"REQUEST_DATA\", \"error\":\"" + e.getMessage() + "\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
+		
+		// Now check if the specified profile name already exists
+		if(!profileOverwrite) {
+			try {
+				if(!profileDao.profileNameAvailable(profileName, user)) {
+					String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
+							"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
+					return Response.status(Status.CONFLICT).entity(responseText).build();
+				}
+			} catch(AuthenticationException e) {
+				String responseText = "{\"status\":\"ERROR\", \"code\":\"AUTHENTICATION_REQUIRED\", \"error\":" +
+						"\"You must be authenticated to check if a profile name exists.\"}";
+				return Response.status(Status.FORBIDDEN).entity(responseText).build();
+			}
+		}
+
     			
 		Map<String, Object> profileData = new HashMap<String,Object>();
 		profileData.put("name", profileName);
@@ -480,7 +481,12 @@ public class ProfileRestResource {
 		profileData.put("public", profilePublic);
 		profileData.put("owner", user.getUsername());
 		Profile profile = new Profile(profileData);
-		profileDao.add(profile);
+		if(profileOverwrite) {
+			profileDao.update(profile);
+		}
+		else {
+			profileDao.add(profile);
+		}
 		sLog.info("The value of profileDao is: " + profileDao);
 		
 		try {
@@ -517,7 +523,7 @@ public class ProfileRestResource {
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	// Check that the user is authenticated
 		if(user == null) {
@@ -591,7 +597,7 @@ public class ProfileRestResource {
     public Response getProfileNamesJson(
     		@PathParam("templateId") String pTemplateId) {
 
-		TempssUser user = getAuthenticatedUser();
+		TempssUser user = ApiUtils.getAuthenticatedUser();
 		
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	JSONArray profileArray = new JSONArray();
@@ -640,7 +646,7 @@ public class ProfileRestResource {
     public Response getProfileNamesText(
     		@PathParam("templateId") String pTemplateId) {
 
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	StringBuilder profileNames = new StringBuilder();
@@ -702,25 +708,5 @@ public class ProfileRestResource {
 				header("Content-Disposition", cd).
 				header("Content-Type", "application/xml").
 				cookie(c).entity(so).build();
-    }
-    
-    /**
-     * Get the details of the currently authenticated user.
-     *  
-     * @return null if no user is authenticated or the TempssUser object of the
-     *         authenticated user if a user is logged in.
-     */
-    private TempssUser getAuthenticatedUser() {
-    	Authentication authToken = 
-    			SecurityContextHolder.getContext().getAuthentication();
-    	
-    	TempssUserDetails userDetails = null;
-		TempssUser user = null;
-		if( (authToken != null) && !(authToken instanceof AnonymousAuthenticationToken) ) {
-			userDetails = (TempssUserDetails) authToken.getPrincipal();
-			user = userDetails.getUser();
-		}
-		
-		return user;
-    }
+    }  
 }

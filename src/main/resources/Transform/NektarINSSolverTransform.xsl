@@ -636,7 +636,7 @@
         <PARAM NAME="OutputFile"><xsl:value-of select="AeroForces/OutputFile/FileName"/></PARAM>
         <PARAM NAME="OutputFrequency"><xsl:value-of select="AeroForces/OutputFile/Frequency"/></PARAM>
       </xsl:if>
-      <PARAM NAME="Boundary"><xsl:value-of select="AeroForces/Boundary"/></PARAM>
+      <PARAM NAME="Boundary">B[<xsl:value-of select="AeroForces/Boundary"/>]</PARAM>
     </xsl:if>
     <xsl:if test="AverageFields">
       <xsl:if test="AverageFields/OutputFile">

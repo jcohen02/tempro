@@ -302,7 +302,11 @@
             <FileName type="xs:string"/>
             <Frequency type="xs:string"/>
           </OutputFile>
-          <Boundary type="xs:string"/>        
+          <Boundary type="xs:string">        
+            <libhpc:documentation>
+              List boundarie(s) sequentially, i.e. for boundary 1 and 2: 1, 2.
+            </libhpc:documentation>
+          </Boundary>
         </AeroForces>
         <AverageFields>
           <OutputFile optional="true">

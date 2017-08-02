@@ -7,6 +7,7 @@
 {% block style %}
 <link rel="stylesheet" href="../assets/css/tree-style.css" media="all" />
 <link rel="stylesheet" href="../assets/lib/css/font-awesome.min.css">
+<link rel="stylesheet" href="../assets/lib/css/jquery.fileupload.css">
 {% endblock style %}
 
 {% block content %}
@@ -14,21 +15,40 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="well">
-			  <h3 style="padding-bottom: 20px;">Templates</h3>
-				<form class="form-horizontal">
-				  <div class="form-group">
-				    <label for="template-select" class="col-sm-2 control-label">Available templates:</label>
-				    <div class="col-sm-8">
-				      <select class="form-control" id="template-select">
-					    <option value="NONE">Select a template...</option>
-					  </select>
-				    </div>
-				    <div class="col-sm-2 loading" id="template-loading" style="display:none;">
-				      <img src="../assets/img/loading.gif"/>
-				      <span>Loading template list...</span>
-				    </div>
-				  </div>
-			    </form>
+			  <div class="container">
+			    <div class="row">
+			      <div class="col-md-6">
+			        <h3 style="padding-bottom: 20px;">Templates</h3>
+			      </div>
+			      <div id="add-template-text" class="col-md-6" style="right: -30px; margin-top:20px; {% if user == null %}display:none;{% endif %}">
+			        <span class="text-muted"><small>Add a new template to TemPSS or update an existing template: </small></span>
+			        <button id="add-template-init-btn" type="button" class="btn btn-xs btn-default">
+			          Add/Update Template
+			        </button>
+			      </div>
+			    </div>
+			    <div class="row">
+			      <div class="col-md-11">
+			        <form class="form-horizontal">
+			          <div class="form-group">
+			            <label for="template-select" class="col-sm-2 control-label">Available templates:</label>
+			            <div class="col-sm-8">
+			              <select class="form-control" id="template-select">
+			                <option value="NONE">Select a template...</option>
+			              </select>
+			            </div>
+			            <div class="col-sm-2 loading" id="template-loading" style="display:none;">
+			              <img src="../assets/img/loading.gif"/>
+			              <span>Loading template list...</span>
+			            </div>
+			          </div>
+			        </form>
+			      </div>
+			    </div>
+			    <div class="row">
+			      
+			    </div>
+			  </div>
 			</div>
 		</div>
 	</div>
@@ -332,9 +352,52 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="add-template-modal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Add / Update Template</h4>
+      </div>
+      <div class="modal-body">
+        <p>Here you can upload a new template or update an existing template.</p>
+        <p>You will need to upload an XML template definition file below.</p>
+        <form id="add-template-form">
+          <div class="form-group">
+            <label for="templateNewName">Template name</label>
+            <input type="text" class="form-control" id="templateNewName" placeholder="New template name">
+          </div>
+            OR
+          <div class="form-group">
+            <label for="templateCurrentName">Select existing template to update</label>
+            <select id="templateCurrentName" class="form-control">
+            
+            </select>
+          </div>
+          <div class="form-group">
+            <span class="btn btn-primary fileinput-button">
+              <i class="glyphicon glyphicon-plus"></i>
+              <span>Select file...</span>
+              <input id="fileupload" type="file" name="files[]">
+            </span>
+            <span id="template-filename-text" style="padding-left: 20px;"></span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        <button id="add-template-btn" type="button" class="btn btn-success">Add template</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 {% endblock modals %}
 
 {% block script %}
+<script type="text/javascript" src="../assets/lib/js/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="../assets/lib/js/jquery.iframe-transport.js"></script>
+<script type="text/javascript" src="../assets/lib/js/jquery.fileupload.js"></script>
 <script type="text/javascript" src="../assets/lib/js/jquery.fileDownload.js"></script>
 <script type="text/javascript" src="../assets/js/bootstrap-tree.js"></script>
 <script type="text/javascript" src="../assets/js/libhpc-parameter-tree.js"></script>

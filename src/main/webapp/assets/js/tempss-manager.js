@@ -824,7 +824,7 @@ function handleAjaxLogin(e, modalSource) {
 			else {
 				$('#navbar .dropdown-toggle').dropdown('toggle');	
 			}
-			
+			$('body').trigger('loginsuccess');
 		}
 	}).fail(function(jqXHR, textStatus, errorThrown) {
 		log('Error logging user in....');

@@ -242,6 +242,25 @@
         	$('#add-template-modal').modal('show');
         });
         
+        // This is the initial handler for the add template button. This is 
+        // removed when a file is selected and a new click handler is added to 
+        // submit the form with the file and form data.
+        $('#add-template-btn').on('click', function(e) {
+        	swal(
+        		"Add Template Form Incomplete",
+        		"You have not selected a file for your new/updated template. " +
+        		"You must select a template or provide a name and select a " + 
+        		"file before the form can be submitted.",
+        		"error"
+        	);
+        })
+        
+        // Pickup the loginsuccess event triggered on the body element and use 
+        // this to display the add template text
+        $('body').on('loginsuccess', function() {
+        	userLoginSuccessful();
+        });
+        
         // Set up the keepalive call to run periodically to main an 
         // active session
         setInterval(function() {
@@ -253,8 +272,58 @@
 				log("Keep alive request FAILED at: " + time.toLocaleString());
 			});
 		}, 1000 * KEEP_ALIVE_FREQUENCY);
-        	
+        
+        // Configuration for the fileupload plugin. We don't want to upload 
+        // the selected file as soon as the user selects it (triggering the 
+        // done call). Instead we want to wait until the form is completed and 
+        // then upload the form data and the file all together.
+        $('#fileupload').fileupload({
+        	// Need to send the CSRF token with the request
+        	beforeSend: function(xhr, settings) {
+        		xhr.setRequestHeader("X-CSRFToken", $('#input[name="_csrf"]').val());
+        	},
+        	url: '/tempss/api/template/upload',
+        	dataType: 'json',
+        	autoUpload: false,
+        	// Upload requires access to the file object for the selected file.
+        	// We can only get this when this function is called so we set up 
+        	// a closure passing the data to the handler function when the 
+        	// form submit button is clicked. 
+        	add: function(e, data) {
+        		log("Fileupload add callback triggered...");
+        		// Get the name of the selected file and display it next to 
+        		// the button. Then set up the handler function. We need to 
+        		// cancel any existing handler function set for a previously 
+        		// selected file and add a new one for this selection.
+        		var fn = data.files.length ? data.files[0].name : "";
+        		$('#template-filename-text').text(fn);
+        		$('#add-template-btn').off('click').on('click', function(e) {
+        			submitAddTemplateForm(e, data);
+        		});
+        	},
+        	done: function(e, data) {
+        		log("Fileupload done callback triggered...");
+        	}
+        })
 	});
+	
+	/**
+	 * Called when the "Add Template" button on the add template modal is 
+	 * clicked. The e and data parameters are passed based on the closure set 
+	 * up when the user added a file. 
+	 */
+	function submitAddTemplateForm(e, data) {
+		e.preventDefault();
+		var templateNewName = $('#templateNewName').val();
+		var templateCurrentName = $('#templateCurrentName').find("option:selected").val();
+		
+		log('Add template form submitted with new name [' + templateNewName + 
+				'], existing name [' + templateCurrentName + '] and selected' +
+				' file name [' + data.files[0].name + ']');
+		
+		//log('Request to add a new template with name [' + name + '] and ' +
+		//		'file [' + data.files[0].name + ']');
+	}
 	
 	function saveProfileNewClicked(e) {
 		$('#save-existing-modal').modal('hide');
@@ -364,6 +433,10 @@
 		        $("#profile-saving").hide();
 		    }
 		);
+	}
+	
+	function userLoginSuccessful() {
+		$('#add-template-text').show();
 	}
 	
 }(window.jQuery, document, window, window.log));

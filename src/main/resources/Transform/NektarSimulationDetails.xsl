@@ -64,7 +64,7 @@
           <xsl:choose>
             <xsl:when test="Direct">Direct</xsl:when>
             <xsl:when test="Adjoint">Adjoint</xsl:when>
-            <xsl:when test="NonLinear">NonLinear</xsl:when>
+            <xsl:when test="NonLinear">Nonlinear</xsl:when>
             <xsl:when test="SkewSymmetric">SkewSymmetric</xsl:when>
             <xsl:when test="TransientGrowth">TransientGrowth</xsl:when>
             <xsl:when test="AdaptiveSFD">AdaptiveSFD</xsl:when>

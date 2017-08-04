@@ -591,39 +591,39 @@
     <xsl:if test="FilterType">
       <FILTER>
         <xsl:if test="FilterType/AeroForces">
-          <xsl:attribute name="NAME">AeroForces</xsl:attribute>
+          <xsl:attribute name="TYPE">AeroForces</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/AverageFields">
-          <xsl:attribute name="NAME">AverageFields</xsl:attribute>
+          <xsl:attribute name="TYPE">AverageFields</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Checkpoint">
-          <xsl:attribute name="NAME">Checkpoint</xsl:attribute>
+          <xsl:attribute name="TYPE">Checkpoint</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Energy">
-          <xsl:attribute name="NAME">ModalEnergy</xsl:attribute>
+          <xsl:attribute name="TYPE">ModalEnergy</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/HistoryPoints">
-          <xsl:attribute name="NAME">HistoryPoints</xsl:attribute>
+          <xsl:attribute name="TYPE">HistoryPoints</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/MovingAverage">
-          <xsl:attribute name="NAME">MovingAverage</xsl:attribute>
+          <xsl:attribute name="TYPE">MovingAverage</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/ReynoldStresses">
-          <xsl:attribute name="NAME">ReynoldStresses</xsl:attribute>
+          <xsl:attribute name="TYPE">ReynoldStresses</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Threshold/Minimum">
-          <xsl:attribute name="NAME">ThresholdMin</xsl:attribute>
+          <xsl:attribute name="TYPE">ThresholdMin</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Threshold/Maximum">
-          <xsl:attribute name="NAME">ThresholdMax</xsl:attribute>
+          <xsl:attribute name="TYPE">ThresholdMax</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
       </FILTER>
@@ -840,7 +840,9 @@
       </CONDITIONS>
 
       <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
-      <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
+      <FILTER>
+        <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
+      </FILTER>
       <xsl:apply-templates select="NumericalSpecification" mode ="AddMap"/>  
       
       <!-- Copy in the geometry -->

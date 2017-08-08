@@ -603,19 +603,23 @@
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Energy">
-          <xsl:attribute name="TYPE">ModalEnergy</xsl:attribute>
+          <xsl:attribute name="TYPE">Energy</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/HistoryPoints">
           <xsl:attribute name="TYPE">HistoryPoints</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
+        <xsl:if test="FilterType/ModalEnergy">
+          <xsl:attribute name="TYPE">ModalEnergy</xsl:attribute>
+          <xsl:apply-templates select="FilterType" mode ="AddParams"/>
+        </xsl:if>
         <xsl:if test="FilterType/MovingAverage">
           <xsl:attribute name="TYPE">MovingAverage</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
-        <xsl:if test="FilterType/ReynoldStresses">
-          <xsl:attribute name="TYPE">ReynoldStresses</xsl:attribute>
+        <xsl:if test="FilterType/ReynoldsStresses">
+          <xsl:attribute name="TYPE">ReynoldsStresses</xsl:attribute>
           <xsl:apply-templates select="FilterType" mode ="AddParams"/>
         </xsl:if>
         <xsl:if test="FilterType/Threshold/Minimum">
@@ -637,6 +641,9 @@
         <PARAM NAME="OutputFrequency"><xsl:value-of select="AeroForces/OutputFile/Frequency"/></PARAM>
       </xsl:if>
       <PARAM NAME="Boundary">B[<xsl:value-of select="AeroForces/Boundary"/>]</PARAM>
+      <xsl:if test="AeroForces/Directions">
+        <xsl:apply-templates select="AeroForces/Directions" mode ="AddDirections"/>
+      </xsl:if>
     </xsl:if>
     <xsl:if test="AverageFields">
       <xsl:if test="AverageFields/OutputFile">
@@ -662,7 +669,7 @@
         <PARAM NAME="OutputFrequency"><xsl:value-of select="Energy/OutputFile/Frequency"/></PARAM>
       </xsl:if>
     </xsl:if>
-    <xsl:if test="HistoryPoints">
+    <xsdl:if test="HistoryPoints">
       <xsl:if test="HistoryPoints/OutputFile">
         <PARAM NAME="OutputFile"><xsl:value-of select="HistoryPoints/OutputFile/FileName"/></PARAM>
         <PARAM NAME="OutputFrequency"><xsl:value-of select="HistoryPoints/OutputFile/Frequency"/></PARAM>
@@ -671,6 +678,12 @@
         <xsl:apply-templates select="HistoryPoints/Points" mode ="AddHistPoints"/>
         <xsl:value-of select="concat( '&#160;', '&#xA;' )"/>
       </PARAM>
+    </xsl:if>
+    <xsl:if test="ModalEnergy">
+      <xsl:if test="ModalEnergy/OutputFile">
+        <PARAM NAME="OutputFile"><xsl:value-of select="ModalEnergy/OutputFile/FileName"/></PARAM>
+        <PARAM NAME="OutputFrequency"><xsl:value-of select="ModalEnergy/OutputFile/Frequency"/></PARAM>
+      </xsl:if>
     </xsl:if>
     <xsl:if test="MovingAverage">
       <xsl:if test="MovingAverage/OutputFile">
@@ -725,6 +738,13 @@
 
   <xsl:template match="Points" mode ="AddHistPoints">
     <xsl:value-of select="concat( '&#xA;', '&#160;', '&#160;', X, '&#160;', Y, '&#160;', Z, '&#160;')"/>
+  </xsl:template>
+
+  <xsl:template match="AeroForces/Directions" mode ="AddDirections">
+    <PARAM>
+      <xsl:attribute name="NAME"><xsl:value-of select="Name"/></xsl:attribute>
+      <xsl:value-of select="Value"/>
+    </PARAM>
   </xsl:template>
 
   <xsl:template match="Variable" mode ="InitialConditionVars">
@@ -840,9 +860,9 @@
       </CONDITIONS>
 
       <xsl:apply-templates select="AdditionalParameters/Force" mode ="AddForces"/>
-      <FILTER>
+      <FILTERS>
         <xsl:apply-templates select="AdditionalParameters/Filter" mode ="AddFilters"/>
-      </FILTER>
+      </FILTERS>
       <xsl:apply-templates select="NumericalSpecification" mode ="AddMap"/>  
       
       <!-- Copy in the geometry -->

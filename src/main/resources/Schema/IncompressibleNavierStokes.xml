@@ -307,6 +307,10 @@
               List boundarie(s) sequentially, i.e. for boundary 1 and 2: 1, 2.
             </libhpc:documentation>
           </Boundary>
+          <Directions repeatable="true" optional="true">
+            <Name type="xs:string"/>
+            <Value type="xs:string"/>
+          </Directions>
         </AeroForces>
         <AverageFields>
           <OutputFile optional="true">
@@ -341,6 +345,12 @@
             <Z type="xs:string"/>
           </Points>          
         </HistoryPoints>
+        <ModalEnergy>
+          <OutputFile optional="true">
+            <FileName type="xs:string"/>
+            <Frequency type="xs:string"/>
+          </OutputFile>
+        </ModalEnergy>
         <MovingAverage>
           <OutputFile optional="true">
             <FileName type="xs:string"/>
@@ -355,7 +365,7 @@
             <Frequency type="xs:string"/>
           </OutputFile>          
           <SampleFile optional="true">
-            <File type="fieldNameString" inputType="file">
+            <File type="fieldNameString" inputType="file" optional="true">
             </File>
             <Frequency type="xs:string"/>
           </SampleFile>     

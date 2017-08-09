@@ -98,7 +98,7 @@ public class TemplateRestResource {
     private static final Logger sLog = LoggerFactory.getLogger(TemplateRestResource.class.getName());
 
     /**
-     * ServletContext obejct used to access template data
+     * ServletContext object used to access template data
      * Injected via @Context annotation
      */
     ServletContext _context;

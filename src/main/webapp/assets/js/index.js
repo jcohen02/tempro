@@ -241,18 +241,16 @@
         $('#add-template-init-btn').on('click', function(e) {
         	$('#add-template-modal').modal('show');
         });
+        // Initialise modal on opening
+        $('#add-template-modal').on('show.bs.modal', function(e) {
+        	initAddTemplateModal(e);
+        })
         
         // This is the initial handler for the add template button. This is 
         // removed when a file is selected and a new click handler is added to 
         // submit the form with the file and form data.
         $('#add-template-btn').on('click', function(e) {
-        	swal(
-        		"Add Template Form Incomplete",
-        		"You have not selected a file for your new/updated template. " +
-        		"You must select a template or provide a name and select a " + 
-        		"file before the form can be submitted.",
-        		"error"
-        	);
+        	submitAddTemplateForm(null,null);
         })
         
         // Pickup the loginsuccess event triggered on the body element and use 
@@ -282,7 +280,7 @@
         	beforeSend: function(xhr, settings) {
         		xhr.setRequestHeader("X-CSRFToken", $('#input[name="_csrf"]').val());
         	},
-        	url: '/tempss/api/template/upload',
+        	url: '/tempss/api/admin/template/',
         	dataType: 'json',
         	autoUpload: false,
         	// Upload requires access to the file object for the selected file.
@@ -303,8 +301,35 @@
         	},
         	done: function(e, data) {
         		log("Fileupload done callback triggered...");
+        	},
+        	progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css('width', progress + '%').html(
+                		progress + '%');
+            }
+        });
+        
+        /***
+         * Event handlers for the fileupload form.
+         * Ensure that when a template name is entered, the option to select a
+         * template from the drop down list is disabled and vice versa
+         */
+        $('#templateNewId, #templateNewName').on('keyup', function(e) {
+        	var $currentName = $('#templateCurrentName');
+        	var $newId = $('#templateNewId');
+        	var $newName = $('#templateNewName');
+        	var idVal = $newId.val();
+        	var nameVal = $newName.val();
+        	if( (idVal == undefined || idVal == "") && 
+        			(nameVal == undefined || nameVal == "") ) {
+        		$currentName.removeAttr('disabled');
         	}
-        })
+        	else {
+        		$currentName.val("NONE");
+        		$currentName.attr('disabled', 'disabled');
+        	}
+        });
+        
 	});
 	
 	/**
@@ -313,16 +338,55 @@
 	 * up when the user added a file. 
 	 */
 	function submitAddTemplateForm(e, data) {
-		e.preventDefault();
+		if(e) e.preventDefault();
+		// Delete any existing error text
+		$('.addtemp-form-error').html("");
+		
+		var templateNewId = $('#templateNewId').val();
 		var templateNewName = $('#templateNewName').val();
 		var templateCurrentName = $('#templateCurrentName').find("option:selected").val();
 		
+		var dataVal = (data != null) ? data.files[0].name : '';
 		log('Add template form submitted with new name [' + templateNewName + 
 				'], existing name [' + templateCurrentName + '] and selected' +
-				' file name [' + data.files[0].name + ']');
+				' file name [' + dataVal + ']');
 		
-		//log('Request to add a new template with name [' + name + '] and ' +
-		//		'file [' + data.files[0].name + ']');
+		// Validate the form content before trying to send anything.
+		// If neither template name is provided or existing template selected
+		var formErrors = false;
+		if( (templateNewId == undefined || templateNewId == "" || 
+				templateNewId.indexOf(' ') >= 0) && templateCurrentName == "NONE") {
+			$('#templateNewName-errors').html('You must enter an ID ' + 
+					'(containing no spaces) for the new template. ');
+			formErrors = true;
+		}
+		if( (templateNewName == undefined || templateNewName == "") &&
+				templateCurrentName == "NONE") {
+			$('#templateNewName-errors').html(
+				$('#templateNewName-errors').html() + 'You must enter a new ' +
+					'template name or select an existing template to update.');
+			formErrors = true;
+		}
+		if(data == null || data.files.length == 0) {
+			$('#fileupload-errors').html("You have not selected a file to upload.");
+			formErrors = true;
+		}
+		if(formErrors) return;
+		
+		var csrfToken = $('input[name="_csrf"]').val();
+		$.ajaxSetup({
+		    headers: {
+		        'X-CSRF-TOKEN': csrfToken
+		    }
+		});
+		var result = data.submit();
+		result.done(function (result, textStatus, jqXHR) {
+			log('File upload done with result <' + result + 
+					'> and textStatus <' + textStatus + '>');
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			log('File upload failed with status <' + textStatus + 
+					'> and error thrown <' + errorThrown + '>');
+		});
 	}
 	
 	function saveProfileNewClicked(e) {
@@ -437,6 +501,30 @@
 	
 	function userLoginSuccessful() {
 		$('#add-template-text').show();
+	}
+	
+	function initAddTemplateModal(e) {
+		// Remove any existing errors and zero the progress bar
+		$('.addtemp-form-error').html("");
+		$('#progress .progress-bar').css('width', '0%').html('');
+		// Remove any existing files and attach a new listener with no context
+		$('#template-filename-text').text("");
+		$('#add-template-btn').off('click').on('click', function(e) {
+			submitAddTemplateForm(null, null);
+		});
+		
+		// Clear any existing entries in the name/id input boxes
+		$('#templateNewName').val("");
+		$('#templateNewId').val("");
+		$('#templateCurrentName').removeAttr('disabled');
+		
+		// Initialise the modal by copying the list of available templates 
+		// from the main template list into the modal's template list. We also 
+		// add a modified placeholder as the first element.
+		var $options = $('#template-select > option:not(:first)').clone();
+		var $placeholder = $('<option value="NONE">Select an existing template to update...</option>');
+		$('#templateCurrentName').append($placeholder);
+		$('#templateCurrentName').append($options);
 	}
 	
 }(window.jQuery, document, window, window.log));

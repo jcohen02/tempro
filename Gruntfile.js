@@ -14,7 +14,10 @@ module.exports = function(grunt) {
             	  'bootstrap.min.js':'bootstrap/dist/js/bootstrap.min.js',
             	  'sweetalert2.min.js':'sweetalert2/dist/sweetalert2.min.js',
             	  'bootstrap-dialog.min.js': 'bootstrap3-dialog/dist/js/bootstrap-dialog.min.js',
-            	  'jquery.fileDownload.js': 'jquery-file-download/src/Scripts/jquery.fileDownload.js',            	  
+            	  'jquery.fileDownload.js': 'jquery-file-download/src/Scripts/jquery.fileDownload.js',
+            	  'jquery.ui.widget.js':'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
+            	  'jquery.iframe-transport.js':'blueimp-file-upload/js/jquery.iframe-transport.js',
+            	  'jquery.fileupload.js':'blueimp-file-upload/js/jquery.fileupload.js'
               }
           },
           styles: {

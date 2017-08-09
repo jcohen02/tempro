@@ -122,16 +122,6 @@
       <SteadyStateStability>
         <Driver type="SteadyStateDriverType" optional="true"/>
         <EvolutionOperator type="SteadyEvolutionType" optional="true"/>
-        <BaseFlow optional="true">
-          <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
-          <Variable repeatable="true">
-            <VariableName type="xs:string"/>
-            <Type paramType="choice">
-              <Expression type="xs:string" />
-              <File type="baseNameString" inputType="file">
-              </File>
-            </Type>
-          </Variable>
       </SteadyStateStability>
     </SimulationType>
 

@@ -115,22 +115,31 @@
         <targetValue>VelocityCorrectionScheme-3D</targetValue>
       </mapping>
 
+      <!-- Mapping of equation type with solvertype -->
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Equation">
+        <targetValue>SteadyOseen</targetValue>
+        <targetValue>SteadyLinearisedNavierStokes</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Equation">
+        <targetValue>UnsteadyNavierStokes</targetValue>
+        <targetValue>UnsteadyStokes</targetValue>
+        <targetValue>SteadyStokes</targetValue>
+      </mapping>
+
       <!-- Mapping of simulation type with equation type -->
       <mapping variable="SimulationType" varvalue="DirectNumericalSimulation" targetVariable="Equation">
         <targetValue>UnsteadyNavierStokes</targetValue>
-        <targetValue>UnsteadyStokes</targetValue>
       </mapping>
       <mapping variable="SimulationType" varvalue="StabilityAnalysis" targetVariable="Equation">
         <targetValue>UnsteadyNavierStokes</targetValue>
         <targetValue>UnsteadyStokes</targetValue>
-        <targetValue>SteadyOseen</targetValue>
-        <targetValue>SteadyStokes</targetValue>
         <targetValue>SteadyLinearisedNavierStokes</targetValue>
       </mapping>
       <mapping variable="SimulationType" varvalue="SteadyStateStability" targetVariable="Equation">
         <targetValue>SteadyOseen</targetValue>
         <targetValue>SteadyStokes</targetValue>
         <targetValue>SteadyLinearisedNavierStokes</targetValue>
+        <targetValue>UnsteadyNavierStokes</targetValue>
       </mapping>
      
       <!-- Mapping of solver type with projection type -->

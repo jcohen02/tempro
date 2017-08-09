@@ -132,8 +132,6 @@
               </File>
             </Type>
           </Variable>
-        </BaseFlow>
-        <ModeType type="ModeType" optional="true"/>
       </SteadyStateStability>
     </SimulationType>
 

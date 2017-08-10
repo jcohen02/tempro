@@ -225,6 +225,9 @@
     </xsl:choose>
     <xsl:choose>
       <xsl:when test="UserDefinedType/ExistingType">
+        <xsl:if test="UserDefinedType/ExistingType = 'Flowrate'">
+          <xsl:attribute name="USERDEFINEDTYPE">Flowrate</xsl:attribute>
+        </xsl:if>
         <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
           <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
         </xsl:if>
@@ -274,6 +277,9 @@
     </xsl:choose>
     <xsl:choose>
       <xsl:when test="UserDefinedType/ExistingType">
+        <xsl:if test="UserDefinedType/ExistingType = 'Flowrate'">
+          <xsl:attribute name="USERDEFINEDTYPE">Flowrate</xsl:attribute>
+        </xsl:if>
         <xsl:if test="UserDefinedType/ExistingType = 'HighOrderPressure'">
           <xsl:attribute name="USERDEFINEDTYPE">H</xsl:attribute>
         </xsl:if>

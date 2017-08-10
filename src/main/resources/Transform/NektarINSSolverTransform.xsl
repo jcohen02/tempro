@@ -669,7 +669,7 @@
         <PARAM NAME="OutputFrequency"><xsl:value-of select="Energy/OutputFile/Frequency"/></PARAM>
       </xsl:if>
     </xsl:if>
-    <xsdl:if test="HistoryPoints">
+    <xsl:if test="HistoryPoints">
       <xsl:if test="HistoryPoints/OutputFile">
         <PARAM NAME="OutputFile"><xsl:value-of select="HistoryPoints/OutputFile/FileName"/></PARAM>
         <PARAM NAME="OutputFrequency"><xsl:value-of select="HistoryPoints/OutputFile/Frequency"/></PARAM>

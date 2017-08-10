@@ -332,6 +332,7 @@
               <xs:element name="ExistingType">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
+                    <xs:enumeration value="Flowrate"/>
                     <xs:enumeration value="HighOrderPressure"/>
                     <xs:enumeration value="HOutflow"/>
                     <xs:enumeration value="MovingBody"/>
@@ -388,6 +389,7 @@
               <xs:element name="ExistingType">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
+                    <xs:enumeration value="Flowrate"/>
                     <xs:enumeration value="HighOrderPressure"/>
                     <xs:enumeration value="HOutflow"/>
                     <xs:enumeration value="MovingBody"/>

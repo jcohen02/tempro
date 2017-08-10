@@ -1,6 +1,8 @@
 package uk.ac.imperial.libhpc2.schemaservice;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +48,7 @@ public class TempssTemplateLoader {
     /**
      * Template store directory
      */
-    private static final Path TEMPLATE_STORE_DIR = 
+    public static final Path TEMPLATE_STORE_DIR = 
     		Paths.get(System.getProperty("user.home"), ".libhpc", "templates"); 
 
 
@@ -106,33 +108,85 @@ public class TempssTemplateLoader {
             return componentMap;
         }
         
+        processMetadataFiles(templateMetadataFiles, constraintMetadataFiles, componentMap, false);
+        if(templateMetadataAdditionalFiles != null)
+        	processMetadataFiles(templateMetadataAdditionalFiles, constraintMetadataAdditionalFiles, 
+        			componentMap, true);
+        
         // We now need to check if there's a configuration file present that
         // specifies some templates that are to be ignored
         TempssConfig config = TempssConfig.getInstance();
         List<String> ignorePatterns = config.getIgnorePatterns();
         
+        // Now compare the IDs to the ignore patterns obtained from the 
+        // tempss configuration and remove any components to be ignored.
+        // UPDATE Apr 17: This updating of the component map has been modified to
+        // set the ignore flag on a tempss object rather than removing it from the
+        // componentMap altogether.
+		_updateComponentMap(componentMap.keySet(), ignorePatterns, componentMap);
+		
+		return componentMap;
+	}
+	
+	/**
+	 * Processes the component metadata files provided and adds the generated TempssObject
+	 * instances to the provided component map. If overwrite is set, any existing component
+	 * in the component map with the same ID is replaced. 
+	 * 
+	 * @param pMetadataFiles The File object array of metadata files.
+	 * @param pConstraintFiles The File object array of constraint files.
+	 * @param pComponents The component map of component ID string to TempssObject
+	 * @param overwrite Should any existing component with the same ID as a new one be overwritten?
+	 */
+	private void processMetadataFiles(File[] pMetadataFiles, File[] pConstraintFiles,
+			Map<String, TempssObject> pComponents, boolean overwrite) {
+		
         // Now process the template metadata files to generate instances
         // of TemplateObject that can be stored in the application context
-        for (File f : templateMetadataFiles) {
+        for (File f : pMetadataFiles) {
             Properties props = new Properties();
             String absolutePath = f.getAbsolutePath();
             sLog.debug("Template absolute path: " + absolutePath);
-            String resourcePath = absolutePath.substring(absolutePath.indexOf("META-INF" + File.separator + "Template"));
-            sLog.debug("Template file: " + absolutePath + "\nGetting resource: " + resourcePath);
-            InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
-            if(resourceStream != null) {
-                try {
-                    props.load(resourceStream);
-                } catch (IOException e) {
-                    sLog.error("Unable to load resource metadata for <" + resourcePath + ">");
+            // See if the absolute path is within the deployed tomcat tree (e.g. within META-INF)
+            // or whether its in a standard directory location on the disk.
+            int pathIndex = absolutePath.indexOf("META-INF" + File.separator + "Template");
+            String resourcePath = null;
+            String tempssObjPath = null;
+            if(pathIndex >= 0) {
+            	resourcePath = absolutePath.substring(pathIndex);
+            	InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
+            	if(resourceStream != null) {
+                    try {
+                        props.load(resourceStream);
+                    } catch (IOException e) {
+                        sLog.error("Unable to load resource metadata for <" + resourcePath + ">");
+                        continue;
+                    }
+                }
+            	else {
+                    sLog.error("Input stream for resource <" + resourcePath + "> is null.");
                     continue;
                 }
             }
+            // If we're dealing with a standard file - i.e. one that is not in 
+            // the classpath as a resource within the deployed web application.
             else {
-                sLog.error("Input stream for resource <" + resourcePath + "> is null.");
-                continue;
+            	try {
+            		FileInputStream fis = new FileInputStream(absolutePath);
+            		props.load(fis);
+            		fis.close();
+            		tempssObjPath = Paths.get(absolutePath).getParent().getParent().toString();
+            	} catch (FileNotFoundException e) {
+                    sLog.error("Unable to open resource file with path <" + resourcePath + ">");
+                    continue;
+				} catch (IOException e) {
+                    sLog.error("Unable to load resource metadata for <" + absolutePath + ">");
+                    continue;					
+				}
             }
-
+            
+            sLog.debug("Template file: " + absolutePath + "\nGetting resource: " + resourcePath);
+ 
             String[] components = props.getProperty("component.id").split(",");            
             for(String comp : components) {
                 comp = comp.trim();
@@ -140,11 +194,18 @@ public class TempssTemplateLoader {
                 String schema = props.getProperty(comp+".schema");
                 String transform = props.getProperty(comp+".transform");
                 String constraints = props.getProperty(comp+".constraints");
+                
+                if(name == null || schema == null) {
+                	sLog.debug("Unable to get the name or schema file for component <{}>. "
+                			+ "Ignoring this component.", comp);
+                	continue;
+                }
+                
                 // Check that the constraints file was found and is present in the constraintMetadataFiles 
                 // list. If it is not, then set constraints to null and log an error
-                if(constraints != null) {
+                if(constraints != null && pConstraintFiles != null) {
 	                boolean constraintFileFound = false;
-	                for(File cf : constraintMetadataFiles) {
+	                for(File cf : pConstraintFiles) {
 	                	if(cf.getName().equals(constraints)) {
 	                		constraintFileFound = true;
 	                		break;
@@ -166,19 +227,20 @@ public class TempssTemplateLoader {
                 }
                 
                 TempssObject obj = new TempssObject(comp, name, schema, transform, constraints);
+                if(tempssObjPath != null) obj.setPath(tempssObjPath);
                 sLog.info("Found and registered new template object: \n" + obj.toString());
-                componentMap.put(comp, obj);
+                if(pComponents.containsKey(comp)) {
+                	sLog.debug("The key <{}> already exists in the component map...", comp);
+                	// If we're not to overwrite the component then continue without adding it to the map
+                	if(!overwrite) continue;
+                }
+                TempssObject oldVal = pComponents.put(comp, obj);
+                if(oldVal != null) {
+                	sLog.debug("The key <{}> has been successfully replaced in the component map...", comp);
+                }
             }
         }
-        
-        // Now compare the IDs to the ignore patterns obtained from the 
-        // tempss configuration and remove any components to be ignored.
-        // UPDATE Apr 17: This updating of the component map has been modified to
-        // set the ignore flag on a tempss object rather than removing it from the
-        // componentMap altogether.
-		_updateComponentMap(componentMap.keySet(), ignorePatterns, componentMap);
-		
-		return componentMap;
+
 	}
 	
     private File[] getResourceFiles(String pPath, final String pExtension, final String[] pIgnore, boolean filesInClasspath)
@@ -205,7 +267,8 @@ public class TempssTemplateLoader {
 			sLog.debug("resourcePath: " + resourcePath);
     	}
     	else {
-    		resourcePath = pPath;
+    		Path path = Paths.get(pPath);
+    		resourcePath = path.toUri().toURL().toString();
     	}
 			
 		URI resourcePathURI = null;

@@ -68,7 +68,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import uk.ac.imperial.libhpc2.schemaservice.TempssTemplateLoader;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
+
+
 
 /**
  * Jersey REST class representing the admin/template endpoint
@@ -157,13 +160,13 @@ public class TemplateAdminRestResource {
     	
     	// If we have access to all the data required, we now build the necessary structures
     	// to store the template
-    	if(!Files.exists(TEMPLATE_STORE_DIR)) {
+    	if(!Files.exists(TempssTemplateLoader.TEMPLATE_STORE_DIR)) {
     		try {
-    			Files.createDirectories(TEMPLATE_STORE_DIR);
-    			Files.createDirectory(TEMPLATE_STORE_DIR.resolve("Template"));
-    			Files.createDirectory(TEMPLATE_STORE_DIR.resolve("Schema"));
-    			Files.createDirectory(TEMPLATE_STORE_DIR.resolve("Transform"));
-    			Files.createDirectory(TEMPLATE_STORE_DIR.resolve("Constraintse"));
+    			Files.createDirectories(TempssTemplateLoader.TEMPLATE_STORE_DIR);
+    			Files.createDirectory(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Template"));
+    			Files.createDirectory(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Schema"));
+    			Files.createDirectory(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Transform"));
+    			Files.createDirectory(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Constraints"));
     		} catch(IOException e) {
     			String responseText = "{\"status\":\"ERROR\", \"code\":\"CREATE_DIR_ERROR\", \"error\":" +
     					"\"Unable to create missing template store directory.\"}";

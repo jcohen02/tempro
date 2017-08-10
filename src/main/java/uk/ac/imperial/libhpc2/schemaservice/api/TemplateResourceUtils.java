@@ -1,6 +1,10 @@
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -16,7 +20,9 @@ import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 
 public class TemplateResourceUtils {
-
+	/**
+	 * Logger
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(TemplateResourceUtils.class.getName());
 	
 	@SuppressWarnings("unchecked")
@@ -70,4 +76,66 @@ public class TemplateResourceUtils {
 
 		return definition;
     }
+	
+	/**
+	 * Get the file paths for a provided template configuration object. 
+	 * Returns a map of paths for the schema, transform and constraint files.
+	 * 
+	 * @param pTempssObj The TempssObject to get paths for.
+	 * @return A map containing keys "schema", "transform", "constraints"
+	 */
+	public static Map<String,String> getTemplateFilePaths(TempssObject pTempssObj, ServletContext pContext) {
+		
+		Map<String, String> filePaths = new HashMap<String,String>(3);
+		
+		if(pTempssObj.getPath() != null) {
+			Path basePath = Paths.get(pTempssObj.getPath());
+			filePaths.put("schema", basePath.resolve("Schema").resolve(pTempssObj.getSchema()).toString());
+			if(pTempssObj.getTransform() != null) {
+				filePaths.put("transform", basePath.resolve("Transform").resolve(pTempssObj.getTransform()).toString());
+			} 
+			else {
+				filePaths.put("transform", null);
+			}
+			if(pTempssObj.getConstraints() != null) {
+				filePaths.put("constraints", basePath.resolve("Constraints").resolve(pTempssObj.getConstraints()).toString());
+			}
+			else {
+				filePaths.put("constraints", null);
+			}
+		}
+		else {
+	        String basePath = pContext.getRealPath("/WEB-INF/classes") + File.separator;
+		
+	        filePaths.put("schema", basePath + pTempssObj.getSchema());
+	        if(pTempssObj.getTransform() != null) {
+	        	filePaths.put("transform", basePath + pTempssObj.getTransform());
+	        }
+	        else {
+	        	filePaths.put("transform", null);
+	        }
+	        if(pTempssObj.getConstraints() != null) {
+	        	filePaths.put("constraints", Paths.get(basePath).resolve("Constraints").resolve(pTempssObj.getConstraints()).toString());
+	        }
+	        else {
+	        	filePaths.put("constraints", null);
+	        }
+		}		
+		return filePaths;
+	}
+	
+	public static String getTemplateSchemaFilePath(TempssObject pTempssObj, ServletContext pContext) {
+		Map<String,String> map = getTemplateFilePaths(pTempssObj, pContext);
+		return map.get("schema");
+	}
+	
+	public static String getTemplateTransformFilePath(TempssObject pTempssObj, ServletContext pContext) {
+		Map<String,String> map = getTemplateFilePaths(pTempssObj, pContext);
+		return map.get("transform");
+	}
+	
+	public static String getTemplateConstraintsFilePath(TempssObject pTempssObj, ServletContext pContext) {
+		Map<String,String> map = getTemplateFilePaths(pTempssObj, pContext);
+		return map.get("constraints");
+	}
 }

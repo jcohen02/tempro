@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -75,6 +76,7 @@ import org.dom4j.DocumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.imperial.libhpc2.schemaservice.api.TemplateResourceUtils;
 import uk.ac.imperial.libhpc2.tempss.xml.TemPSSSchemaBuilder;
 import uk.ac.imperial.libhpc2.tempss.xml.TemPSSXMLTemplateProcessor;
 
@@ -109,20 +111,17 @@ public class SchemaProcessor {
     public String processComponentSelector(TempssObject pComponentMetadata)
         throws FileNotFoundException, IOException, ParseException, TransformerException {
 
-        LOG.debug("ServletContext: " + _context);
-        String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
-        //String verboseName = pComponentMetadata.getName();
-        String schemaName = pComponentMetadata.getSchema();
-
-        // Construct full path to file
-        String schemaPathAndName = schemaPath + schemaName;
+    	Map<String, String> paths = TemplateResourceUtils.getTemplateFilePaths(pComponentMetadata, _context);
+        Path schemaFilePathObj = Paths.get(paths.get("schema"));
+        String schemaFilePath = schemaFilePathObj.toString(); 
+        String schemaFileDir = schemaFilePathObj.getParent().toString();
 
         // Get the contents of the schema.
-        File schemaFile = new File(schemaPathAndName);
-        if (!schemaFile.exists()) {
+        File schemaFile = new File(schemaFilePath);
+        if(!schemaFile.exists()) {
             throw new FileNotFoundException("Could not find component schema file on server.");
         }
-
+        
         // I am going to hack around with the schema to include any included
         // schemas.  Therefore need to get the schema as a string rather than
         // work directly with the StreamSource.
@@ -180,14 +179,23 @@ public class SchemaProcessor {
         // For each included file, process it:
         while (matcher.find()) {
             String includedSchemaName = matcher.group(1);
-            String includedSchemaPathAndName = schemaPath + includedSchemaName;
+            String includedSchemaPathAndName = schemaFileDir + includedSchemaName;
             File includedSchemaFile = new File(includedSchemaPathAndName);
 
+            String includedSchemaString = null;
             if (!includedSchemaFile.exists()) {
-                throw new FileNotFoundException("Could not find included component schema file on server: " + includedSchemaName);
+            	// Check in the default location before throwing an error...
+            	File schemaFileAltPath = new File(_context.getRealPath("/WEB-INF/classes") + File.separator + 
+            			includedSchemaName);
+            	if(!schemaFileAltPath.exists()) {
+            		throw new FileNotFoundException("Could not find included component schema file on server at <" + 
+            				includedSchemaPathAndName + "> or <" + schemaFileAltPath + ">");
+            	}
+            	includedSchemaString = FileUtils.readFileToString(schemaFileAltPath, "utf-8");
             }
-
-            String includedSchemaString = FileUtils.readFileToString(includedSchemaFile, "utf-8");
+            else {
+            	includedSchemaString = FileUtils.readFileToString(includedSchemaFile, "utf-8");
+            }
 
             // Need to find the part of the included schema that's within the
             // <schema> <\schema> tabs. Another regex...
@@ -273,12 +281,8 @@ public class SchemaProcessor {
 
     @SuppressWarnings("unchecked")
     public Map<String,String> convertProfileToInputData(
-        String pComponentName,
-        String pBasicXml,
-        String pXml,
-        String pSessionId)
-        throws UnknownTemplateException, TransformerException, IOException
-    {
+    				String pComponentName, String pBasicXml, String pXml, String pSessionId)
+    						throws UnknownTemplateException, TransformerException, IOException {
         // Now we need to convert the completed xml profile into form that is
         // expected as input by the component. Look up the component metadata to
         // get the path to the XSLT transform for this component.
@@ -286,7 +290,8 @@ public class SchemaProcessor {
         String transformPath = "";
         if(components.containsKey(pComponentName)) {
             TempssObject componentMetadata = components.get(pComponentName);
-            transformPath = _context.getRealPath("/WEB-INF/classes") + File.separator + componentMetadata.getTransform();
+            Map<String, String> paths = TemplateResourceUtils.getTemplateFilePaths(componentMetadata, _context);
+            transformPath = paths.get("transform");
         } else {
             throw new UnknownTemplateException("Unhandled component name while transforming xml:" + pComponentName);
         }

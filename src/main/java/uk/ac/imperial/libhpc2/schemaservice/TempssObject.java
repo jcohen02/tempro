@@ -56,6 +56,7 @@ public class TempssObject {
     private String _schema;
     private String _transform;
     private String _constraints;
+    private String _path;
     private boolean _ignore;
 
     
@@ -77,6 +78,7 @@ public class TempssObject {
         this._schema = schema;
         this._transform = transform;
         this._constraints = constraints;
+        this._path = null;
         this._ignore = ignore;
     }
     
@@ -86,6 +88,7 @@ public class TempssObject {
         this._schema = pObj.getSchema();
         this._transform = pObj.getTransform();
         this._constraints = pObj.getConstraints();
+        this._path = pObj.getPath();
         this._ignore = pObj.ignore();
     }
 
@@ -129,6 +132,14 @@ public class TempssObject {
         this._constraints = constraints;
     }
     
+    public String getPath() {
+        return _path;
+    }
+    
+    public void setPath(String path) {
+        this._path = path;
+    }
+    
     public boolean ignore() {
     	return this._ignore;
     }
@@ -145,6 +156,7 @@ public class TempssObject {
         s.append("\n\tSchema: " + getSchema());
         s.append("\n\tTransform: " + getTransform());
         s.append("\n\tConstraints: " + getConstraints());
+        s.append("\n\tComponent path: " + ((getPath() == null) ? "Default resource path" : getPath()));
         s.append("\n\tIgnore template? " + ((ignore()) ? "YES" : "NO"));
         return s.toString();
     }

@@ -45,10 +45,14 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -61,13 +65,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
 
+import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
 import uk.ac.imperial.libhpc2.schemaservice.TempssTemplateLoader;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
 
@@ -113,7 +123,8 @@ public class TemplateAdminRestResource {
      * 
      */
     
-    // Add a new template
+    @SuppressWarnings("unchecked")
+	// Add a new template
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces("application/json")
@@ -121,6 +132,7 @@ public class TemplateAdminRestResource {
     		@Context HttpServletRequest pRequest,
     		@FormDataParam("templateNewName") String newName,
     		@FormDataParam("templateNewId") String newId,
+    		@FormDataParam("templateCurrentId") String currentId,
     		@FormDataParam("templateCurrentName") String currentName,
     		@FormDataParam("files[]") InputStream uploadFile,
     		@FormDataParam("files[]") FormDataContentDisposition uploadFileInfo,
@@ -133,13 +145,31 @@ public class TemplateAdminRestResource {
 			return Response.status(Status.FORBIDDEN).entity(responseText).build();
     	}
     	
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
+    	
     	boolean updateTemplate = false;
+    	String templId = null;
+    	String templName = null;
     	if( newId != null && !newId.equals("") && newName != null && !newName.equals("") ) {
     		sLog.debug("We are adding a new template with name <{}> and ID <{}>.", newName, newId);
+    		templId = newId;
+    		templName = newName;
+    		if(components.containsKey(templId)) {
+    			String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_EXISTS\", \"error\":" +
+    					"\"A template with the specified ID already exists.\"}";
+        		return Response.status(Status.CONFLICT).entity(responseText).build();
+    		}
     	}
-    	else if(currentName != null && !currentName.equals("")) {
+    	else if(currentName != null && !currentName.equals("") && currentId != null && !currentId.equals("")) {
     		updateTemplate = true;
-    		sLog.debug("We are updating existing template with name <{}>.", currentName);
+    		sLog.debug("We are updating existing template with id <{}> and name <{}>.", currentId, currentName);
+    		templId = currentId;
+    		int spacerIdx = currentName.indexOf(" - ");
+    		if(spacerIdx >= 0) {
+    			currentName = currentName.substring(spacerIdx+3);
+    		}
+    		templId = currentId;
+    		templName = currentName;
     	}
     	else {
     		String responseText = "{\"status\":\"ERROR\", \"code\":\"MISSING_PARAMS\", \"error\":" +
@@ -174,7 +204,88 @@ public class TemplateAdminRestResource {
     		}
     	}
     	
-    	return Response.ok("{}", MediaType.APPLICATION_JSON).build();
+    	String name = uploadFileInfo.getFileName();
+    	String randStr = RandomStringUtils.randomAlphanumeric(8);
+    	int dotIdx = name.indexOf('.');
+    	String schemaFile = (dotIdx >= 0) ? 
+    			name.substring(0, dotIdx) + "_" + randStr + name.substring(dotIdx) : 
+    				name + "_" + randStr;
+    	
+		// Get a handle for the properties file - required to check if it exists.
+		File templPropsFile = new File(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Template").resolve(
+				"template-" + templId + ".properties").toString());
+    	/*
+    	 * FIXME: Fix how we handle files that we're saving.
+    	 * For now, if we're updating an existing template, we overwrite its properties file
+    	 **/
+    	if(templPropsFile.exists() && !updateTemplate) {
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_FILE_EXISTS\", \"error\":" +
+					"\"The template properties file already exists.\"}";
+    		return Response.status(Status.CONFLICT).entity(responseText).build();
+    	}
+    	else if(templPropsFile.exists()) {
+    		sLog.debug("Overwriting previous properties file <{}> for template.", templPropsFile.getAbsolutePath());
+    	}
+
+    	// We now need to prepare the properties file that defines the template files.
+    	Properties templProps = new Properties();
+    	templProps.put("component.id", templId);
+    	templProps.put(templId + ".name", templName);
+    	templProps.put(templId + ".schema", schemaFile);
+    	templProps.put(templId + ".transform", "");
+    	//templProps.put(templId + ".constraints", "");
+    	
+    	// Get the path for the schema file
+    	String schemaPath = TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Schema").resolve(schemaFile).toString();
+    	
+    	// Now write the properties file out to the Template directory
+    	try {
+    		FileOutputStream fos = new FileOutputStream(templPropsFile);
+    		templProps.store(fos, "Template metadata for uploaded TemPSS template.");
+    		fos.close();
+    	} catch(FileNotFoundException e) {
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"FILE_CREATE_ERROR\", \"error\":" +
+					"\"Unable to create or write to the file storing this template metadata.\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+    	} catch (IOException e) {
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"METADATA_WRITE_ERROR\", \"error\":" +
+					"\"Unable to store the templ file storing this template metadata.\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();		
+    	}
+    	
+    	// Now store the uploaded file to the Schema directory
+    	int bytesCopied = -1;
+    	try {
+    		bytesCopied = FileCopyUtils.copy(uploadFile, new FileOutputStream(schemaPath));
+		} catch (IOException e1) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"SCHEMA_WRITE_ERROR\", " +
+					"\"error\":\"Unable to store the uploaded schema file.\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}	
+    	
+    	JSONObject response = new JSONObject();
+    	try {
+    		JSONArray arr = new JSONArray();
+        	JSONObject fileObj = new JSONObject();
+			fileObj.put("name", uploadFileInfo.getFileName());
+			fileObj.put("size", bytesCopied);
+	    	fileObj.put("url", "");
+	    	arr.put(fileObj);
+	    	response.put("files", arr);
+	    	response.put("result", "OK");
+		} catch (JSONException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"RESPONSE_ERROR\", \"error\":" +
+					"\"Unable to build response data.\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+    	
+    	// Before the response is returned, we need to update the component
+    	// data to include the newly added or updated template...
+    	TempssObject tempssObj = new TempssObject(templId, templName, schemaFile, "");
+    	tempssObj.setPath(TempssTemplateLoader.TEMPLATE_STORE_DIR.toString());
+    	components.put(templId, tempssObj);
+    	
+    	return Response.ok(response.toString(), MediaType.APPLICATION_JSON).build();
     }
 
     // Update an existing template

@@ -304,7 +304,7 @@
         	},
         	progressall: function (e, data) {
                 var progress = parseInt(data.loaded / data.total * 100, 10);
-                $('#progress .progress-bar').css('width', progress + '%').html(
+                $('.progress .progress-bar').css('width', progress + '%').html(
                 		progress + '%');
             }
         });
@@ -315,7 +315,7 @@
          * template from the drop down list is disabled and vice versa
          */
         $('#templateNewId, #templateNewName').on('keyup', function(e) {
-        	var $currentName = $('#templateCurrentName');
+        	var $currentName = $('#templateCurrentId');
         	var $newId = $('#templateNewId');
         	var $newName = $('#templateNewName');
         	var idVal = $newId.val();
@@ -344,24 +344,24 @@
 		
 		var templateNewId = $('#templateNewId').val();
 		var templateNewName = $('#templateNewName').val();
-		var templateCurrentName = $('#templateCurrentName').find("option:selected").val();
+		var templateCurrentId = $('#templateCurrentId').find("option:selected").val();
 		
 		var dataVal = (data != null) ? data.files[0].name : '';
 		log('Add template form submitted with new name [' + templateNewName + 
-				'], existing name [' + templateCurrentName + '] and selected' +
+				'], existing id [' + templateCurrentId + '] and selected' +
 				' file name [' + dataVal + ']');
 		
 		// Validate the form content before trying to send anything.
 		// If neither template name is provided or existing template selected
 		var formErrors = false;
 		if( (templateNewId == undefined || templateNewId == "" || 
-				templateNewId.indexOf(' ') >= 0) && templateCurrentName == "NONE") {
+				templateNewId.indexOf(' ') >= 0) && templateCurrentId == "NONE") {
 			$('#templateNewName-errors').html('You must enter an ID ' + 
 					'(containing no spaces) for the new template. ');
 			formErrors = true;
 		}
 		if( (templateNewName == undefined || templateNewName == "") &&
-				templateCurrentName == "NONE") {
+				templateCurrentId == "NONE") {
 			$('#templateNewName-errors').html(
 				$('#templateNewName-errors').html() + 'You must enter a new ' +
 					'template name or select an existing template to update.');
@@ -379,13 +379,30 @@
 		        'X-CSRF-TOKEN': csrfToken
 		    }
 		});
+		var formData = $('#add-template-form').serializeArray();
+		if(templateCurrentId != 'NONE') {
+			formData.push({'name':'templateCurrentName', 'value':$('#templateCurrentId').find("option:selected").text() });
+		}
+		data.formData = formData;
 		var result = data.submit();
 		result.done(function (result, textStatus, jqXHR) {
 			log('File upload done with result <' + result + 
 					'> and textStatus <' + textStatus + '>');
+			if('result' in result && result['result'] == 'OK') {
+				$('#add-template-modal').modal('hide');
+				$('#template-select').trigger('change');
+			}
+			else {
+				swal("Error adding template", 
+						"Unable to add new/updated template: " + 
+						result['error'], "error");
+			}
 		}).fail(function(jqXHR, textStatus, errorThrown) {
 			log('File upload failed with status <' + textStatus + 
 					'> and error thrown <' + errorThrown + '>');
+			swal("Error adding template", 
+					"Unable to add new/updated template: " + 
+					result['error'], "error");
 		});
 	}
 	
@@ -514,17 +531,19 @@
 		});
 		
 		// Clear any existing entries in the name/id input boxes
-		$('#templateNewName').val("");
-		$('#templateNewId').val("");
-		$('#templateCurrentName').removeAttr('disabled');
+		$('#templateNewName').val('');
+		$('#templateNewId').val('');
+		$('#templateCurrentId').removeAttr('disabled');
+		$('#templateCurrentId').val('NONE');
+		$('.progress .progress-bar').css('width','0%').text('');
 		
 		// Initialise the modal by copying the list of available templates 
 		// from the main template list into the modal's template list. We also 
 		// add a modified placeholder as the first element.
 		var $options = $('#template-select > option:not(:first)').clone();
 		var $placeholder = $('<option value="NONE">Select an existing template to update...</option>');
-		$('#templateCurrentName').append($placeholder);
-		$('#templateCurrentName').append($options);
+		$('#templateCurrentId').append($placeholder);
+		$('#templateCurrentId').append($options);
 	}
 	
 }(window.jQuery, document, window, window.log));

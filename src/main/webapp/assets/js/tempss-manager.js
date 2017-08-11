@@ -190,7 +190,10 @@ function displayTemplate(templateID, templateText) {
         // Error callback function
         function(data) {
             log('Error getting HTML tree: ' + JSON.stringify(data));
+            var response = data['responseJSON'];
             $("#template-tree-loading").hide(0);
+            swal("Error loading template tree", "An error has occurred " +
+            		"loading the template tree: " + response['error'], "error");
             dfd.reject();
         }
     );

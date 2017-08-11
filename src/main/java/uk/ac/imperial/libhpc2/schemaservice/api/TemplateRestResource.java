@@ -229,9 +229,13 @@ public class TemplateRestResource {
     		TempssObject metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
     		templateHtml = _getTemplateHtml(templateId, metadata);
     	} catch(UnknownTemplateException e) {
-    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_NOT_FOUND\"," +
+					"  \"error\":\"The requested template could not be found: " + e.getMessage() + "\"}";
+    		return Response.status(Status.NOT_FOUND).entity(responseText).build();
     	} catch(TemplateProcessorException e) {
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_PROCESSING_ERROR\"," +
+					"  \"error\":\"Unable to generate HTML for template: " + e.getMessage() + "\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
     	}
     	
     	return Response.ok(templateHtml, MediaType.TEXT_HTML).build();
@@ -249,9 +253,13 @@ public class TemplateRestResource {
     		metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
     		templateHtml = _getTemplateHtml(templateId, metadata);
     	} catch(UnknownTemplateException e) {
-    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_NOT_FOUND\"," +
+					"  \"error\":\"The requested template could not be found: " + e.getMessage() + "\"}";
+    		return Response.status(Status.NOT_FOUND).entity(responseText).build();
     	} catch(TemplateProcessorException e) {
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_PROCESSING_ERROR\"," +
+					"  \"error\":\"Unable to generate HTML for template: " + e.getMessage() + "\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
     	}
     	
     	JSONObject templateObj = new JSONObject();

@@ -124,7 +124,7 @@ public class TemplateAdminRestResource {
      */
     
     @SuppressWarnings("unchecked")
-	// Add a new template
+	// Add a new template - we'll be passed up to three files in the upload form.
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces("application/json")
@@ -134,8 +134,12 @@ public class TemplateAdminRestResource {
     		@FormDataParam("templateNewId") String newId,
     		@FormDataParam("templateCurrentId") String currentId,
     		@FormDataParam("templateCurrentName") String currentName,
-    		@FormDataParam("files[]") InputStream uploadFile,
-    		@FormDataParam("files[]") FormDataContentDisposition uploadFileInfo,
+    		@FormDataParam("file-schema") InputStream uploadFileSchema,
+    		@FormDataParam("file-schema") FormDataContentDisposition uploadFileInfoSchema,
+    		@FormDataParam("file-transform") InputStream uploadFileTransform,
+    		@FormDataParam("file-transform") FormDataContentDisposition uploadFileInfoTransform,
+    		@FormDataParam("file-constraint") InputStream uploadFileConstraint,
+    		@FormDataParam("file-constraint") FormDataContentDisposition uploadFileInfoConstraint,
             FormDataMultiPart multipartData) {
     	
     	TempssUser user = ApiUtils.getAuthenticatedUser();
@@ -177,7 +181,7 @@ public class TemplateAdminRestResource {
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
     	}
     	
-    	if(uploadFile == null || uploadFileInfo == null) {
+    	if(uploadFileSchema == null || uploadFileInfoSchema == null) {
     		String responseText = "{\"status\":\"ERROR\", \"code\":\"MISSING_FILE\", \"error\":" +
 					"\"Required file upload for new/updated template is missing.\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
@@ -186,7 +190,7 @@ public class TemplateAdminRestResource {
     	// Get the parameters from the request and see if we're updating a template or creating
     	// a new one.
     	sLog.debug("Received file upload for new/updated template. Filename <{}>, new ID <{}>, new name <{}>, " +
-    			"original name <{}>.", uploadFileInfo.getFileName(), newId, newName, currentName);
+    			"original name <{}>.", uploadFileInfoSchema.getFileName(), newId, newName, currentName);
     	
     	// If we have access to all the data required, we now build the necessary structures
     	// to store the template
@@ -204,13 +208,31 @@ public class TemplateAdminRestResource {
     		}
     	}
     	
-    	String name = uploadFileInfo.getFileName();
     	String randStr = RandomStringUtils.randomAlphanumeric(8);
+    	
+    	String name = uploadFileInfoSchema.getFileName();
     	int dotIdx = name.indexOf('.');
     	String schemaFile = (dotIdx >= 0) ? 
     			name.substring(0, dotIdx) + "_" + randStr + name.substring(dotIdx) : 
     				name + "_" + randStr;
     	
+    	if(uploadFileTransform != null) {
+    		sLog.debug("We have a transform file uploaded - handling the transform file...");
+    		String transformName = uploadFileInfoTransform.getFileName();
+        	dotIdx = transformName.indexOf('.');
+        	String transformFile = (dotIdx >= 0) ? 
+        			transformName.substring(0, dotIdx) + "_" + randStr + transformName.substring(dotIdx) : 
+        				transformName + "_" + randStr; 
+    	}
+    	if(uploadFileConstraint != null) {
+    		sLog.debug("We have a constraints file uploaded - handling the constraints file...");
+    		String constraintName = uploadFileInfoConstraint.getFileName();
+        	dotIdx = constraintName.indexOf('.');
+        	String constraintFile = (dotIdx >= 0) ? 
+        			constraintName.substring(0, dotIdx) + "_" + randStr + constraintName.substring(dotIdx) : 
+        				constraintName + "_" + randStr; 
+    	}
+    			
 		// Get a handle for the properties file - required to check if it exists.
 		File templPropsFile = new File(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Template").resolve(
 				"template-" + templId + ".properties").toString());
@@ -227,6 +249,8 @@ public class TemplateAdminRestResource {
     		sLog.debug("Overwriting previous properties file <{}> for template.", templPropsFile.getAbsolutePath());
     	}
 
+    	// **** TODO: Handle the transform and constraint files when setting up the properties file....
+    	
     	// We now need to prepare the properties file that defines the template files.
     	Properties templProps = new Properties();
     	templProps.put("component.id", templId);
@@ -256,7 +280,7 @@ public class TemplateAdminRestResource {
     	// Now store the uploaded file to the Schema directory
     	int bytesCopied = -1;
     	try {
-    		bytesCopied = FileCopyUtils.copy(uploadFile, new FileOutputStream(schemaPath));
+    		bytesCopied = FileCopyUtils.copy(uploadFileSchema, new FileOutputStream(schemaPath));
 		} catch (IOException e1) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"SCHEMA_WRITE_ERROR\", " +
 					"\"error\":\"Unable to store the uploaded schema file.\"}";
@@ -267,7 +291,7 @@ public class TemplateAdminRestResource {
     	try {
     		JSONArray arr = new JSONArray();
         	JSONObject fileObj = new JSONObject();
-			fileObj.put("name", uploadFileInfo.getFileName());
+			fileObj.put("name", uploadFileInfoSchema.getFileName());
 			fileObj.put("size", bytesCopied);
 	    	fileObj.put("url", "");
 	    	arr.put(fileObj);

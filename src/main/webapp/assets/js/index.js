@@ -6,6 +6,9 @@
 	var KEEP_ALIVE_FREQUENCY = 300;
 	
 	$(function() {
+		// Stores details of the files added to the fileupload form
+		var files = {};
+		
 		log("Index page - document ready...")
 
 		updateTemplateList();
@@ -289,14 +292,18 @@
         	// form submit button is clicked. 
         	add: function(e, data) {
         		log("Fileupload add callback triggered...");
+        		// First get the item that was triggered
+        		var targetName = e.delegatedEvent.target.name;
+        		
         		// Get the name of the selected file and display it next to 
         		// the button. Then set up the handler function. We need to 
         		// cancel any existing handler function set for a previously 
         		// selected file and add a new one for this selection.
         		var fn = data.files.length ? data.files[0].name : "";
-        		$('#template-filename-text').text(fn);
+        		$('#' + targetName + '-text').text(fn);
+        		files[targetName] = data.files[0];
         		$('#add-template-btn').off('click').on('click', function(e) {
-        			submitAddTemplateForm(e, data);
+        			submitAddTemplateForm(e, data, files);
         		});
         	},
         	done: function(e, data) {
@@ -337,7 +344,7 @@
 	 * clicked. The e and data parameters are passed based on the closure set 
 	 * up when the user added a file. 
 	 */
-	function submitAddTemplateForm(e, data) {
+	function submitAddTemplateForm(e, data, files) {
 		if(e) e.preventDefault();
 		// Delete any existing error text
 		$('.addtemp-form-error').html("");
@@ -346,10 +353,11 @@
 		var templateNewName = $('#templateNewName').val();
 		var templateCurrentId = $('#templateCurrentId').find("option:selected").val();
 		
-		var dataVal = (data != null) ? data.files[0].name : '';
+		var fileStr = "";
+		for(var key in files) fileStr += key + ": [" + files[key].name + "] ";
 		log('Add template form submitted with new name [' + templateNewName + 
-				'], existing id [' + templateCurrentId + '] and selected' +
-				' file name [' + dataVal + ']');
+				'], existing id [' + templateCurrentId + '] and file details: '+
+				fileStr);
 		
 		// Validate the form content before trying to send anything.
 		// If neither template name is provided or existing template selected
@@ -367,8 +375,13 @@
 					'template name or select an existing template to update.');
 			formErrors = true;
 		}
-		if(data == null || data.files.length == 0) {
+		if(files == null || files == {}) {
 			$('#fileupload-errors').html("You have not selected a file to upload.");
+			formErrors = true;
+		}
+		else if(!('file-schema' in files) || files['file-schema'] == "") {
+			$('#fileupload-errors').html("You must include a schema file. " +
+					"Transform and constraint files are optional.");
 			formErrors = true;
 		}
 		if(formErrors) return;
@@ -379,11 +392,22 @@
 		        'X-CSRF-TOKEN': csrfToken
 		    }
 		});
-		var formData = $('#add-template-form').serializeArray();
+		var formData = $('#fileupload').serializeArray();
 		if(templateCurrentId != 'NONE') {
 			formData.push({'name':'templateCurrentName', 'value':$('#templateCurrentId').find("option:selected").text() });
 		}
 		data.formData = formData;
+		
+		// Before submitting the data, prepare the files and param names to 
+		// attach to the data object.
+		var paramNames = [];
+		var fileObjs = [];
+		for(var key in files) {
+			paramNames.push(key);
+			fileObjs.push(files[key]);
+		}
+		data.files = fileObjs;
+		data.paramName = paramNames;
 		var result = data.submit();
 		result.done(function (result, textStatus, jqXHR) {
 			log('File upload done with result <' + result + 
@@ -398,11 +422,18 @@
 						result['error'], "error");
 			}
 		}).fail(function(jqXHR, textStatus, errorThrown) {
+			var response = {};
+			var errorMsg = "An unknown error occurred.";
+			if('responseText' in jqXHR && jqXHR.responseText != undefined 
+					&& jqXHR.responseText != "") {
+				response = JSON.parse(jqXHR.responseText);
+				if('error' in response) errorMsg = response['error'];
+			}
 			log('File upload failed with status <' + textStatus + 
 					'> and error thrown <' + errorThrown + '>');
 			swal("Error adding template", 
-					"Unable to add new/updated template: " + 
-					result['error'], "error");
+					"Unable to add new/updated template [" +errorThrown+ "]: "+ 
+					errorMsg, "error");
 		});
 	}
 	
@@ -525,7 +556,9 @@
 		$('.addtemp-form-error').html("");
 		$('#progress .progress-bar').css('width', '0%').html('');
 		// Remove any existing files and attach a new listener with no context
-		$('#template-filename-text').text("");
+		$('#file-schema-text').text("");
+		$('#file-transform-text').text("");
+		$('#file-constraint-text').text("");
 		$('#add-template-btn').off('click').on('click', function(e) {
 			submitAddTemplateForm(null, null);
 		});

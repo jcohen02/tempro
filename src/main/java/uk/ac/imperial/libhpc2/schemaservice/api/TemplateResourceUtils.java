@@ -1,6 +1,8 @@
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,6 +19,7 @@ import uk.ac.ic.prism.jhc02.csp.CSPParseException;
 import uk.ac.ic.prism.jhc02.csp.CSProblemDefinition;
 import uk.ac.imperial.libhpc2.schemaservice.ConstraintsException;
 import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
+import uk.ac.imperial.libhpc2.schemaservice.TempssTemplateLoader;
 import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 
 public class TemplateResourceUtils {
@@ -58,7 +61,19 @@ public class TemplateResourceUtils {
 		// Now that we have the name of the constraint file we can create an 
 		// instance of a constraint satisfaction problem definition based on this file.
 		// The file is loaded as a resource from the jar file.
-		InputStream xmlResource = TemplateResourceUtils.class.getClassLoader().getResourceAsStream("META-INF/Constraints/" + constraintFile);
+		InputStream xmlResource = null;
+		if(metadata.getPath()== null) {
+			xmlResource = TemplateResourceUtils.class.getClassLoader().getResourceAsStream("META-INF/Constraints/" + constraintFile);
+		}
+		else {
+			try {
+				xmlResource = new FileInputStream(TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve(
+								"Constraints").resolve(metadata.getConstraints()).toString());
+			} catch (FileNotFoundException e) {
+				throw new ConstraintsException("Unable to open the constraint file " +
+						"configured for this template <" + templateId + ">.");
+			}
+		}
 		if(xmlResource == null) {
 			LOG.error("Unable to access constraint file <" + constraintFile + "> as resource.");
 			throw new ConstraintsException("The constraint XML file could not be accessed.");

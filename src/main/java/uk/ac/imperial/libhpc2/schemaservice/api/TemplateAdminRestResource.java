@@ -216,19 +216,21 @@ public class TemplateAdminRestResource {
     			name.substring(0, dotIdx) + "_" + randStr + name.substring(dotIdx) : 
     				name + "_" + randStr;
     	
+    	String transformFile = null;
     	if(uploadFileTransform != null) {
     		sLog.debug("We have a transform file uploaded - handling the transform file...");
     		String transformName = uploadFileInfoTransform.getFileName();
         	dotIdx = transformName.indexOf('.');
-        	String transformFile = (dotIdx >= 0) ? 
+        	transformFile = (dotIdx >= 0) ? 
         			transformName.substring(0, dotIdx) + "_" + randStr + transformName.substring(dotIdx) : 
         				transformName + "_" + randStr; 
     	}
+    	String constraintFile = null;
     	if(uploadFileConstraint != null) {
     		sLog.debug("We have a constraints file uploaded - handling the constraints file...");
     		String constraintName = uploadFileInfoConstraint.getFileName();
         	dotIdx = constraintName.indexOf('.');
-        	String constraintFile = (dotIdx >= 0) ? 
+        	constraintFile = (dotIdx >= 0) ? 
         			constraintName.substring(0, dotIdx) + "_" + randStr + constraintName.substring(dotIdx) : 
         				constraintName + "_" + randStr; 
     	}
@@ -256,8 +258,10 @@ public class TemplateAdminRestResource {
     	templProps.put("component.id", templId);
     	templProps.put(templId + ".name", templName);
     	templProps.put(templId + ".schema", schemaFile);
-    	templProps.put(templId + ".transform", "");
-    	//templProps.put(templId + ".constraints", "");
+    	templProps.put(templId + ".transform", (transformFile != null) ? transformFile : "");
+    	if(constraintFile != null) {
+    		templProps.put(templId + ".constraints", constraintFile);
+    	}
     	
     	// Get the path for the schema file
     	String schemaPath = TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Schema").resolve(schemaFile).toString();
@@ -279,13 +283,39 @@ public class TemplateAdminRestResource {
     	
     	// Now store the uploaded file to the Schema directory
     	int bytesCopied = -1;
+    	int transformBytesCopied = -1;
+    	int constraintBytesCopied = -1;
     	try {
     		bytesCopied = FileCopyUtils.copy(uploadFileSchema, new FileOutputStream(schemaPath));
-		} catch (IOException e1) {
+		} catch (IOException e) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"SCHEMA_WRITE_ERROR\", " +
 					"\"error\":\"Unable to store the uploaded schema file.\"}";
     		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
-		}	
+		}
+    	
+    	if(transformFile != null) {
+    		// Store the transform file
+    		try {
+    			String transformPath = TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Transform").resolve(transformFile).toString();
+        		transformBytesCopied = FileCopyUtils.copy(uploadFileTransform, new FileOutputStream(transformPath));
+    		} catch (IOException e) {
+    			String responseText = "{\"status\":\"ERROR\", \"code\":\"TRANSFORM_WRITE_ERROR\", " +
+    					"\"error\":\"Unable to store the uploaded transform file.\"}";
+        		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+    		}
+    	}
+    	
+    	if(constraintFile != null) {
+    		// Store the constraint file
+    		try {
+    			String constraintPath = TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Constraints").resolve(constraintFile).toString();
+        		constraintBytesCopied = FileCopyUtils.copy(uploadFileConstraint, new FileOutputStream(constraintPath));
+    		} catch (IOException e) {
+    			String responseText = "{\"status\":\"ERROR\", \"code\":\"CONSTRAINTS_WRITE_ERROR\", " +
+    					"\"error\":\"Unable to store the uploaded constraints file.\"}";
+        		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+    		}
+    	}
     	
     	JSONObject response = new JSONObject();
     	try {
@@ -295,6 +325,23 @@ public class TemplateAdminRestResource {
 			fileObj.put("size", bytesCopied);
 	    	fileObj.put("url", "");
 	    	arr.put(fileObj);
+	    	
+	    	if(transformFile != null) {
+	    		fileObj = new JSONObject();
+				fileObj.put("name", uploadFileInfoTransform.getFileName());
+				fileObj.put("size", transformBytesCopied);
+		    	fileObj.put("url", "");
+		    	arr.put(fileObj);
+	    	}
+	    	
+	    	if(constraintFile != null) {
+	    		fileObj = new JSONObject();
+				fileObj.put("name", uploadFileInfoConstraint.getFileName());
+				fileObj.put("size", constraintBytesCopied);
+		    	fileObj.put("url", "");
+		    	arr.put(fileObj);
+	    	}
+	    	
 	    	response.put("files", arr);
 	    	response.put("result", "OK");
 		} catch (JSONException e) {

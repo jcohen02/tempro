@@ -414,7 +414,16 @@
 					'> and textStatus <' + textStatus + '>');
 			if('result' in result && result['result'] == 'OK') {
 				$('#add-template-modal').modal('hide');
-				$('#template-select').trigger('change');
+				// Update the template list to pick up any new template names
+				setTimeout(function() {
+					var ts = $('#template-select');
+					var templateSelected = ts.val();
+					var tlUpdate = updateTemplateList();
+					tlUpdate.done(function() {
+						ts.val(templateSelected);
+						ts.trigger('change');
+					});
+				}, 0);
 			}
 			else {
 				swal("Error adding template", 

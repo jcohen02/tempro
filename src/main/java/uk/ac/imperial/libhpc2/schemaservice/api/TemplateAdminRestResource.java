@@ -352,7 +352,8 @@ public class TemplateAdminRestResource {
     	
     	// Before the response is returned, we need to update the component
     	// data to include the newly added or updated template...
-    	TempssObject tempssObj = new TempssObject(templId, templName, schemaFile, "");
+    	String objTransform = (transformFile != null) ? transformFile : "";
+    	TempssObject tempssObj = new TempssObject(templId, templName, schemaFile, objTransform, constraintFile);
     	tempssObj.setPath(TempssTemplateLoader.TEMPLATE_STORE_DIR.toString());
     	components.put(templId, tempssObj);
     	

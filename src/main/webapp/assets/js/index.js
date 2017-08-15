@@ -246,6 +246,9 @@
         });
         // Initialise modal on opening
         $('#add-template-modal').on('show.bs.modal', function(e) {
+    		// Empty the files dict scoped within this block since this  
+    		// retains the most recently selected file of each type otherwise.
+    		files = {};
         	initAddTemplateModal(e);
         })
         

@@ -359,6 +359,7 @@
 		
 		var templateNewId = $('#templateNewId').val();
 		var templateNewName = $('#templateNewName').val();
+		var templateNewGroup = $('#templateNewGroup').val();
 		var templateCurrentId = $('#templateCurrentId').find("option:selected").val();
 		
 		var fileStr = "";

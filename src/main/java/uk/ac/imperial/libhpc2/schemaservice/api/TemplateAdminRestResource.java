@@ -132,6 +132,7 @@ public class TemplateAdminRestResource {
     		@Context HttpServletRequest pRequest,
     		@FormDataParam("templateNewName") String newName,
     		@FormDataParam("templateNewId") String newId,
+    		@FormDataParam("templateNewGroup") String newGroup,
     		@FormDataParam("templateCurrentId") String currentId,
     		@FormDataParam("templateCurrentName") String currentName,
     		@FormDataParam("file-schema") InputStream uploadFileSchema,
@@ -262,6 +263,9 @@ public class TemplateAdminRestResource {
     	if(constraintFile != null) {
     		templProps.put(templId + ".constraints", constraintFile);
     	}
+    	if(newGroup != null && !newGroup.equals("")) {
+    		templProps.put(templId + ".group", newGroup);
+    	}
     	
     	// Get the path for the schema file
     	String schemaPath = TempssTemplateLoader.TEMPLATE_STORE_DIR.resolve("Schema").resolve(schemaFile).toString();
@@ -355,6 +359,9 @@ public class TemplateAdminRestResource {
     	String objTransform = (transformFile != null) ? transformFile : "";
     	TempssObject tempssObj = new TempssObject(templId, templName, schemaFile, objTransform, constraintFile);
     	tempssObj.setPath(TempssTemplateLoader.TEMPLATE_STORE_DIR.toString());
+    	if(newGroup != null && !newGroup.equals("")) {
+    		tempssObj.setGroup(newGroup);
+    	}
     	components.put(templId, tempssObj);
     	
     	return Response.ok(response.toString(), MediaType.APPLICATION_JSON).build();

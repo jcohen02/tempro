@@ -194,6 +194,7 @@ public class TempssTemplateLoader {
                 String schema = props.getProperty(comp+".schema");
                 String transform = props.getProperty(comp+".transform");
                 String constraints = props.getProperty(comp+".constraints");
+                String group = props.getProperty(comp+".group");
                 
                 if(name == null || schema == null) {
                 	sLog.debug("Unable to get the name or schema file for component <{}>. "
@@ -226,7 +227,7 @@ public class TempssTemplateLoader {
                 	TempssConfig.getInstance().getIgnorePatterns().add(comp);
                 }
                 
-                TempssObject obj = new TempssObject(comp, name, schema, transform, constraints);
+                TempssObject obj = new TempssObject(comp, name, schema, transform, constraints, group);
                 if(tempssObjPath != null) obj.setPath(tempssObjPath);
                 sLog.info("Found and registered new template object: \n" + obj.toString());
                 if(pComponents.containsKey(comp)) {

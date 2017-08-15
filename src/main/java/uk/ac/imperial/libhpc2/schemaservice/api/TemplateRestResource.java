@@ -124,6 +124,9 @@ public class TemplateRestResource {
                 componentObj.put("name", component.getName());
                 componentObj.put("schema", component.getSchema());
                 componentObj.put("transform", component.getTransform());
+                if(component.getGroup() != null) {
+                	componentObj.put("group", component.getGroup());
+                }
             } catch (JSONException e) {
                 sLog.error("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage());
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage()).build();

@@ -22,6 +22,11 @@
 		// determine whether to refresh the template when loading a profile
 		window.profileLoaded = false;
 		
+		$('#template-select').select2({
+			theme: 'bootstrap',
+			minimumResultsForSearch: Infinity,
+		});
+		
 		$('#template-select').on('change', function(e) {
 			var target = e.currentTarget;
 			var selected = $(target).find(":selected");

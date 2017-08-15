@@ -55,6 +55,8 @@ function updateTemplateList() {
                 // Remove current content excluding the placeholder
                 $('#template-select option:gt(0)').remove();
                 var templateSelect = $('#template-select');
+                var templateDict = {'Other templates':[]}
+                var templateList = [];
                 var components = data.components;
                 components.sort(function(a, b) {
                     if (a.name.toLowerCase() < b.name.toLowerCase()) {
@@ -64,10 +66,37 @@ function updateTemplateList() {
                         return 1;
                     }
                 });
+                // Process template items
                 for (var i = 0; i < components.length; i++) {
                     var item = components[i];
-                    templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
+                    var group = 'Other templates';
+                    if('group' in item) group = item['group'];
+                	if(!(group in templateDict)) {
+                		templateDict[group] = [];
+                	}
+                	templateDict[group].push("<option value=\"" + 
+                			item.id + "\">" + item.name + " (id: " + 
+                			item.id +")</option>");
                 }
+                // Now prepare a large list containing all the templates
+            	// which we can add to the UI DOM.
+            	var sortedGroups = Object.keys(templateDict).sort(
+        			function(a, b) {
+        				if (a.toLowerCase() < b.toLowerCase())
+        					return -1;
+        				if (a.toLowerCase() > b.toLowerCase())
+        					return 1;
+        			}
+            	); 
+            	for(var index in sortedGroups) {
+            		var templates = templateDict[sortedGroups[index]];
+            		templateList.push('<optgroup label="' + sortedGroups[index] + '">');
+            		templateList.push.apply(templateList, templates);
+            	}
+
+                // Now add template items to the document
+            	$("#template-select").append(templateList);
+                
                 $("#template-loading").hide(0);
             },
             // Error callback function:

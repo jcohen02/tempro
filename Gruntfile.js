@@ -17,7 +17,8 @@ module.exports = function(grunt) {
             	  'jquery.fileDownload.js': 'jquery-file-download/src/Scripts/jquery.fileDownload.js',
             	  'jquery.ui.widget.js':'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
             	  'jquery.iframe-transport.js':'blueimp-file-upload/js/jquery.iframe-transport.js',
-            	  'jquery.fileupload.js':'blueimp-file-upload/js/jquery.fileupload.js'
+            	  'jquery.fileupload.js':'blueimp-file-upload/js/jquery.fileupload.js',
+            	  'select2.min.js':'select2/dist/js/select2.min.js'
               }
           },
           styles: {
@@ -31,6 +32,8 @@ module.exports = function(grunt) {
                   'bootstrap-dialog.min.css': 'bootstrap3-dialog/dist/css/bootstrap-dialog.min.css',
                   'font-awesome.min.css':'font-awesome/css/font-awesome.min.css',
                   //'jquery.fileupload-ui.css': 'blueimp-file-upload/css/jquery.fileupload-ui.css',
+                  'select2.min.css':'select2/dist/css/select2.min.css',
+                  'select2-bootstrap.min.css':'select2-bootstrap-theme/dist/select2-bootstrap.min.css'
               }
         	  
           },

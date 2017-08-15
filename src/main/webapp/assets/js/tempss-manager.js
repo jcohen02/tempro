@@ -53,8 +53,10 @@ function updateTemplateList() {
             // Success callback function:
             function(data) {
                 // Remove current content excluding the placeholder
-                $('#template-select option:gt(0)').remove();
-                var templateSelect = $('#template-select');
+            	var $templateSelect = $('#template-select');
+            	$templateSelect.find('option:gt(0)').remove();
+                $templateSelect.find('optgroup').remove();
+                
                 var templateDict = {'Other templates':[]}
                 var templateList = [];
                 var components = data.components;

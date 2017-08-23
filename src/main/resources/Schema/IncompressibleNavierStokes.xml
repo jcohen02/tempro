@@ -120,6 +120,18 @@
         <ModeType type="ModeType" optional="true"/>
       </StabilityAnalysis>
       <SteadyStateStability>
+        <TimeIntegration>
+          <Timing>
+            <TimeStep type="xs:string" optional="true"/>
+            <NumSteps type="xs:string" optional="true"/>
+            <FinTime type="xs:string" optional="true">
+              <libhpc:documentation>
+                Simulated real time length.
+              </libhpc:documentation>
+            </FinTime>
+          </Timing>
+          <TimeIntegrationMethod type="TimingType"/>
+        </TimeIntegration>
         <Driver type="SteadyStateDriverType" optional="true"/>
         <EvolutionOperator type="SteadyEvolutionType" optional="true"/>
       </SteadyStateStability>

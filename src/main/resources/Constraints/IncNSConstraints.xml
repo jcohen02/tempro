@@ -62,7 +62,7 @@
         </domain>
       </variable>
 
-      <variable path="NumericalSpecification.SimulationType.DirectNumericalSimulation.TimeIntegration.TimeIntegrationMethod" name="TimeIntegrationMethod">
+<!--       <variable path="NumericalSpecification.SimulationType.DirectNumericalSimulation.TimeIntegration.TimeIntegrationMethod" name="TimeIntegrationMethod">
         <domain>
           <value>NotProvided</value>
           <value>IMEXOrder1</value>
@@ -91,6 +91,21 @@
           <value>BDFImplicitOrder2</value>
         </domain>
       </variable>
+      <variable path="NumericalSpecification.SimulationType.SteadyStateStability.TimeIntegration.TimeIntegrationMethod" name="SteadyTimeIntegrationMethod">
+        <domain>
+          <value>NotProvided</value>
+          <value>IMEXOrder1</value>
+          <value>IMEXOrder2</value>
+          <value>IMEXOrder3</value>
+          <value>DIRKOrder1</value>
+          <value>ForwardEuler</value>
+          <value>BackwardEuler</value>
+          <value>ClassicalRungeKutta4</value>
+          <value>BDFImplicitOrder1</value>
+          <value>BDFImplicitOrder2</value>
+        </domain>
+      </variable>
+ -->
 
     </variables>
     
@@ -138,7 +153,6 @@
       <mapping variable="SimulationType" varvalue="SteadyStateStability" targetVariable="Equation">
         <targetValue>SteadyOseen</targetValue>
         <targetValue>SteadyStokes</targetValue>
-        <targetValue>SteadyLinearisedNavierStokes</targetValue>
         <targetValue>UnsteadyNavierStokes</targetValue>
       </mapping>
      
@@ -152,8 +166,8 @@
         <targetValue>ContinuousGalerkin</targetValue>
       </mapping>
       
-      <!-- Mapping of solver type with time integration method -->
-      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="TimeIntegrationMethod">
+      <!-- Mapping of equation type with time integration method -->
+<!--       <mapping variable="Equation" varvalue="SteadyLinearisedNavierStokes" targetVariable="SteadyTimeIntegrationMethod">
         <targetValue>IMEXOrder1</targetValue>
         <targetValue>IMEXOrder2</targetValue>
         <targetValue>IMEXOrder3</targetValue>
@@ -164,24 +178,12 @@
         <targetValue>BDFImplicitOrder1</targetValue>
         <targetValue>BDFImplicitOrder2</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="TimeIntegrationMethod">
+      <mapping variable="Equation" varvalue="SteadyStokes" targetVariable="SteadyTimeIntegrationMethod">
         <targetValue>NotProvided</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="StabilityTimeIntegrationMethod">
-        <targetValue>IMEXOrder1</targetValue>
-        <targetValue>IMEXOrder2</targetValue>
-        <targetValue>IMEXOrder3</targetValue>
-        <targetValue>DIRKOrder1</targetValue>
-        <targetValue>ForwardEuler</targetValue>
-        <targetValue>BackwardEuler</targetValue>
-        <targetValue>ClassicalRungeKutta4</targetValue>
-        <targetValue>BDFImplicitOrder1</targetValue>
-        <targetValue>BDFImplicitOrder2</targetValue>
-      </mapping>
-      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="StabilityTimeIntegrationMethod">
+      <mapping variable="Equation" varvalue="SteadyOseen" targetVariable="SteadyTimeIntegrationMethod">
         <targetValue>NotProvided</targetValue>
-      </mapping>
-
+      </mapping> -->
     </constraints>              
                   
 </PrismConstraints>

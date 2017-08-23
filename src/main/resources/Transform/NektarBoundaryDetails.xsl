@@ -267,9 +267,7 @@
   <xsl:template match="Options" mode="BCVariablesPeriodic">
     <xsl:choose>
       <xsl:when test="Expression">
-        <xsl:attribute name="VALUE">
-          [<xsl:value-of select="Expression"/>]
-        </xsl:attribute>
+        <xsl:attribute name="VALUE">[<xsl:value-of select="Expression"/>]</xsl:attribute>
       </xsl:when>
       <xsl:otherwise>
         <xsl:message>Unable to set the value for this boundary condition variable, it uses a value type that is currently unsupported.</xsl:message>

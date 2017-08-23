@@ -53,8 +53,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,11 +68,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class handles the initialisation of the tempss servlet,
- * reading in details of all the available schemas and creating
- * a map of them that is stored in the application context.
+ * reading in details of all the available schemas and constraint
+ * data and creating a map of this information that is stored in 
+ * the application context.
  *
- * This map is used to check that subsequent requests to the service
- * refer to valid components.
+ * This map is used to check that subsequent requests to the service 
+ * refer to valid components and to identify when constraint data is 
+ * available.
+ * 
+ * Specification of a constraints file is optional.
  *
  * @author jhc02
  */
@@ -86,48 +88,30 @@ public class TempssServletContextListener implements ServletContextListener {
      * Search for all the properties files in the "Template" directory
      * and read in the details from them, creating a TempssObject instance
      * for each and storing this in the component map.
+     * 
+     * Also read in constraint information and add this to the TempssObjects 
+     * for templates that also have constraints information stored.
      */
     public void contextInitialized(ServletContextEvent pContext) {
         Map<String, TempssObject> componentMap = new HashMap<String, TempssObject>();
 
         // Now search for the available properties files describing components
         // These are placed in the META-INF/Template directory in the classpath
-
-        // We can't simply get a list of all files in the classpath from the
-        // classloader so we instead get access to the location of the current
-        // class by accessing its URL and then construct the path to
-        // META-INF/Template where we can search for our files.
-        Class<?> clazz = this.getClass();
-        String className = clazz.getSimpleName() + ".class";
-        sLog.debug("Class name: " + className);
-        URL path = null;
+        File[] templateMetadataFiles = null;
+        File[] constraintMetadataFiles = null;
         try {
-            sLog.debug("Class URL: " + clazz.getResource(className).toString());
-            path = new URL(clazz.getResource(className).toString());
-        } catch (MalformedURLException e1) {
-            sLog.error("Unable to get class URL to search for component property files.");
+        	templateMetadataFiles = getResourceFiles(pContext, "META-INF/Template", ".properties", new String[]{});
+        	constraintMetadataFiles = getResourceFiles(pContext, "META-INF/Constraints", ".xml", new String[]{});
+        } catch (MalformedURLException e) {
+        	sLog.error(e.getMessage());
+            pContext.getServletContext().setAttribute("components", componentMap);
+            return;
+        } catch (URISyntaxException e) {
+            sLog.error(e.getMessage());
             pContext.getServletContext().setAttribute("components", componentMap);
             return;
         }
-
-        String templatePath = path.toString().substring(0,path.toString().indexOf("WEB-INF/classes/") + 16) + "META-INF/Template";
-        sLog.debug("templatePath: " + templatePath);
-
-        URI templatePathURI = null;
-        try {
-            templatePathURI = new URI(templatePath);
-        } catch (URISyntaxException e1) {
-            sLog.error("Unable to construct URI for template path to search for property files.");
-            pContext.getServletContext().setAttribute("components", componentMap);
-            return;
-        }
-
-        File[] templateMetadataFiles = new File(templatePathURI).listFiles(new FilenameFilter() {
-            public boolean accept(File f, String name) {
-                return name.endsWith(".properties");
-            }
-        });
-
+        
         // We now need to check if there's a configuration file present that
         // specifies some templates that are to be ignored
         TempssConfig config = TempssConfig.getInstance();
@@ -161,7 +145,33 @@ public class TempssServletContextListener implements ServletContextListener {
                 String name = props.getProperty(comp+".name");
                 String schema = props.getProperty(comp+".schema");
                 String transform = props.getProperty(comp+".transform");
-                TempssObject obj = new TempssObject(comp, name, schema, transform);
+                String constraints = props.getProperty(comp+".constraints");
+                // Check that the constraints file was found and is present in the constraintMetadataFiles 
+                // list. If it is not, then set constraints to null and log an error
+                if(constraints != null) {
+	                boolean constraintFileFound = false;
+	                for(File cf : constraintMetadataFiles) {
+	                	if(cf.getName().equals(constraints)) {
+	                		constraintFileFound = true;
+	                		break;
+	                	}
+	                }
+	                if(!constraintFileFound) {
+	                	sLog.error("The specified constraints file <{}> was not found.", constraints);
+	                	constraints = null;
+	                	
+	                }
+                }
+                
+                // For some templates, it may be the case that they're used by third-party tools
+                // and are not designed to be shown in the TemPSS template UI. To support this, 
+                // a template properties file can contain a <template-name>.ignore key and the 
+                // template will be added to the ignore list
+                if(props.containsKey(comp+".ignore")) {
+                	TempssConfig.getInstance().getIgnorePatterns().add(comp);
+                }
+                
+                TempssObject obj = new TempssObject(comp, name, schema, transform, constraints);
                 sLog.info("Found and registered new template object: \n" + obj.toString());
                 componentMap.put(comp, obj);
             }
@@ -169,7 +179,10 @@ public class TempssServletContextListener implements ServletContextListener {
         
         // Now compare the IDs to the ignore patterns obtained from the 
         // tempss configuration and remove any components to be ignored.
-		_updateComponentMap(componentMap.keySet(), ignorePatterns);
+        // UPDATE Apr 17: This updating of the component map has been modified to
+        // set the ignore flag on a tempss object rather than removing it from the
+        // componentMap altogether.
+		_updateComponentMap(componentMap.keySet(), ignorePatterns, componentMap);
         pContext.getServletContext().setAttribute("components", componentMap);
         
     }
@@ -179,7 +192,8 @@ public class TempssServletContextListener implements ServletContextListener {
     }
     
     private void _updateComponentMap(
-    			Set<String> pComponents, List<String> pIgnorePatterns) {
+    			Set<String> pComponents, List<String> pIgnorePatterns,
+    			Map<String, TempssObject> pComponentMap) {
     	
     	Set<String> removeSet = new HashSet<String>();
     	for(String pattern : pIgnorePatterns) {
@@ -199,7 +213,55 @@ public class TempssServletContextListener implements ServletContextListener {
     	}
     	// The component IDs are a keySet obtained from the component Map. They
     	// maintain a two-way binding with the component map so calling
-    	// removeAll on the keySet removes 
-    	pComponents.removeAll(removeSet);
+    	// removeAll on the keySet removes the associated items from the map
+    	// pComponents.removeAll(removeSet);
+    	// UPDATE Apr 17: Instead of removing items from component map we now lookup
+    	// each item in the removeSet and set its ignore flag to true.
+    	for(String id : removeSet) {
+    		pComponentMap.get(id).setIgnore(true);
+    	}
+    }
+    
+    private File[] getResourceFiles(ServletContextEvent pContext, String pPath, 
+    								final String pExtension, final String[] pIgnore)
+    		throws MalformedURLException, URISyntaxException {
+        // We can't simply get a list of all files in the classpath from the
+        // classloader so we instead get access to the location of the current
+        // class by accessing its URL and then construct the path to the file search 
+        // location (e.g. META-INF/Template) where we can search for our files.
+        Class<?> clazz = this.getClass();
+        String className = clazz.getSimpleName() + ".class";
+        sLog.debug("Class name: " + className);
+        URL path = null;
+        try {
+            sLog.debug("Class URL: " + clazz.getResource(className).toString());
+            path = new URL(clazz.getResource(className).toString());
+        } catch (MalformedURLException e1) {
+            sLog.error("Unable to get class URL to search for component property files.");
+            throw e1;
+        }
+
+        String resourcePath = path.toString().substring(0,path.toString().indexOf("WEB-INF/classes/") + 16) + pPath;
+        sLog.debug("resourcePath: " + resourcePath);
+
+        URI resourcePathURI = null;
+        try {
+            resourcePathURI = new URI(resourcePath);
+        } catch (URISyntaxException e1) {
+            sLog.error("Unable to construct URI for template path to search for property files.");
+            throw e1;
+        }
+
+        File[] resourceFiles = new File(resourcePathURI).listFiles(new FilenameFilter() {
+            public boolean accept(File f, String name) {
+                // Check if the file is in the ignore list
+            	for(String filename : pIgnore) {
+            		if(filename.equals(name)) return false;
+            	}
+            	return name.endsWith(pExtension);
+            }
+        });
+        
+        return resourceFiles;
     }
 }

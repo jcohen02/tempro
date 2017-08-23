@@ -52,7 +52,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.Principal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -88,11 +87,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -102,7 +97,6 @@ import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 import uk.ac.imperial.libhpc2.schemaservice.web.dao.ProfileDao;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.Profile;
 import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
-import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
 
 /**
  * Jersey REST class representing the profile endpoint
@@ -221,6 +215,19 @@ public class ProfileRestResource {
                     InputStream fileXmlStream = fileFields.get(i).getValueAs(InputStream.class);
                     String fileXml = IOUtils.toString(fileXmlStream);
 
+                    // With the revised support for Nektar++ native geometries, the geometry file must contain a NEKTAR 
+                    // element as the root rather than the previous custom GeomtryAndBoundaryConditions element. To 
+                    // maintain support with both approaches, if we have a native geometry, we strip the start and end 
+                    // of the data to retain only the content between the <NEKTAR></NEKTAR> tags. This removes any
+                    // XML header in the file and also removes any namespace definitions on the root NEKTAR element 
+                    // that seem to cause issues when embedding the content into the main profile and running it 
+                    // through the XSLT transformer. An empty <NEKTAR></NEKTAR> element wrapper is re-inserted.
+                    // (If we've received a geometry in the old format the file is inserted as is - no changes are made) 
+                    if(fileXml.indexOf("<NEKTAR") != -1) {
+                    	fileXml = "<NEKTAR>" + fileXml.substring(fileXml.indexOf("<GEOMETRY"),
+                    								fileXml.indexOf("</GEOMETRY>")+11) + "</NEKTAR>";
+                    }
+                    
                     // Embed file in profile. File name appears in lower case 
                     // so do case-insensitive string replace using (?i)
                     String tempXml = completeXml.replaceAll("(?i)" + fileName, fileXml);
@@ -274,6 +281,62 @@ public class ProfileRestResource {
         return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
     }
     
+    @POST
+    @RolesAllowed("ROLE_USER")
+    @Path("{templateId}/{profileName}/{newState}")
+    @Produces("application/json")
+    @SuppressWarnings("unchecked")
+    public Response changeProfileState(
+    		@PathParam("templateId") String templateId,
+            @PathParam("profileName") String profileName,
+            @PathParam("newState") String newState,
+            @Context HttpServletRequest pRequest) {
+    	
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
+    	
+    	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
+
+    	// Check the specified template exists and that it is owned by the 
+    	// currently authenticated user or it is public
+		TempssObject templateMetadata = components.get(templateId);
+		if(templateMetadata == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"INVALID_TEMPLATE\", \"error\":" +
+					"\"The specified template <" + templateId + "> does not exist.\"}";
+			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
+		}
+		
+		// Now try and get the profile
+		Profile p = profileDao.findByName(profileName, user);
+		if(p == null) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_DOES_NOT_EXIST\", \"error\":" +
+					"\"The profile with the specified name <" + profileName + "> does not exists.\"}";
+			return Response.status(Status.NOT_FOUND).entity(responseText).build();
+		}
+    
+		boolean profilePublic = false;
+		if(newState.toUpperCase().equals("PUBLIC")) {
+			profilePublic = true;
+		}
+		
+		int rowsUpdated = profileDao.updateStatus(profilePublic, profileName, p.getTemplateId(), user);
+		if(rowsUpdated != 1) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"UPDATE_FAILED\", \"error\":\"Profile state update failed.\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+		
+		
+    	JSONObject jsonResponse = new JSONObject();
+		try {
+			jsonResponse.put("status", "OK");
+		} catch (JSONException e) {
+			String responseText = "{\"status\":\"ERROR\", \"code\":\"RESPONSE_DATA\", \"error\":\"" + e.getMessage() + "\"}";
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
+		}
+    	    	    	
+    	return Response.ok(jsonResponse.toString(), MediaType.APPLICATION_JSON).build();
+    }
+
+    
     /**
      * Get the profile identified by "profileName" that is based
      * on the template identified by "templateId".
@@ -290,13 +353,13 @@ public class ProfileRestResource {
     @GET
     @Path("{templateId}/{profileName}")
     @Produces("application/json")
+    @SuppressWarnings("unchecked")
     public Response loadProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
-        @Context HttpServletRequest pRequest,
-        TempssUser pUser) {
+        @Context HttpServletRequest pRequest) {
     
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
 
@@ -354,7 +417,7 @@ public class ProfileRestResource {
         @RequestBody String profileJson,
         @Context HttpServletRequest pRequest) {
 
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	// Check that the user is authenticated
 		if(user == null) {
@@ -375,21 +438,9 @@ public class ProfileRestResource {
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
 		
-		// Now check if the specified profile name already exists
-		try {
-			if(!profileDao.profileNameAvailable(profileName, user)) {
-				String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
-						"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
-				return Response.status(Status.CONFLICT).entity(responseText).build();
-			}
-		} catch(AuthenticationException e) {
-			String responseText = "{\"status\":\"ERROR\", \"code\":\"AUTHENTICATION_REQUIRED\", \"error\":" +
-					"\"You must be authenticated to check if a profile name exists.\"}";
-			return Response.status(Status.FORBIDDEN).entity(responseText).build();
-		}
-
     	String profileXml = "";
     	int profilePublic = 0;
+    	boolean profileOverwrite = false;
     	JSONObject jsonResponse = new JSONObject();
  
     	// Get the profile XML string from the incoming request data
@@ -399,12 +450,29 @@ public class ProfileRestResource {
 			if(profileObj.getBoolean("profilePublic")) {
 				profilePublic = 1;
 			}
+			profileOverwrite = profileObj.getBoolean("profileOverwrite");
 			sLog.debug("Handling save request for profile name <" + profileName + "> for template <" 
 					  + templateId + "> with public flag <" + profilePublic + ">:\n" + profileXml);
 		} catch (JSONException e) {
 			String responseText = "{\"status\":\"ERROR\", \"code\":\"REQUEST_DATA\", \"error\":\"" + e.getMessage() + "\"}";
 			return Response.status(Status.BAD_REQUEST).entity(responseText).build();
 		}
+		
+		// Now check if the specified profile name already exists
+		if(!profileOverwrite) {
+			try {
+				if(!profileDao.profileNameAvailable(profileName, user)) {
+					String responseText = "{\"status\":\"ERROR\", \"code\":\"PROFILE_NAME_EXISTS\", \"error\":" +
+							"\"A profile with the specified name <" + profileName + "> aready exists.\"}";
+					return Response.status(Status.CONFLICT).entity(responseText).build();
+				}
+			} catch(AuthenticationException e) {
+				String responseText = "{\"status\":\"ERROR\", \"code\":\"AUTHENTICATION_REQUIRED\", \"error\":" +
+						"\"You must be authenticated to check if a profile name exists.\"}";
+				return Response.status(Status.FORBIDDEN).entity(responseText).build();
+			}
+		}
+
     			
 		Map<String, Object> profileData = new HashMap<String,Object>();
 		profileData.put("name", profileName);
@@ -413,7 +481,12 @@ public class ProfileRestResource {
 		profileData.put("public", profilePublic);
 		profileData.put("owner", user.getUsername());
 		Profile profile = new Profile(profileData);
-		profileDao.add(profile);
+		if(profileOverwrite) {
+			profileDao.update(profile);
+		}
+		else {
+			profileDao.add(profile);
+		}
 		sLog.info("The value of profileDao is: " + profileDao);
 		
 		try {
@@ -444,12 +517,13 @@ public class ProfileRestResource {
     @DELETE
     @Path("{templateId}/{profileName}")
     @Produces("application/json")
+    @SuppressWarnings("unchecked")
     public Response deleteProfile(
         @PathParam("templateId") String templateId,
         @PathParam("profileName") String profileName,
         @Context HttpServletRequest pRequest) {
     
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	// Check that the user is authenticated
 		if(user == null) {
@@ -523,7 +597,7 @@ public class ProfileRestResource {
     public Response getProfileNamesJson(
     		@PathParam("templateId") String pTemplateId) {
 
-		TempssUser user = getAuthenticatedUser();
+		TempssUser user = ApiUtils.getAuthenticatedUser();
 		
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	JSONArray profileArray = new JSONArray();
@@ -572,7 +646,7 @@ public class ProfileRestResource {
     public Response getProfileNamesText(
     		@PathParam("templateId") String pTemplateId) {
 
-    	TempssUser user = getAuthenticatedUser();
+    	TempssUser user = ApiUtils.getAuthenticatedUser();
     	
     	List<Profile> profiles = profileDao.findByTemplateId(pTemplateId, user);
     	StringBuilder profileNames = new StringBuilder();
@@ -634,25 +708,5 @@ public class ProfileRestResource {
 				header("Content-Disposition", cd).
 				header("Content-Type", "application/xml").
 				cookie(c).entity(so).build();
-    }
-    
-    /**
-     * Get the details of the currently authenticated user.
-     *  
-     * @return null if no user is authenticated or the TempssUser object of the
-     *         authenticated user if a user is logged in.
-     */
-    private TempssUser getAuthenticatedUser() {
-    	Authentication authToken = 
-    			SecurityContextHolder.getContext().getAuthentication();
-    	
-    	TempssUserDetails userDetails = null;
-		TempssUser user = null;
-		if( (authToken != null) && !(authToken instanceof AnonymousAuthenticationToken) ) {
-			userDetails = (TempssUserDetails) authToken.getPrincipal();
-			user = userDetails.getUser();
-		}
-		
-		return user;
-    }
+    }  
 }

@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="XsdToHtmlTransform.xsl"?>
+
+<!--
+A TemPSS schema defining a tree structure for building a Mesh Configuration 
+File (MCF) for NekMesh.
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation"
+           targetNamespace="http://www.libhpc.imperial.ac.uk"
+           elementFormDefault="qualified"
+           xmlns="http://www.libhpc.imperial.ac.uk"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.libhpc.imperial.ac.uk LibhpcSchemaAnnotation.xsd">
+
+
+<xs:simpleType name="positiveDouble">
+  <xs:restriction base="xs:double">
+    <xs:minExclusive value="0"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="negativeDouble">
+  <xs:restriction base="xs:double">
+    <xs:maxExclusive value="0"/>
+  </xs:restriction>
+</xs:simpleType>
+    
+<xs:simpleType name="gtOneDouble">
+  <xs:restriction base="xs:double">
+    <xs:minExclusive value="1"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="gtZeroLtOneDouble">
+  <xs:restriction base="xs:double">
+    <xs:minExclusive value="0"/>
+    <xs:maxExclusive value="1"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="stepFileName">
+  <xs:simpleContent>
+    <xs:extension base="xs:string">
+      <xs:attribute name="fileType" type="xs:string" fixed="STEP" use="required"/>
+    </xs:extension>
+  </xs:simpleContent>
+</xs:complexType>
+
+<xs:simpleType name="NACAAerofoilCode">
+  <xs:restriction base="xs:string">
+    <xs:pattern value="^[0-9][0-9][0-9][0-9]$"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="NACAParametersType">
+  <xs:sequence>
+    <xs:element name="Xmin" type="negativeDouble">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Xmin value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Ymin" type="negativeDouble">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Ymin value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Xmax" type="gtOneDouble">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Xmax value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Ymax" type="positiveDouble">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Ymax value for the NACA aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AOA" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The angle of attack for the aerofoil.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="NACAAerofoilType">
+  <xs:sequence>
+    <xs:element name="NACACode" type="NACAAerofoilCode">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="NACAParameters" type="NACAParametersType">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Set of parameters that configure the NACA aerofoil.</libhpc:documentation>
+          <libhpc:nodeInfo>The values in this section define the bounding box for the NACA aerofoil. 
+                 You need to take into account the geometry of the aerofoil when defining 
+                 the bounding box to ensure there is sufficient space for the computation 
+                 to be carried out correctly.
+          </libhpc:nodeInfo>
+        </xs:appinfo>
+      </xs:annotation>
+      
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="CADSourceType">
+  <xs:choice>
+    <xs:element name="CADFile" type="stepFileName">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Name of the CAD file to be used for meshing. Input file must be in STEP format.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="NACAAerofoil" type="NACAAerofoilType">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Description of a NACA aerofoil to use as the input to the mesh generator.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:choice>
+</xs:complexType>
+  
+<xs:complexType name="Mesh2D"/>
+<xs:complexType name="Mesh3D"/>
+
+<xs:complexType name="ConstantOrExpressionType">
+  <xs:choice>
+    <xs:element name="Constant" type="xs:double"/>
+    <xs:element name="Expression" type="xs:string"/>
+  </xs:choice>
+</xs:complexType>
+
+<xs:complexType name="BoundaryLayerSplitType">
+  <xs:sequence>
+    <xs:element name="BoundaryLayerLayers" type="xs:string">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Specify the number of boundary layers.
+          </libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>        
+    </xs:element>
+    <xs:element name="BoundaryLayerProgression" type="ConstantOrExpressionType">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation></libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="BoundaryLayerMeshType">
+    <xs:sequence>
+      <xs:element name="BoundaryLayerSurfaces" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify the boundary layer surfaces using this format: ...
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+      </xs:element>
+      <xs:element name="BoundaryLayerThickness" type="ConstantOrExpressionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SplitBoundaryLayer">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Whether or not to split the boundary layer 
+            into sections. If you select Yes then you have the option to 
+            select the layer elements to split and to set a progression that 
+            determines how the size of the created sections changes across the 
+            space.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Yes" type="BoundaryLayerSplitType"/>
+            <xs:element name="No"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="MeshParameters">
+  <xs:sequence>
+    <xs:element name="MinimumDelta" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Smallest element size the mesh generator will aim for.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="MaximumDelta" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Largest element size the mesh generator will aim for.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="CurvatureSensitivity" type="gtZeroLtOneDouble">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Value (n) must be 0&lt;n&lt;1 Sensivity to curvature, smaller value will make more elements. This value is symmetric around 0.5, e.g. entering 0.01 or 0.99 will have the same effect.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Order" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Polynomial order of the nodal mesh to be made.</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+    
+<xs:complexType name="AdditionalParameters">
+  <xs:sequence>
+    <xs:element name="SurfaceOptimiser" minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Turn on surface mesh optimisation</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="VariationalOptimiser" minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Turn on variational optimiser</libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="WriteOctree" minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation></libhpc:documentation>
+          <libhpc:units></libhpc:units>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>  
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="MeshConfiguration">
+    <xs:sequence>
+    <xs:element name="CADSource" type="CADSourceType">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>Set the source of the CAD geometry for the mesh to be generated. This may be a STEP file that you provide or a NACA 4-digit code that is used to generate a NACA aerofoil geometry.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="MeshType">
+      <xs:complexType>
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+The type of mesh to generate -- 2D: A 2D mesh without boundary layer surfaces;
+3D: A 3D mesh without boundary layer surfaces; 2DBoundaryLayer: A 2D mesh 
+with boundary layer surfaces specified; 3DBoundaryLayer: A 3D mesh with  
+boundary layer surfaces specified 
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:choice>
+      <xs:element name="Mesh2D" type="Mesh2D">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>2D mesh without boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Mesh3D" type="Mesh3D">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>3D mesh without boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayerMesh2D" type="BoundaryLayerMeshType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>2D mesh with boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayerMesh3D" type="BoundaryLayerMeshType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>3D mesh with boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+    </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="LineRefinementsType">
+  <xs:sequence>
+    <xs:element name="X1" type="xs:double"/>
+    <xs:element name="Y1" type="xs:double"/>
+    <xs:element name="Z1" type="xs:double"/>
+    <xs:element name="X2" type="xs:double"/>
+    <xs:element name="Y2" type="xs:double"/>
+    <xs:element name="Z2" type="xs:double"/>
+    <xs:element name="R" type="xs:double"/>
+    <xs:element name="D" type="xs:double"/>
+  </xs:sequence>
+</xs:complexType>
+
+  <!-- Mesh Configuration File root node    -->
+  <xs:element name="NektarMeshing">
+    <xs:annotation>
+      <xs:appinfo>
+        <libhpc:documentation>
+The base element for a NekMesh mesh configuration that is used to provide the parameters to generate a Nektar++ input file from a CAD model.
+        </libhpc:documentation>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="MeshConfiguration" type="MeshConfiguration">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains the core configuration data including the model to be meshed, the type of mesh to generate and the boundary layer surfaces.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="MeshParameters" type="MeshParameters">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This section contains the meshing metadata describing the specific properties of the mesh to be generated from the CAD model.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="LineRefinements" type="LineRefinementsType" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>This optional section is used to add line refinement parameters.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AdditionalParameters" type="AdditionalParameters">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Additional boolean parameters for switching optimisation and octree writing on/off.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>  
+</xs:schema>
+

@@ -50,22 +50,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.Context;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -75,16 +70,19 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.dom4j.DocumentException;
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.imperial.libhpc2.tempss.xml.TemPSSSchemaBuilder;
+import uk.ac.imperial.libhpc2.tempss.xml.TemPSSXMLTemplateProcessor;
 
 public class SchemaProcessor {
     /**
      * Logger
      */
-    private static final Logger sLog = Logger.getLogger(SchemaProcessor.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaProcessor.class.getName());
 
     /**
      * Servlet context passed in on class creation
@@ -111,9 +109,9 @@ public class SchemaProcessor {
     public String processComponentSelector(TempssObject pComponentMetadata)
         throws FileNotFoundException, IOException, ParseException, TransformerException {
 
-        sLog.fine("ServletContext: " + _context);
+        LOG.debug("ServletContext: " + _context);
         String schemaPath = _context.getRealPath("/WEB-INF/classes") + File.separator;
-        String verboseName = pComponentMetadata.getName();
+        //String verboseName = pComponentMetadata.getName();
         String schemaName = pComponentMetadata.getSchema();
 
         // Construct full path to file
@@ -137,6 +135,28 @@ public class SchemaProcessor {
             throw new IOException("Unable to read the schema file as a string...", e);
         }
 
+        // Updated Jan17: Adding support for new XML-based template format -
+        // if we have an XML-based template then run the converter to the 
+        // original XML Schema format now...
+        if(TemPSSXMLTemplateProcessor.isXMLTemplate(schemaString)) {
+        	LOG.debug("Converting an XML template to XML schema format...");
+        	// Convert to schema format template.
+        	TemPSSXMLTemplateProcessor proc = new TemPSSXMLTemplateProcessor(schemaString);
+    		if(!proc.parseXML()) {
+    			LOG.debug("Unable to parse the XML template content.");
+    			return "";
+    		}
+    		
+    		schemaString = proc.getConvertedResult();
+    		if(schemaString != null) {
+    			LOG.debug("Template XML successfully converted to schema format");
+    		}
+    		else {
+    			LOG.error("Conversion failed, result was null");
+    			return "";
+    		}
+        }
+        
         // Use regex to find and include files. First find the identifier
         // assigned to the schema namespace. Usually it's xs or xsd Need to
         // match pattern like: xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -316,8 +336,13 @@ public class SchemaProcessor {
 
         // Get path to web-inf folder
         String filePath = _context.getRealPath("/temp");
+        File filePathObj = new File(filePath);
+        if(!filePathObj.exists()) {
+        	// Try to create the directory if it doesn't exist
+        	filePathObj.mkdir();
+        }
         File tempDir = new File(filePath);
-        boolean isSuccess = tempDir.mkdirs();
+        //boolean isSuccess = tempDir.mkdirs();
 
         try {
             File file = new File(tempDir, basicXmlFileName);
@@ -348,5 +373,63 @@ public class SchemaProcessor {
         transformOutputMap.put("TransformedDataFile", outputXmlFileName);
 
         return transformOutputMap;
+    }
+    
+    public static void main(String[] args) throws TransformerException {
+    	System.out.println("TemPSS Profile Conversion Test Tool");
+    	System.out.println("-----------------------------------\n");
+    	if(args.length != 2) {
+    		System.err.println("Usage: SchemaProcessor [XSLT transform] [TemPSS XML Profile]");
+    		System.exit(0);
+    	}
+    	
+    	File xslFile = new File(args[0]);
+    	File profileFile = new File(args[1]);
+    	if( (!xslFile.exists()) || (!profileFile.exists()) ) {
+    		System.err.println("A specified file does not exist.");
+    		System.err.println("Usage: SchemaProcessor [XSLT transform] [TemPSS XML Profile]");
+    		System.exit(0);
+    	}
+        Source xsl = new StreamSource(xslFile);
+        StringReader inputReader = null;
+        StreamSource xmlInput = null;
+        try {
+        	inputReader = new StringReader(new String(
+            	Files.readAllBytes(Paths.get(profileFile.getAbsolutePath()))));
+        	xmlInput = new StreamSource(inputReader);
+		} catch (IOException e) {
+			throw new TransformerException("Error creating stream for XML input data.", e);
+		}
+        StreamResult xmlOutput = new StreamResult(new StringWriter());
+        String outputXml = "";
+        Transformer transformer;
+
+        try {
+            transformer = TransformerFactory.newInstance().newTransformer(xsl);
+        } catch (TransformerConfigurationException e) {
+            throw new TransformerException("Error creating transformer for the specified XSLT document <" + xslFile + ">", e);
+        } catch (TransformerFactoryConfigurationError e) {
+            throw new TransformerException("Configuration error creating transformer for the specified XSLT document <" + xslFile + ">", e);
+        }
+
+        LibhpcErrorListener errorHandler = new LibhpcErrorListener();
+        transformer.setErrorListener(errorHandler);
+
+        try {
+            transformer.transform(xmlInput, xmlOutput);
+        } catch (TransformerException e) {
+            throw new TransformerException("Error carrying out XSLT transform: " + errorHandler.getErrorMessages().toString(), e);
+        }
+        outputXml = xmlOutput.getWriter().toString();
+        try {
+            outputXml = SchemaProcessorUtils.prettyPrintXml(outputXml);
+        } catch (DocumentException e) {
+            throw new TransformerException("Document error formatting XML output data: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new TransformerException("IO error formatting XML output data: " + e.getMessage(), e);
+        }
+        
+        System.out.println("Output from XSLT conversion to Nektar++ input file: \n\n" + outputXml);
+
     }
 }

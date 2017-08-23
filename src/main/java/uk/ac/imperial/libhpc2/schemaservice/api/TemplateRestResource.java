@@ -45,18 +45,17 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -72,10 +71,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import uk.ac.ic.prism.jhc02.csp.CSProblemDefinition;
+import uk.ac.ic.prism.jhc02.csp.Constraint;
+import uk.ac.imperial.libhpc2.schemaservice.ConstraintsException;
 import uk.ac.imperial.libhpc2.schemaservice.SchemaProcessor;
+import uk.ac.imperial.libhpc2.schemaservice.TemplateProcessorException;
 import uk.ac.imperial.libhpc2.schemaservice.TempssObject;
+import uk.ac.imperial.libhpc2.schemaservice.UnknownTemplateException;
 
 /**
  * Jersey REST class representing the template endpoint
@@ -111,6 +117,7 @@ public class TemplateRestResource {
 
     	JSONArray componentList = new JSONArray();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             JSONObject componentObj = new JSONObject();
             try {
                 componentObj.put("id", component.getId());
@@ -143,6 +150,7 @@ public class TemplateRestResource {
 
         StringBuilder sb = new StringBuilder();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             sb.append("[" + component.getId() + ", "
                       + component.getName() + ", "
                       + component.getSchema() + ", "
@@ -160,6 +168,7 @@ public class TemplateRestResource {
 
         StringBuilder sb = new StringBuilder();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             sb.append(component.getName() + "\n");
         }
         return sb.toString();
@@ -174,6 +183,7 @@ public class TemplateRestResource {
 
         JSONArray componentNames = new JSONArray();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             componentNames.put(component.getName());
         }
         return componentNames.toString();
@@ -188,6 +198,7 @@ public class TemplateRestResource {
 
         StringBuilder sb = new StringBuilder();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             sb.append(component.getId() + "\n");
         }
         return sb.toString();
@@ -202,6 +213,7 @@ public class TemplateRestResource {
 
         JSONArray componentNames = new JSONArray();
         for(TempssObject component : components.values()) {
+        	if(component.ignore()) continue;
             componentNames.put(component.getId());
         }
         return componentNames.toString();
@@ -210,39 +222,109 @@ public class TemplateRestResource {
     @GET
     @Produces("text/html")
     @Path("id/{templateId}")
-    @SuppressWarnings("unchecked")
     public Response getTemplatesHtmlTree(@PathParam("templateId") String templateId) {
-        // Get the component metadata from the servletcontext and check the name is valid
-        Map<String, TempssObject> components = (Map<String, TempssObject>)_context.getAttribute("components");
-
-        // If we don't have a template of this name then throw an error
-        if(!components.containsKey(templateId)) {
-            return Response.status(Status.NOT_FOUND).entity("Template with ID <" + templateId + "> does not exist.").build();
+    	String templateHtml = "";
+    	try {
+    		// Get the template information from the metadata map
+    		TempssObject metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
+    		templateHtml = _getTemplateHtml(templateId, metadata);
+    	} catch(UnknownTemplateException e) {
+    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    	} catch(TemplateProcessorException e) {
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    	}
+    	
+    	return Response.ok(templateHtml, MediaType.TEXT_HTML).build();
+    }
+    
+    @GET
+    @Produces("application/json")
+    @Path("id/{templateId}")
+    public Response getTemplatesHtmlJson(@PathParam("templateId") String templateId,
+    		@Context HttpServletRequest request) {
+    	String templateHtml = "";
+    	TempssObject metadata = null;
+    	try {
+    		// Get the template information from the metadata map
+    		metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
+    		templateHtml = _getTemplateHtml(templateId, metadata);
+    	} catch(UnknownTemplateException e) {
+    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    	} catch(TemplateProcessorException e) {
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    	}
+    	
+    	JSONObject templateObj = new JSONObject();
+        try {        	
+        	// Keys used for compatibility with old API
+            templateObj.put("ComponentName", templateId);
+            templateObj.put("TreeHtml", templateHtml);
+            templateObj.put("authenticated", !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken));
+            
+            boolean constraints = false;
+            // Additional keys for constraint data
+            if(metadata.getConstraints() != null) {
+            	constraints = true;
+            	CSProblemDefinition problem = null;
+            	try {
+					 problem = TemplateResourceUtils.getConstraintData(templateId, this._context);
+					 List<Constraint> constraintList = problem.getConstraints();
+					 // Constraint map will be used to build a two way mapping between constraint variable relationships
+					 Map<String, Set<String>> constraintMap = new HashMap<String, Set<String>>();
+					 for(Constraint c : problem.getConstraints()) {
+						 String varName = c.getVariable1FQName();
+						 String var2Name = c.getVariable2FQName();
+						 if(!constraintMap.containsKey(varName)) {
+							 constraintMap.put(varName, new HashSet<String>());
+						 }
+						 constraintMap.get(varName).add(var2Name);
+						 if(!constraintMap.containsKey(var2Name)) {
+							 constraintMap.put(var2Name, new HashSet<String>());
+						 }
+						 constraintMap.get(var2Name).add(varName);
+					 }
+		            templateObj.put("constraintInfo", constraintMap);
+				} catch (UnknownTemplateException | ConstraintsException e) {
+					sLog.error("Error accessing constraint information for template <{}>", templateId);
+					constraints = false;
+				}
+            	
+            	
+            }
+            templateObj.put("constraints", constraints);
+        } catch (JSONException e) {
+            sLog.error("Unable to add template HTML for template <" 
+            		+ templateId + "> to JSON object: " + e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+            		"Unable to add template HTML for template <" + templateId +
+            		"> to JSON object: " + e.getMessage()).build();
         }
-
-        // Get the template information from the metadata map
-        // and make a call to the schema processor to transform
-        // the template schema to an HTML tree for display in
-        // a web page
+    	
+    	return Response.ok(templateObj.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    private String _getTemplateHtml(String templateId, TempssObject metadata) 
+    		throws UnknownTemplateException, TemplateProcessorException {
+        // Make a call to the schema processor to transform the template 
+        // schema to an HTML tree for display in a web page
         SchemaProcessor proc = new SchemaProcessor(_context);
-        TempssObject metadata = components.get(templateId);
         String htmlTree = "";
         try {
             htmlTree = proc.processComponentSelector(metadata);
         } catch (FileNotFoundException e) {
             sLog.error("File not found when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("File not found when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("File not found when trying to generate HTML tree: " + e.getMessage());
         } catch (IOException e) {
             sLog.error("IO error when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("IO error when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("IO error when trying to generate HTML tree: " + e.getMessage());
         } catch (ParseException e) {
             sLog.error("XML parse error when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XML parse error when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("XML parse error when trying to generate HTML tree: " + e.getMessage());
         } catch (TransformerException e) {
             sLog.error("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("XSLT transform error when trying to generate HTML tree: " + e.getMessage()).build();
+            throw new TemplateProcessorException("XSLT transform error when trying to generate HTML tree: " + e.getMessage());
         }
 
-        return Response.ok(htmlTree, MediaType.TEXT_HTML).build();
-    }
+        return htmlTree;
+    }   
 }

@@ -314,6 +314,7 @@ var constraints = {
 								$toggleInput.candlestick('on');
 							}
 							$targetEl.addClass('set_by_constraint');
+							$toggleInput.candlestick('disable');
 						}						
 					}
 
@@ -397,6 +398,7 @@ var constraints = {
 			else if($element.children('span.toggle_button_tristate').length > 0) {
 				var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
 				$input.candlestick('reset');
+				$input.candlestick('enabled');
 			}
 		}
 		// Remove the set_by_constraint from any toggle nodes...
@@ -574,6 +576,7 @@ var constraints = {
 					else if($input.val() != "" && constraintData[i]['value'] == "") {
 						$targetEl.data("run-solver", false);
 						$input.candlestick('reset');
+						$input.candlestick('enabled');
 					}
 					else {
 						log("The toggle value is already correct, no change required...");

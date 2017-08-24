@@ -421,6 +421,11 @@ function isInteger(valueToCheck) {
                 
                 // Function to handle tri-state toggle buttons...
                 this._tree.on('click' + '.' + this._name, 'li.parent_li > span.toggle_button_tristate', function(e) {
+                	// If the toggle is disabled, ignore the click
+                	if( $(this).find('div.candlestick-bg').hasClass('candlestick-disabled') ) {
+                		return;
+                	}
+                	
                 	// For now, we ignore all clicks on this span element and
                 	// have the toggle process handled entirely by the switches
                 	// in the callbacks provided by the candlestick plugin

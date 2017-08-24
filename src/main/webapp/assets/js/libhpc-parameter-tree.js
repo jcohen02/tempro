@@ -297,6 +297,10 @@ function isInteger(valueToCheck) {
                 if (this._options.enableTooltips) {
                     this.enableTooltips();
                 }
+                
+                // Set up tristate switches using "candlestick" plugin
+                this.setupTristateToggles();
+
             },
 
             /**
@@ -414,6 +418,30 @@ function isInteger(valueToCheck) {
                 this._tree.on('click' + '.' + this._name, 'li.parent_li > span.toggle_button', function(e) {
                     toggleBranch($(this).closest('ul'));
                 });
+                
+                // Function to handle tri-state toggle buttons...
+                this._tree.on('click' + '.' + this._name, 'li.parent_li > span.toggle_button_tristate', function(e) {
+                	// For now, we ignore all clicks on this span element and
+                	// have the toggle process handled entirely by the switches
+                	// in the callbacks provided by the candlestick plugin
+                	return;
+                	/*
+                	// If the toggle button is still in a disabled state, ignore
+                	var $input = $(this).find('input.toggle_button');
+                	if($input.val() == "" || $input.val() == undefined) 
+                		return;
+                	
+                	// If the target was a click on the span element in which 
+                	// the tristate is placed, trigger a toggle of the switch
+                	// If the target was the switch itself then we assume that 
+                	// the switch has already been changed
+                	if($input.val() == "0") $input.candlestick('on');
+                	else if($input.val() == "1") $input.candlestick('off');
+                		
+                	toggleBranch($(this).closest('ul'));
+                	*/
+                });
+                
                 // Add button to switch on optional branches
                 //this._optionalLIs.children('span.badge').after('&nbsp;<span class="toggle-button enable-button glyphicon glyphicon-off" title="Optional branch disabled - click to activate" aria-hidden="true"></span>');
                 setupOptionalBranches(this._optionalULs, this._optionalLIs);
@@ -489,6 +517,34 @@ function isInteger(valueToCheck) {
              */
             updateLIs: function() {
             	this._allLIs = this._tree.find('li');
+            },
+            
+            /**
+             * Setup tristate toggle switches for optional branches - these 
+             * use the jquery candlestick plugin, see: 
+             * https://github.com/EdouardTack/candlestick 
+             */
+            setupTristateToggles: function() {
+                var $toggleBtns = this._tree.find('.toggle_button[type="checkbox"]');
+                $toggleBtns.candlestick({
+                	swipe:false, 
+                	size: 'xs', 
+                	allowManualDefault: false,
+                	afterSetting: function(input, wrapper, value) {
+                		log("Tristate setting callback with value: " + value);
+                		var $closestUL = input.closest('ul');
+                		// If the value that was set is different to the value
+                		// of the optional node, toggle it
+                		if($closestUL.hasClass("disabled") && value == "1") {
+                			toggleBranch($closestUL);
+                		}
+                		else if((!$closestUL.hasClass("disabled")) && value == "0") {
+                			toggleBranch($closestUL);	
+                		}
+                	},
+                });
+                $toggleBtns.candlestick('enable');
+                this._tree.find('div.candlestick-toggle').css('left','12px;');
             }
     };
 
@@ -1860,3 +1916,5 @@ $.ajax({
     }
 });
 */
+
+// Modification of the 

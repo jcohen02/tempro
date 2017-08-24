@@ -179,11 +179,6 @@ function displayTemplate(templateID, templateText) {
             // Instantiate the tree plugin on the tree
             $templateContainer.LibhpcParameterTree();
             
-            // Enable the candlestick tri-state buttons in the tree.
-            var $toggleBtns = $templateContainer.find('.toggle_button[type="checkbox"]');
-            $toggleBtns.candlestick({swipe:false, size: 'xs', allowManualDefault: false});
-            $toggleBtns.candlestick('enable');
-            $('div.candlestick-toggle').css('left','10px;');
             treeRoot = $('#template-container ul[role="tree"]');
             var $templateNameNode = treeRoot.find("> li.parent_li > span[data-fqname]");
             var templateName = $templateNameNode.text();

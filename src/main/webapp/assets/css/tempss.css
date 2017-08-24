@@ -163,7 +163,7 @@ div.constraint-header a {
  * Styling for the "candlestick" toggles to make them more clearly visible
  */
 .candlestick-wrapper {
-	top: 3px;
+	top: 6px;
 	left: 0px;
 }
 

@@ -540,8 +540,8 @@ function isInteger(valueToCheck) {
                 var $toggleBtns = this._tree.find('.toggle_button[type="checkbox"]');
                 $toggleBtns.candlestick({
                 	swipe:false, 
-                	size: 'xs', 
-                	allowManualDefault: false,
+                	size: 'sm', 
+                	allowManualDefault: true,
                 	afterSetting: function(input, wrapper, value) {
                 		log("Tristate setting callback with value: " + value);
                 		var $closestUL = input.closest('ul');
@@ -553,10 +553,13 @@ function isInteger(valueToCheck) {
                 		else if((!$closestUL.hasClass("disabled")) && value == "0") {
                 			toggleBranch($closestUL);	
                 		}
+                		input.trigger('tristate_toggle_set', [value]);
                 	},
                 });
                 $toggleBtns.candlestick('enable');
-                this._tree.find('div.candlestick-toggle').css('left','12px;');
+                this._tree.find('div.candlestick-toggle').css('left','15px');
+                this._tree.find('div.candlestick-toggle').css('border','1px solid #b9b9b9');
+                this._tree.find('.toggle_button_tristate .candlestick-nc').off('click');
             }
     };
 

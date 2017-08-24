@@ -99,6 +99,14 @@ var constraints = {
 					var selectHTML = $select.html();
 					constraintData[prop] = selectHTML;
 				}
+				else if($element.find('input#' + targetName).length > 0) {
+					var $input = $element.find('input#' + targetName);
+					var value = $input.val();
+					if(value == "") value = "NONE";
+					else if(value == "1") value = "On";
+					else if(value == "0") value = "Off";
+					constraintData[prop] = value;
+				}
 			}
 		}
 		return constraintData;
@@ -181,9 +189,6 @@ var constraints = {
 				// FIXME: For now, we only want to set the actual value of the
 				// on/off item when it has been set by a constraint result or
 				// when it is the element that triggered the update
-				// FIXME: For now, we only want to set the actual value of the
-				// on/off item when it has been set by a constraint result or
-				// when it is the element that triggered the update
 				if($el.is($triggerElement)) {
 					log("This is on/off node is the trigger element...");
 					value = ($iEl.hasClass("enable_button")) ? "Off" : "On";
@@ -196,6 +201,26 @@ var constraints = {
 					value = "Off";
 				}
 				else value = "On";
+			}
+			else if($el.children('span.toggle_button_tristate').length > 0) {
+				// This handles the use of a tri-state toggle button which 
+				// addresses the issues in the above handling of a standard 
+				// toggle button where we don't know how to handle it when it 
+				// has an initial on/off state that we haven't set.
+				log("Preparing constraints - we have an on/off node...");
+				var $input = $el.find('> span.toggle_button_tristate input.toggle_button');
+				if($el.is($triggerElement)) {
+					log("This on/off node is the trigger element...");
+					value = ($input.val() == "1") ? "On" : "Off";
+					$el.addClass("set_by_constraint");
+				}
+				else if(!$el.hasClass("set_by_constraint")) {
+					value = "NONE";
+				}
+				else if($input.val() == "1") {
+					value = "On";
+				}
+				else value = "Off";
 			}
 			log("Name: " + name + "    Value: " + value);
 			formDict[name] = value;
@@ -255,7 +280,7 @@ var constraints = {
 						$selectEl.html(selectHTML);
 						this._revalidateChoiceElement($selectEl);
 					}
-					// Else if we have an on/off node
+					// Else if we have a standard on/off node
 					else if($targetEl.children('span.toggle_button').length > 0) {
 						var $toggleSpan = $targetEl.children('span.toggle_button');
 						var solutionValue = "";
@@ -273,6 +298,25 @@ var constraints = {
 							$targetEl.addClass('set_by_constraint');
 						}						
 					}
+					// Else if we have a tri-state on/off/unset node
+					else if($targetEl.children('span.toggle_button_tristate').length > 0) {
+						var $toggleInput = $targetEl.children('span.toggle_button_tristate').find('input.toggle_button');
+						var solutionValue = "";
+						if(solution['values'].length == 1) {
+							solutionValue = solution['values'][0];
+							log("We have a fixed value for on/off node that needs to be set.");
+							if(solutionValue == "Off" && ($toggleInput.val() != "0")) {
+								$targetEl.data("run-solver", false);
+								$toggleInput.candlestick('off');
+							}
+							else if(solutionValue == "On" && ($toggleInput.val() != "1")) {
+								$targetEl.data("run-solver", false);
+								$toggleInput.candlestick('on');
+							}
+							$targetEl.addClass('set_by_constraint');
+						}						
+					}
+
 				}
 				
 				// After processing all the data, we now store the current
@@ -349,6 +393,10 @@ var constraints = {
 					var event = {target: $select[0]};
 					selectChoiceItem(event);
 				}
+			}
+			else if($element.children('span.toggle_button_tristate').length > 0) {
+				var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
+				$input.candlestick('reset');
 			}
 		}
 		// Remove the set_by_constraint from any toggle nodes...
@@ -487,26 +535,52 @@ var constraints = {
 				this._revalidateChoiceElement($targetEl.children('select.choice'));
 				break;
 			case "toggle":
-				// Get the current value of the toggle - if its the same as 
-				// the stored value then we don't need to change anything, 
-				// otherwise we change it triggering a click and add the tag 
-				// to tell the constraint solver not to run again.
-				var $iEl = $targetEl.find('> span.toggle_button > i.toggle_button');
-				$targetEl.removeClass('set_by_constraint');
-				var $toggleSpan = $targetEl.children('span.toggle_button');
-				if($iEl.hasClass("enable_button") && constraintData[i]['value'] == "On") {
-					$targetEl.data("run-solver", false);
-					$toggleSpan.trigger('click');
+				// Find out whether this is an old style toggle or a tristate 
+				// toggle.
+				if($targetEl.find('> span.toggle_button > i.toggle_button').length > 0) {
+					// Get the current value of the toggle - if its the same as 
+					// the stored value then we don't need to change anything, 
+					// otherwise we change it triggering a click and add the tag 
+					// to tell the constraint solver not to run again.
+					var $iEl = $targetEl.find('> span.toggle_button > i.toggle_button');
+					$targetEl.removeClass('set_by_constraint');
+					var $toggleSpan = $targetEl.children('span.toggle_button');
+					if($iEl.hasClass("enable_button") && constraintData[i]['value'] == "On") {
+						$targetEl.data("run-solver", false);
+						$toggleSpan.trigger('click');
+					}
+					else if($iEl.hasClass("disable_button") && constraintData[i]['value'] == "Off") {
+						$targetEl.data("run-solver", false);
+						$toggleSpan.trigger('click');
+					}
+					else {
+						log("The toggle value is already correct, no change required...");
+					}
+					if(constraintData[i]['sbc']) {
+						$targetEl.addClass('set_by_constraint');
+					}
 				}
-				else if($iEl.hasClass("disable_button") && constraintData[i]['value'] == "Off") {
-					$targetEl.data("run-solver", false);
-					$toggleSpan.trigger('click');
-				}
-				else {
-					log("The toggle value is already correct, no change required...");
-				}
-				if(constraintData[i]['sbc']) {
-					$targetEl.addClass('set_by_constraint');
+				else if($targetEl.find('> span.toggle_button_tristate').length > 0) {
+					var $input = $targetEl.find('> span.toggle_button_tristate input.toggle_button');
+					$targetEl.removeClass('set_by_constraint');
+					if($input.val() != "0" && constraintData[i]['value'] == "Off") {
+						$targetEl.data("run-solver", false);
+						$input.candlestick('off');
+					}
+					else if($input.val() != "1"  && constraintData[i]['value'] == "On") {
+						$targetEl.data("run-solver", false);
+						$input.candlestick('on');
+					}
+					else if($input.val() != "" && constraintData[i]['value'] == "") {
+						$targetEl.data("run-solver", false);
+						$input.candlestick('reset');
+					}
+					else {
+						log("The toggle value is already correct, no change required...");
+					}
+					if(constraintData[i]['sbc']) {
+						$targetEl.addClass('set_by_constraint');
+					}
 				}
 				break;
 			case "text":
@@ -539,6 +613,8 @@ var constraints = {
 				nodeType = "choice";
 			else if($element.children('span.toggle_button').length > 0)
 				nodeType = "toggle";
+			else if($element.children('span.toggle_button_tristate').length > 0)
+				nodeType = "toggle";
 			else if($element.children('input[type="text"]').length > 0)
 				nodeType = "text";
 			
@@ -570,15 +646,25 @@ var constraints = {
 				else {
 					constraintItem['sbc'] = false;
 				}
-				var $iEl = $element.find('> span.toggle_button > i.toggle_button');
-				if($iEl.hasClass("enable_button")) {
-					constraintItem['value'] = "Off";
+				// We handle capture of the values differently depending on 
+				// whether we have a standard toggle or a tri-state toggle.
+				
+				if($element.find('> span.toggle_button > i.toggle_button').length > 0) {
+					var $iEl = $element.find('> span.toggle_button > i.toggle_button');
+					if($iEl.hasClass("enable_button")) {
+						constraintItem['value'] = "Off";
+					}
+					else {
+						constraintItem['value'] = "On";
+					}
 				}
-				else {
-					constraintItem['value'] = "On";
+				else if($element.find('> span.toggle_button_tristate').length > 0) {
+					var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
+					if($input.val() == "0")	constraintItem['value'] = "Off";
+					if($input.val() == "1")	constraintItem['value'] = "On";
+					if($input.val() == "")	constraintItem['value'] = "";
 				}
 				break;
-			
 			case "text":
 				constraintItem['type'] = "text";
 				constraintItem['value'] = $element.children('input[type="text"]').val();

@@ -424,22 +424,34 @@ function isInteger(valueToCheck) {
                 	// For now, we ignore all clicks on this span element and
                 	// have the toggle process handled entirely by the switches
                 	// in the callbacks provided by the candlestick plugin
-                	return;
-                	/*
                 	// If the toggle button is still in a disabled state, ignore
                 	var $input = $(this).find('input.toggle_button');
-                	if($input.val() == "" || $input.val() == undefined) 
+                	var value = $input.val();
+                	if(value == "" || value == undefined) 
                 		return;
+                	
+                	// If the click was not made on this span element, then
+                	// we ignore it since it will be handled by the toggle btn.
+                	if( (e.originalEvent.target.className == "fa fa-check") ||
+                		(e.originalEvent.target.className == "fa fa-times")) {
+                		return;
+                	}
                 	
                 	// If the target was a click on the span element in which 
                 	// the tristate is placed, trigger a toggle of the switch
                 	// If the target was the switch itself then we assume that 
                 	// the switch has already been changed
-                	if($input.val() == "0") $input.candlestick('on');
-                	else if($input.val() == "1") $input.candlestick('off');
-                		
-                	toggleBranch($(this).closest('ul'));
-                	*/
+            		var $closestUL = $input.closest('ul');
+            		// If the value that was set is different to the value
+            		// of the optional node, toggle it
+            		if($closestUL.hasClass("disabled") && value == "0") {
+            			// Candlestick afterSetting callback handles branch toggle
+            			$input.candlestick('on');
+            		}
+            		else if((!$closestUL.hasClass("disabled")) && value == "1") {
+            			// Candlestick afterSetting callback handles branch toggle
+            			$input.candlestick('off');	
+            		}
                 });
                 
                 // Add button to switch on optional branches

@@ -167,6 +167,14 @@ div.constraint-header a {
 	left: 0px;
 }
 
+.candlestick-disabled {
+	cursor: default;
+}
+
+.candlestick-disabled .candlestick-toggle:hover {
+	cursor: default;
+}
+
 .candlestick-toggle {
 	border: !important 1px solid #b9b9b9;
 	left: !important 14px;

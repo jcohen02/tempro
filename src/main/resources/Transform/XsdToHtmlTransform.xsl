@@ -150,6 +150,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:attribute name="class">toggle_button_tristate</xsl:attribute>
             <xsl:attribute name="title">Optional branch inactive - click to activate</xsl:attribute>
             <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            <xsl:attribute name="data-toggle">tooltip</xsl:attribute>
 
             <!-- 
             <xsl:element name="i">

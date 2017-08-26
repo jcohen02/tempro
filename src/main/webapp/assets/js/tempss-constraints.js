@@ -315,6 +315,15 @@ var constraints = {
 							}
 							$targetEl.addClass('set_by_constraint');
 							$toggleInput.candlestick('disable');
+							var $toggleSpan = $toggleInput.closest('.toggle_button_tristate');
+							$toggleSpan.attr('title','The control switch ' +
+								'for this optional branch is disabled because' +
+								' it has been fixed by the constraint solver.' +
+								' To change the setting either undo the ' +
+								'constraint change that set this switch or ' +
+								'reset the constraints.').tooltip();
+							//$toggleSpan.attr('data-toggle','tooltip');
+							//$toggleSpan.attr('data-placement','right');
 						}						
 					}
 
@@ -398,7 +407,7 @@ var constraints = {
 			else if($element.children('span.toggle_button_tristate').length > 0) {
 				var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
 				$input.candlestick('reset');
-				$input.candlestick('enabled');
+				$input.candlestick('enable');
 			}
 		}
 		// Remove the set_by_constraint from any toggle nodes...
@@ -576,7 +585,7 @@ var constraints = {
 					else if($input.val() != "" && constraintData[i]['value'] == "") {
 						$targetEl.data("run-solver", false);
 						$input.candlestick('reset');
-						$input.candlestick('enabled');
+						$input.candlestick('enable');
 					}
 					else {
 						log("The toggle value is already correct, no change required...");

@@ -192,11 +192,11 @@
 		// Set up tooltips for collapse/expand tree buttons
 		hideTreeExpandCollapseButtons(true);
 		
-		// Enable tooltips (for save button)
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
+		// Enable tooltips (for save button and disabled toggles)
+        $('body').tooltip({
+        	selector: '[data-toggle="tooltip"]' 
         });
-		
+           
         $('#load-profile-btn-modal').on('click', function(e) {
         	var modal = $('#confirm-load-profile-modal');
         	var templateId = modal.data('templateId');

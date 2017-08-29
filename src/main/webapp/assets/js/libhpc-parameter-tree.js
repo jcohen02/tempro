@@ -426,6 +426,13 @@ function isInteger(valueToCheck) {
                 		return;
                 	}
                 	
+                	// If the original target of this click was not the span
+                	// element, then we ignore it since the click will be 
+                	// handled by handlers on the tri-state switch.
+                	if(!$(this).is($(e.originalEvent.target))) {
+                		return;
+                	}
+                	
                 	// For now, we ignore all clicks on this span element and
                 	// have the toggle process handled entirely by the switches
                 	// in the callbacks provided by the candlestick plugin
@@ -437,10 +444,10 @@ function isInteger(valueToCheck) {
                 	
                 	// If the click was not made on this span element, then
                 	// we ignore it since it will be handled by the toggle btn.
-                	if( (e.originalEvent.target.className == "fa fa-check") ||
-                		(e.originalEvent.target.className == "fa fa-times")) {
-                		return;
-                	}
+                	//if( (e.originalEvent.target.className == "fa fa-check") ||
+                	//	(e.originalEvent.target.className == "fa fa-times")) {
+                	//	return;
+                	//}
                 	
                 	// If the target was a click on the span element in which 
                 	// the tristate is placed, trigger a toggle of the switch
@@ -558,7 +565,7 @@ function isInteger(valueToCheck) {
                 		else if((!$closestUL.hasClass("disabled")) && value == "0") {
                 			toggleBranch($closestUL);	
                 		}
-                		input.trigger('tristate_toggle_set', [value]);
+                		//input.trigger('tristate_toggle_set', [value]);
                 	},
                 });
                 $toggleBtns.candlestick('enable');
@@ -719,6 +726,7 @@ function isInteger(valueToCheck) {
             });
         }
     };
+    window.toggleBranch = toggleBranch;
 
     /**
      * Repeat this branch.

@@ -345,6 +345,37 @@
         	}
         });
         
+        /**
+         * For debug/testing, trying to identify why candlestick toggles 
+         * sometimes go one way and then the other with a single click. Adding 
+         * listeners to each of the click handlers on a toggle to see what 
+         * clicks are being picked up...
+         */
+        $('body').on('click', '.candlestick-on', function() {
+        	log("CLICK DETECTED FOR candlestick-on");
+        });
+        $('body').on('click', '.candlestick-off', function() {
+        	log("CLICK DETECTED FOR candlestick-off");
+        });
+        $('body').on('click', '.candlestick-nc', function() {
+        	log("CLICK DETECTED FOR candlestick-nc");
+        });
+        $('body').on('click', '.candlestick-toggle', function() {
+        	log("CLICK DETECTED FOR candlestick-toggle");
+        });
+        
+        $('body').on('click', '.candlestick-bg', function() {
+        	log("CLICK DETECTED FOR candlestick-bg");
+        });
+        
+        $('body').on('click', '.candlestick-wrapper', function() {
+        	log("CLICK DETECTED FOR candlestick-wrapper");
+        });
+        
+        $('body').on('click', '.toggle_button_tristate', function() {
+        	log("CLICK DETECTED FOR toggle_button_tristate");
+        });
+        
 	});
 	
 	/**

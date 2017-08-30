@@ -1682,7 +1682,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             }
                             if (!(isStringEnumerationFound)) {
                                 $caller.markValidity("invalid",
-                                        {message: 'This property must have a value from the list: ' + value.toString()});
+                                        {message: 'This property must have a value from the list: ' + value.join(', ')});
                             }
                             break;
                         case "xs:filetype":
@@ -1698,7 +1698,7 @@ function validateEntries($caller, validationType, restrictionsJSON) {
                             if (!(extensionFound)) {
                                 // File is not valid after all
                                 $caller.markValidity("invalid",
-                                        {message: 'The filename must have an extension from the list: ' + value.toString()});
+                                        {message: 'The filename must have an extension from the list: ' + value.join(', ')});
                             }
                             break;
                         case "xs:pattern":

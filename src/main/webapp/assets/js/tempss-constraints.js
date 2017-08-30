@@ -416,6 +416,11 @@ var constraints = {
 		while(this.constraintChangeStack.length > 1)
 			this.constraintChangeStack.pop();
 		this.constraintChangeStackPointer = 0;
+		
+		// Finally, find any items that have a val-help info message next to 
+		// them and remove any invalid state that has been set when  
+		// re-evaluating the content following the field reset.
+		$('li.parent_li.constraint .val-help').closest('ul').removeClass('invalid');
 	
 	},
 	

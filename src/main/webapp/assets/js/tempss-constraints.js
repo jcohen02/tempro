@@ -155,10 +155,10 @@ var constraints = {
 		// a result of processing a constraint, we add a flag to it which is 
 		// picked up here and prevents the solver running again as a result of 
 		// the change to this element.
-		if($triggerElement.data("runSolver") !== undefined && !$triggerElement.data("runSolver")) {
+		if($triggerElement.data("run-solver") !== undefined && !$triggerElement.data("run-solver")) {
 			log("Data attribute directed solver not to run.");
 			$triggerElement.removeAttr("data-run-solver");
-			$triggerElement.removeData("runSolver");
+			$triggerElement.removeData("run-solver");
 			return;
 		}
 		
@@ -238,6 +238,7 @@ var constraints = {
 			data: formDict
 		});
 		
+		var candlestickUpdatedByConstraint = this.candlestickUpdatedByConstraint;
 		solveRequest.done($.proxy(function(data) {
 			if(data.hasOwnProperty("result") && 
 			   data.hasOwnProperty("solutions") && 
@@ -288,11 +289,11 @@ var constraints = {
 							solutionValue = solution['values'][0];
 							log("We have a fixed value for on/off node that needs to be set.");
 							if(solutionValue == "Off" && $toggleSpan.children('i').hasClass('disable_button')) {
-								$targetEl.data("run-solver", false);
+								$targetEl.attr("data-run-solver", false);
 								$toggleSpan.trigger('click');
 							}
 							else if(solutionValue == "On" && $toggleSpan.children('i').hasClass('enable_button')) {
-								$targetEl.data("run-solver", false);
+								$targetEl.attr("data-run-solver", false);
 								$toggleSpan.trigger('click');
 							}
 							$targetEl.addClass('set_by_constraint');
@@ -306,31 +307,15 @@ var constraints = {
 							solutionValue = solution['values'][0];
 							log("We have a fixed value for on/off node that needs to be set.");
 							if(solutionValue == "Off" && ($toggleInput.val() != "0")) {
-								$targetEl.data("run-solver", false);
+								$targetEl.attr("data-run-solver", false);
 								$toggleInput.candlestick('off');
 							}
 							else if(solutionValue == "On" && ($toggleInput.val() != "1")) {
-								$targetEl.data("run-solver", false);
+								$targetEl.attr("data-run-solver", false);
 								$toggleInput.candlestick('on');
 							}
 							$targetEl.addClass('set_by_constraint');
-							$toggleInput.candlestick('disable');
-							var $toggleSpan = $toggleInput.closest('.toggle_button_tristate');
-							// Update the title for the tooltip - to do this, 
-							// we backup the original title, set our new title
-							// as data-original-title and then use the fixTitle
-							// feature to store the new title to the main title
-							// and initialise it. Then replace the original 
-							// title to data-original-title.
-							var newTooltipText = 'The control switch ' +
-							'for this optional branch is disabled because' +
-							' it has been fixed by the constraint solver.' +
-							' To change the setting either undo the ' +
-							'constraint change that set this switch or ' +
-							'reset the constraints.';
-							var originalTitle = $toggleSpan.data('title');
-							$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('show');
-							$toggleSpan.attr('data-original-title',originalTitle);
+							candlestickUpdatedByConstraint($toggleInput);
 						}						
 					}
 
@@ -414,9 +399,8 @@ var constraints = {
 			else if($element.children('span.toggle_button_tristate').length > 0) {
 				var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
 				var $toggleSpan = $input.closest('.toggle_button_tristate');
-				$toggleSpan.tooltip('hide').tooltip('fixTitle').tooltip('show');
-				$input.candlestick('reset');
-				$input.candlestick('enable');
+				$input.closest('li.parent_li').attr('data-run-solver', false);
+				resetEnableCandlestick($input);
 			}
 		}
 		// Remove the set_by_constraint from any toggle nodes...
@@ -566,11 +550,11 @@ var constraints = {
 					$targetEl.removeClass('set_by_constraint');
 					var $toggleSpan = $targetEl.children('span.toggle_button');
 					if($iEl.hasClass("enable_button") && constraintData[i]['value'] == "On") {
-						$targetEl.data("run-solver", false);
+						$targetEl.attr("data-run-solver", false);
 						$toggleSpan.trigger('click');
 					}
 					else if($iEl.hasClass("disable_button") && constraintData[i]['value'] == "Off") {
-						$targetEl.data("run-solver", false);
+						$targetEl.attr("data-run-solver", false);
 						$toggleSpan.trigger('click');
 					}
 					else {
@@ -585,25 +569,24 @@ var constraints = {
 					var $closestUL = $input.closest('ul');
 					$targetEl.removeClass('set_by_constraint');
 					if($input.val() != "0" && constraintData[i]['value'] == "Off") {
-						$targetEl.data("run-solver", false);
+						$targetEl.attr("data-run-solver", false);
 						$input.candlestick('off');
+						this.candlestickUpdatedByConstraint($input);
 					}
 					else if($input.val() != "1"  && constraintData[i]['value'] == "On") {
-						$targetEl.data("run-solver", false);
+						$targetEl.attr("data-run-solver", false);
 						$input.candlestick('on');
+						this.candlestickUpdatedByConstraint($input);
 					}
 					else if($input.val() != "" && constraintData[i]['value'] == "") {
-						$targetEl.data("run-solver", false);
+						$targetEl.attr("data-run-solver", false);
 						var $toggleSpan = $input.closest('.toggle_button_tristate');
-						$toggleSpan.tooltip('hide').tooltip('fixTitle').tooltip('show');
-						$input.candlestick('reset');
 						// The toggle should be set to disabled when we reset 
 						// the switch
 						if(!$closestUL.hasClass("disabled")) {
 							window.toggleBranch($closestUL);
 						}
-						
-						$input.candlestick('enable');
+						resetEnableCandlestick($input);
 					}
 					else {
 						log("The toggle value is already correct, no change required...");
@@ -711,6 +694,28 @@ var constraints = {
 		//	if($('#constraint-' + action).hasClass('disabled'))
 		//		$('#constraint-' + action).removeClass('disabled');
 		//}
+	},
+	
+	candlestickUpdatedByConstraint: function($input) {
+		if(!$input.closest('.candlestick-bg').hasClass('candlestick-disabled')) {
+			$input.candlestick('disable');
+		}
+		var $toggleSpan = $input.closest('.toggle_button_tristate');
+		// Update the title for the tooltip - to do this, 
+		// we backup the original title, set our new title
+		// as data-original-title and then use the fixTitle
+		// feature to store the new title to the main title
+		// and initialise it. Then replace the original 
+		// title to data-original-title.
+		var newTooltipText = 'The control switch ' +
+		'for this optional branch is disabled because' +
+		' it has been fixed by the constraint solver.' +
+		' To change the setting either undo the ' +
+		'constraint change that set this switch or ' +
+		'reset the constraints.';
+		var originalTitle = ($toggleSpan.attr('title') != "") ? $toggleSpan.attr('title') : $toggleSpan.attr('data-original-title');
+		$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('show');
+		$toggleSpan.attr('data-old-title', originalTitle);
 	},
 	
 	/**

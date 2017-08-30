@@ -565,7 +565,7 @@ function isInteger(valueToCheck) {
                 		else if((!$closestUL.hasClass("disabled")) && value == "0") {
                 			toggleBranch($closestUL);	
                 		}
-                		//input.trigger('tristate_toggle_set', [value]);
+                		input.trigger('tristate_toggle_set', [value]);
                 	},
                 });
                 $toggleBtns.candlestick('enable');
@@ -1876,73 +1876,17 @@ function _processProfile(profileXml, templateId) {
     });
 }
 
-/*
-var profileXml = "";
-//var rootNode = $("[role='tree']").children("li");
-var templateName = $.trim(treeRootNode.children("span").text());
-var indentation = "    ";
-
-profileXml += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-profileXml += "<" + templateName + ">\n";
-profileXml += generateChildXML(treeRootNode, indentation, false); // useFileContent=false: Don't include xml from files, but upload them seperately, as large data will fail in POST
-profileXml += "</" + templateName + ">\n";
-
-// Create form data object to post the xml and files to the server
-var formData = new FormData();
-
-// Add the files to the form data
-$("input[type = 'file']").each(function (index, element) {
-    formData.append('xmlupload_file', element.files[0]);  // Just assume one file provided for each thing for now.
-});
-
-// Add the xml string
-formData.append('xmlupload', profileXml);
-
-// Add a field to tell the server what component this is.
-// The component name has to match the name of the root node in the tree!
-// UPDATED: This is no longer required with the REST API
-// var componentName = $("input[name = 'componentname']").val();
-// formData.append('componentname', componentName);
-
-var csrfToken = $('input[name="_csrf"]').val();
-
-$.ajax({
-    url: '/tempss/api/profile/' + templateId + '/convert',
-    data: formData,
-    processData: false,
-    contentType: false,
-    type: 'POST',
-    dataType: 'json',
-    beforeSend: function(jqxhr, settings) {
-    	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
-    },
-    success: function (data) {
-    	// If the request returns successfully we'll
-    	// have some JSON data containing a group of URLs
-    	// The TransformedXml parameter will contain a 
-    	// link to the required data.
-    	log('Location of transformed XML: ' + data.TransformedXml);
-    	
-    	var inputFileUrl = data.TransformedXml;
-    	var fileId = inputFileUrl.substring(inputFileUrl.lastIndexOf('_') +1, inputFileUrl.length - 4);
-    	log('Using fileId <' + fileId + '>');
-    	
-    	// Trigger a download request to get the transformed XML
-    	// and prompt the user to save the file.
-    	$.fileDownload('/tempss/api/profile/inputFile/' + fileId);
-    	
-    	// If a loading element is displayed, hide it
-    	if($('#process-profile-loading').length > 0) {
-    		$('#process-profile-loading').hide();
-    	}
-    },
-    error: function(data) {
-    	log('An error occured downloading the application input file for templateId ' + templateId);
-    	if($('#process-profile-loading').length > 0) {
-    		$('#process-profile-loading').hide();
-    	}
-    }
-});
-*/
-
-// Modification of the 
+function resetEnableCandlestick($input) {
+	var $toggleSpan = $input.closest('span.toggle_button_tristate');
+	// See if we have an old title and if so, replace the current title.
+	if($toggleSpan.attr('data-old-title')) {
+		$toggleSpan.tooltip('hide').attr('title', $toggleSpan.attr('data-old-title')).tooltip('fixTitle').tooltip('show');
+		$toggleSpan.removeAttr('data-old-title');
+	}
+	if(!$toggleSpan.closest('li.parent_li').attr('data-run-solver')) {
+		$toggleSpan.closest('li.parent_li').attr('data-run-solver', false);
+	}
+	
+	$input.candlestick('reset');
+	$input.candlestick('enable');
+}

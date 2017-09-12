@@ -708,5 +708,5 @@ public class ProfileRestResource {
 				header("Content-Disposition", cd).
 				header("Content-Type", "application/xml").
 				cookie(c).entity(so).build();
-    }
+    }  
 }

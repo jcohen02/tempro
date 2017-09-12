@@ -376,78 +376,6 @@ function disableGenerateInputButton(disable) {
     }
 }
 
-// Given a profile name entered by the user into a modal
-// pop up, save the profile, relating to the specified
-// template.
-function saveProfile(templateId, profileName) {
-    log('Request to save profile <' + profileName + '> for template <' + templateId + '>.');
-    var profileData = $templateContainer.data(treePluginName).getXmlProfile();
-    var profilePublic = $('#profile-public').prop('checked');
-	var csrfToken = $('input[name="_csrf"]').val();
-	var profileObject = {profile:profileData, profilePublic:profilePublic};
-    $("#profile-saving").show();
-    // Clear any existing error text
-    $('#profile-save-errors').html("");
-       
-	var saveProfileCall = $.ajax({
-        method:   'POST',
-        url:      '/tempss/api/profile/' + templateId + '/' + profileName,
-        dataType: 'json',
-        contentType: 'application/json',
-        beforeSend: function(jqxhr, settings) {
-        	jqxhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
-        },
-        data:     JSON.stringify(profileObject)
-	});
-
-    saveProfileCall.then(
-	    // Success function
-	    function(data) {
-	        // Check if save succeeded
-	        if (data.status == 'OK') {
-	            // Close the modal and update the profile list since
-	            //save completed successfully.
-	            $('#save-profile-modal').modal('hide');
-	            updateProfileList(templateId);
-	        } else {
-	            $('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
-	        }
-	        $("#profile-saving").hide();
-	    },
-	    // Error function
-	    function(data) {
-	        var result = $.parseJSON(data.responseText);
-	        if (result.status == 'ERROR') {
-	            // Some error occurred, show the error message in the modal
-	            var errorText = "";
-	            switch(result.code) {
-	                case 'INVALID_TEMPLATE':
-	                    errorText = "An invalid template identifier has been specified.";
-	                    break;
-	                case 'PROFILE_NAME_EXISTS':
-	                    errorText = "The specified profile name already exists.";
-	                    break;
-	                case 'REQUEST_DATA':
-	                    errorText = "The JSON request data provided is invalid.";
-	                    break;
-	                case 'RESPONSE_DATA':
-	                    errorText = "Unable to prepare JSON response data. Profile may have saved successfully";
-	                    break;
-	                case 'PERMISSION_DENIED':
-	                    errorText = result.error;
-	                    break;
-	                default:
-	                    errorText = "An unknown error has occurred.";
-	            }
-	            $('#profile-save-errors').html("<h6>Unable to save profile: " + errorText + "</h6>");
-	        } else {
-	            $('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
-	        }
-	        $("#profile-saving").hide();
-	    }
-	);
-}
-
 // Before loading the profile, we need to clear any existing loaded  
 // profile from the tree and check that the user is happy with this.
 // Use the same approach as when loading a new tree - check that the current
@@ -761,7 +689,7 @@ function attachBoundaryConditionHandlers() {
     // element and there is no CSS parent selector), we add a class to identify 
     // these nodes.
     // TEST: Attaching handlers to input nodes instead of main bc node.
-    $('li.parent_li[data-fqname="BoundaryConditionName"]').parent(
+    $('li.parent_li[data-fqname="BoundaryConditionReference"]').parent(
     	).addClass('boundary-condition').on('nodeValid', function(e) {
     		updateBoundaryRegions(e, true);
     	}).on('nodeInvalid', function(e) {
@@ -961,7 +889,7 @@ function updateBoundaryRegions(event, valid) {
 	// a name set. Compile a list of these names and then add them to each 
 	// BoundaryRegion/BoundaryCondition node.
 	var BCNames = [];
-	$('li.parent_li[data-fqname="BoundaryConditionName"] input').each(function() {
+	$('li.parent_li[data-fqname="BoundaryConditionReference"] input').each(function() {
 		if(!$(this).parent().parent().parent().parent().hasClass('disabled')) {
 			var value = $(this).val();
 			if(value != null && value != "") {
@@ -1027,4 +955,6 @@ window.log = function(message) {
         console.log(message);
     }
 }
+
 var log = window.log;
+

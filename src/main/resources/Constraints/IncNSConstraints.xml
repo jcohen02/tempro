@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<PrismConstraints 
+    xmlns="http://libhpc.doc.ic.ac.uk/prism/constraints"  
+    xmlns:prism="http://libhpc.doc.ic.ac.uk/prism/constraints"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://libhpc.doc.ic.ac.uk/prism/constraints PRISMConstraints.xsd">
+    
+    <description>Constraints for the Nektar++ Incompressible Navier-Stokes Solver</description>
+    
+    <!-- This should be the solver name exactly as it appears in the root node
+         of the tree that these constraints relate to. 
+    -->
+    <solver>IncompressibleNavierStokes</solver>
+    
+    <variables>
+      <variable path="ProblemSpecification.Dimensions" name="Dimensions">
+        <domain>
+          <value>TwoDimensional</value>
+          <value>ThreeDimensional</value>
+        </domain>
+      </variable>              
+
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variable" name="Variable">
+        <domain>
+          <value>CoupledLinearisedNS-2D</value>
+          <value>VelocityCorrectionScheme-2D</value>
+          <value>CoupledLinearisedNS-3D</value>
+          <value>VelocityCorrectionScheme-3D</value>
+        </domain>
+      </variable>              
+
+      <variable path="NumericalSpecification.SolverType" name="SolverType">
+        <domain>
+          <value>CoupledLinearisedNS</value>
+          <value>VelocityCorrectionScheme</value>
+        </domain>
+      </variable>              
+
+      <variable path="NumericalSpecification.Projection" name="Projection">
+        <domain>
+          <value>ContinuousGalerkin</value>
+          <value>DiscontinuousGalerkin</value>
+          <value>MixedGalerkin</value>
+        </domain>
+      </variable>           
+
+      <variable path="NumericalSpecification.SimulationType" name="SimulationType">
+        <domain>
+          <value>DirectNumericalSimulation</value>
+          <value>StabilityAnalysis</value>
+          <value>SteadyStateStability</value>
+        </domain>
+      </variable>              
+
+      <variable path="NumericalSpecification.Equation" name="Equation">
+        <domain>
+          <value>SteadyOseen</value>
+          <value>SteadyStokes</value>
+          <value>UnsteadyStokes</value>
+          <value>SteadyLinearisedNavierStokes</value>
+          <value>UnsteadyNavierStokes</value>
+        </domain>
+      </variable>
+
+<!--       <variable path="NumericalSpecification.SimulationType.DirectNumericalSimulation.TimeIntegration.TimeIntegrationMethod" name="TimeIntegrationMethod">
+        <domain>
+          <value>NotProvided</value>
+          <value>IMEXOrder1</value>
+          <value>IMEXOrder2</value>
+          <value>IMEXOrder3</value>
+          <value>DIRKOrder1</value>
+          <value>ForwardEuler</value>
+          <value>BackwardEuler</value>
+          <value>ClassicalRungeKutta4</value>
+          <value>BDFImplicitOrder1</value>
+          <value>BDFImplicitOrder2</value>
+        </domain>
+      </variable>
+
+      <variable path="NumericalSpecification.SimulationType.StabilityAnalysis.TimeIntegration.TimeIntegrationMethod" name="StabilityTimeIntegrationMethod">
+        <domain>
+          <value>NotProvided</value>
+          <value>IMEXOrder1</value>
+          <value>IMEXOrder2</value>
+          <value>IMEXOrder3</value>
+          <value>DIRKOrder1</value>
+          <value>ForwardEuler</value>
+          <value>BackwardEuler</value>
+          <value>ClassicalRungeKutta4</value>
+          <value>BDFImplicitOrder1</value>
+          <value>BDFImplicitOrder2</value>
+        </domain>
+      </variable>
+      <variable path="NumericalSpecification.SimulationType.SteadyStateStability.TimeIntegration.TimeIntegrationMethod" name="SteadyTimeIntegrationMethod">
+        <domain>
+          <value>NotProvided</value>
+          <value>IMEXOrder1</value>
+          <value>IMEXOrder2</value>
+          <value>IMEXOrder3</value>
+          <value>DIRKOrder1</value>
+          <value>ForwardEuler</value>
+          <value>BackwardEuler</value>
+          <value>ClassicalRungeKutta4</value>
+          <value>BDFImplicitOrder1</value>
+          <value>BDFImplicitOrder2</value>
+        </domain>
+      </variable>
+ -->
+
+    </variables>
+    
+    <constraints>
+      <!-- Mapping of dimensions with boundary conditions -->
+      <mapping variable="Dimensions" varvalue="TwoDimensional" targetVariable="Variable">
+        <targetValue>VelocityCorrectionScheme-2D</targetValue>
+        <targetValue>CoupledLinearisedNS-2D</targetValue>
+      </mapping>
+      <mapping variable="Dimensions" varvalue="ThreeDimensional" targetVariable="Variable">
+        <targetValue>VelocityCorrectionScheme-3D</targetValue>
+        <targetValue>CoupledLinearisedNS-3D</targetValue>
+      </mapping>
+
+      <!-- Mapping of boundary conditions with solvertype -->
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Variable">
+        <targetValue>CoupledLinearisedNS-2D</targetValue>
+        <targetValue>CoupledLinearisedNS-3D</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Variable">
+        <targetValue>VelocityCorrectionScheme-2D</targetValue>
+        <targetValue>VelocityCorrectionScheme-3D</targetValue>
+      </mapping>
+
+      <!-- Mapping of equation type with solvertype -->
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Equation">
+        <targetValue>SteadyOseen</targetValue>
+        <targetValue>SteadyLinearisedNavierStokes</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Equation">
+        <targetValue>UnsteadyNavierStokes</targetValue>
+        <targetValue>UnsteadyStokes</targetValue>
+        <targetValue>SteadyStokes</targetValue>
+      </mapping>
+
+      <!-- Mapping of simulation type with equation type -->
+      <mapping variable="SimulationType" varvalue="DirectNumericalSimulation" targetVariable="Equation">
+        <targetValue>UnsteadyNavierStokes</targetValue>
+      </mapping>
+      <mapping variable="SimulationType" varvalue="StabilityAnalysis" targetVariable="Equation">
+        <targetValue>UnsteadyNavierStokes</targetValue>
+        <targetValue>UnsteadyStokes</targetValue>
+        <targetValue>SteadyLinearisedNavierStokes</targetValue>
+      </mapping>
+      <mapping variable="SimulationType" varvalue="SteadyStateStability" targetVariable="Equation">
+        <targetValue>SteadyOseen</targetValue>
+        <targetValue>SteadyStokes</targetValue>
+        <targetValue>UnsteadyNavierStokes</targetValue>
+      </mapping>
+     
+      <!-- Mapping of solver type with projection type -->
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+        <targetValue>DiscontinuousGalerkin</targetValue>
+        <targetValue>MixedGalerkin</targetValue>
+      </mapping>
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Projection">
+        <targetValue>ContinuousGalerkin</targetValue>
+      </mapping>
+      
+      <!-- Mapping of equation type with time integration method -->
+<!--       <mapping variable="Equation" varvalue="SteadyLinearisedNavierStokes" targetVariable="SteadyTimeIntegrationMethod">
+        <targetValue>IMEXOrder1</targetValue>
+        <targetValue>IMEXOrder2</targetValue>
+        <targetValue>IMEXOrder3</targetValue>
+        <targetValue>DIRKOrder1</targetValue>
+        <targetValue>ForwardEuler</targetValue>
+        <targetValue>BackwardEuler</targetValue>
+        <targetValue>ClassicalRungeKutta4</targetValue>
+        <targetValue>BDFImplicitOrder1</targetValue>
+        <targetValue>BDFImplicitOrder2</targetValue>
+      </mapping>
+      <mapping variable="Equation" varvalue="SteadyStokes" targetVariable="SteadyTimeIntegrationMethod">
+        <targetValue>NotProvided</targetValue>
+      </mapping>
+      <mapping variable="Equation" varvalue="SteadyOseen" targetVariable="SteadyTimeIntegrationMethod">
+        <targetValue>NotProvided</targetValue>
+      </mapping> -->
+    </constraints>              
+                  
+</PrismConstraints>

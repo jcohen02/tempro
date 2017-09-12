@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Types available from the tempss schema: 
+     positiveDouble, xs:double, xs:string, xs:positiveInteger, file -->
+<IncompressibleNavierStokes xmlns="http://www.libhpc.imperial.ac.uk" xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation" xmlns:tempss="http://www.libhpc.imperial.ac.uk/tempss/SchemaAnnotation">
+  <libhpc:documentation>The Nektar++ finite element PDE solver for fluid flow using the 
+    incompressible Navier-Stokes equation. Nektar++ user guide: 
+    http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf</libhpc:documentation>
+  <ProblemSpecification>
+    <libhpc:documentation>ProblemSpecification defines the descriptive parameters of a simulation.</libhpc:documentation>
+    <Dimensions paramType="choice">
+      <libhpc:documentation />
+      <TwoDimensional>
+        <QuasiDimensions optional="true">
+          <HomModesY type="positiveDouble" />
+          <LY type="positiveDouble" />
+        </QuasiDimensions>
+      </TwoDimensional>
+      <ThreeDimensional>
+        <QuasiDimensions optional="true" paramType="choice">
+          <Single>
+            <HomModesZ type="positiveDouble" />
+            <LZ type="positiveDouble" />
+          </Single>
+          <Double>
+            <HomModesY type="positiveDouble" />
+            <LY type="positiveDouble" />
+            <HomModesZ type="positiveDouble" />
+            <LZ type="positiveDouble" />
+          </Double>
+        </QuasiDimensions>
+      </ThreeDimensional>
+    </Dimensions>
+    <ReynoldsNumber type="positiveDouble" optional="true" />
+    <Geometry type="geometryFileName" inputType="file">
+      <libhpc:documentation>The geometry on which the problem is being solved. Provide a Nektar 
+        XML (with root NEKTAR element) containing a GEOMETRY element that
+        will be parsed to identify boundary regions.</libhpc:documentation>
+    </Geometry>
+    <BoundaryDetails type="BoundaryDetails">
+      <libhpc:documentation>Here you can set up your boundary conditions and name them.
+        When you add a geometry file, this will be parsed to identify and
+        build the boundary regions which will appear here automatically.
+        You can then Assign one of your boundary conditions to each region
+        as required.</libhpc:documentation>
+    </BoundaryDetails>
+    <InitialConditions optional="true">
+      <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+      <Variable repeatable="true">
+        <Field type="xs:string" />
+        <Type paramType="choice">
+          <Expression type="xs:string" />
+          <File type="inputNameString" inputType="file" />
+        </Type>
+      </Variable>
+    </InitialConditions>
+  </ProblemSpecification>
+  <NumericalSpecification>
+    <libhpc:documentation>Specification of the numerical domain, i.e. solver and equation types.</libhpc:documentation>
+    <SimulationType paramType="choice">
+      <libhpc:documentation>Dummy parameter which defines what kind of analysis you are performing.</libhpc:documentation>
+      <DirectNumericalSimulation>
+        <TimeIntegration>
+          <Timing>
+            <TimeStep type="xs:string" optional="true" />
+            <NumSteps type="xs:string" optional="true" />
+            <FinTime type="xs:string" optional="true">
+              <libhpc:documentation>Simulated real time length.</libhpc:documentation>
+            </FinTime>
+          </Timing>
+          <TimeIntegrationMethod type="TimingType" />
+        </TimeIntegration>
+        <Driver type="DNSDriverType" optional="true" />
+        <Advection type="AdvectionType" optional="true" />
+      </DirectNumericalSimulation>
+      <StabilityAnalysis>
+        <TimeIntegration>
+          <Timing>
+            <TimeStep type="xs:string" optional="true" />
+            <NumSteps type="xs:string" optional="true" />
+            <FinTime type="xs:string" optional="true">
+              <libhpc:documentation>Simulated real time length.</libhpc:documentation>
+            </FinTime>
+          </Timing>
+          <TimeIntegrationMethod type="TimingType" />
+        </TimeIntegration>
+        <Driver type="StabilityDriverType" optional="true" />
+        <EvolutionOperator type="EvolutionType" optional="true" />
+        <BaseFlow optional="true">
+          <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+          <Variable repeatable="true">
+            <VariableName type="xs:string" />
+            <Type paramType="choice">
+              <Expression type="xs:string" />
+              <File type="baseNameString" inputType="file" />
+            </Type>
+          </Variable>
+        </BaseFlow>
+        <ModeType type="ModeType" optional="true" />
+      </StabilityAnalysis>
+      <SteadyStateStability>
+        <TimeIntegration>
+          <Timing>
+            <TimeStep type="xs:string" optional="true" />
+            <NumSteps type="xs:string" optional="true" />
+            <FinTime type="xs:string" optional="true">
+              <libhpc:documentation>Simulated real time length.</libhpc:documentation>
+            </FinTime>
+          </Timing>
+          <TimeIntegrationMethod type="TimingType" />
+        </TimeIntegration>
+        <Driver type="SteadyStateDriverType" optional="true" />
+        <EvolutionOperator type="SteadyEvolutionType" optional="true" />
+      </SteadyStateStability>
+    </SimulationType>
+    <SolverType paramType="choice">
+      <libhpc:documentation>DirectNumericalSimulation: for standard flow problems
+        StabilityAnalysis: stability problems
+        SteadyStateStability: steady state stability problems</libhpc:documentation>
+      <CoupledLinearisedNS />
+      <VelocityCorrectionScheme paramType="choice">
+        <Standard />
+        <WeakPressure />
+        <Mapping>
+          <MappingType type="xs:string" inputType="choice">
+            <tempss:item>Translation</tempss:item>
+            <tempss:item>XofZ</tempss:item>
+            <tempss:item>XofXZ</tempss:item>
+            <tempss:item>XYofZ</tempss:item>
+            <tempss:item>XYofXY</tempss:item>
+            <tempss:item>General</tempss:item>
+          </MappingType>
+          <Coords>
+            <Variable repeatable="true">
+              <Name type="xs:string" />
+              <Value type="xs:string" />
+            </Variable>
+          </Coords>
+          <Velocity>
+            <Variable optional="true" repeatable="true">
+              <Name type="xs:string" />
+              <Value type="xs:string" />
+            </Variable>
+          </Velocity>
+          <TimeDependent optional="true" />
+          <AdvancedParameters>
+            <PressureTolerance type="positiveDouble" optional="true" />
+            <ViscousTolerance type="positiveDouble" optional="true" />
+            <PressureRelaxation type="positiveDouble" optional="true" />
+            <ViscousRelaxation type="positiveDouble" optional="true" />
+            <MappingImplicitPressure optional="true" />
+            <MappingImplicitViscous optional="true" />
+            <MappingNeglectViscous optional="true" />
+          </AdvancedParameters>
+        </Mapping>
+      </VelocityCorrectionScheme>
+    </SolverType>
+    <Equation type="xs:string" inputType="choice">
+      <libhpc:documentation>SteadyStokes
+        SteadyOseen
+        UnsteadyStokes
+        SteadyLinearisedNavierStokes
+        UnsteadyNavierStokes</libhpc:documentation>
+      <tempss:item>SteadyStokes</tempss:item>
+      <tempss:item>SteadyOseen</tempss:item>
+      <tempss:item>UnsteadyStokes</tempss:item>
+      <tempss:item>SteadyLinearisedNavierStokes</tempss:item>
+      <tempss:item>UnsteadyNavierStokes</tempss:item>
+    </Equation>
+    <Projection paramType="choice">
+      <libhpc:documentation>ContinuousGalerkin: enforces continuity of solution across element boundaries
+        DiscontinuousGalerkin: doesn't enforce continuity, but better at 
+                               capturing shocks in solution</libhpc:documentation>
+      <ContinuousGalerkin />
+      <DiscontinuousGalerkin />
+      <MixedGalerkin>
+        <SubStepping optional="true" />
+        <Scheme type="xs:string" inputType="choice" optional="true">
+          <tempss:item>ForwardEuler</tempss:item>
+          <tempss:item>RungeKutta2</tempss:item>
+        </Scheme>
+      </MixedGalerkin>
+    </Projection>
+    <Expansion>
+      <libhpc:documentation>Specify details of how the solution function 
+      will be approximated.</libhpc:documentation>
+      <PolynomialOrder type="xs:positiveInteger">
+        <libhpc:documentation>The order of polynomial expansion used on each 
+          element. Higher order gives better approximation to the true solution. 
+          The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
+      </PolynomialOrder>
+      <BasisType type="xs:string" inputType="choice">
+        <libhpc:documentation>The type of polynomials used as a basis to expand the solution 
+          function. There are two styles of basis polynomial: modal and nodal.
+           
+           Modal / hierarchical basis: don't need to redefine basis functions 
+           when increase the order (but have to be modified to get zero at boundary).
+           
+           Nodal: have to be redefined when the polynomial order is increased, 
+           but are naturally zero at the boundaries.
+           
+           Available choices:
+             MODIFIED: Legendre polynomials (modal) that have been multiplied 
+                       by two linear functions to make them zero at the boundaries.
+             GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+             GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
+                           Gauss-Lobatto-Legendre
+             GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+             CHEBYSHEV: another modal approach (similar to Fourier modes).</libhpc:documentation>
+        <tempss:item>MODIFIED</tempss:item>
+        <tempss:item>GAUSS_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE</tempss:item>
+        <tempss:item>GLL_LAGRANGE_SEM</tempss:item>
+        <tempss:item>CHEBYSHEV</tempss:item>
+      </BasisType>
+    </Expansion>
+  </NumericalSpecification>
+  <AdditionalParameters>
+    <libhpc:documentation>Commonly used parameters can be found here.</libhpc:documentation>
+    <KinematicViscosity type="xs:string" />
+    <IOParams>
+      <libhpc:documentation>This section contains parameters that specify administrative details.</libhpc:documentation>
+      <IO_CFLSteps type="xs:string" optional="true" />
+      <IO_CheckSteps type="xs:string">
+        <libhpc:documentation>The solution can be dumped out at regular intervals. This parameter 
+          specifies the number of time steps for this interval.</libhpc:documentation>
+      </IO_CheckSteps>
+      <IO_InfoSteps type="xs:string">
+        <libhpc:documentation>Specify the interval in time steps between each 
+        print out of the current solution time.</libhpc:documentation>
+      </IO_InfoSteps>
+    </IOParams>
+    <CustomInputs optional="true">
+      <libhpc:documentation>Add custom expressions and parameters.</libhpc:documentation>
+      <CustomExpression repeatable="true" optional="true">
+        <Name type="xs:string" />
+        <Value type="xs:string" />
+      </CustomExpression>
+      <CustomParameter repeatable="true" optional="true">
+        <Name type="xs:string" />
+        <Value type="xs:string" />
+      </CustomParameter>
+    </CustomInputs>
+    <Filter repeatable="true" optional="true">
+      <libhpc:documentation>Filters are a method for calculating a variety of useful quantities
+        from the field variables as the solution evolves in time, such as
+        time-averaged fields and extracting the field variables at certain
+        points inside the domain.</libhpc:documentation>
+      <FilterType paramType="choice">
+        <AeroForces>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+          <Boundary type="xs:string">
+            <libhpc:documentation>List boundarie(s) sequentially, i.e. for boundary 1 and 2: 1, 2.</libhpc:documentation>
+          </Boundary>
+          <Directions repeatable="true" optional="true">
+            <Name type="xs:string" />
+            <Value type="xs:string" />
+          </Directions>
+        </AeroForces>
+        <AverageFields>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+          <SampleFile optional="true">
+            <File type="fieldNameString" inputType="file" optional="true" />
+            <Frequency type="xs:string" />
+          </SampleFile>
+        </AverageFields>
+        <Checkpoint>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+        </Checkpoint>
+        <Energy>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+        </Energy>
+        <HistoryPoints>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+          <Points repeatable="true">
+            <X type="xs:string" />
+            <Y type="xs:string" />
+            <Z type="xs:string" />
+          </Points>
+        </HistoryPoints>
+        <ModalEnergy>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+        </ModalEnergy>
+        <MovingAverage>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+          <SampleFrequency type="xs:string" />
+          <Tau type="xs:string" optional="true" />
+        </MovingAverage>
+        <ReynoldsStresses>
+          <OutputFile optional="true">
+            <FileName type="xs:string" />
+            <Frequency type="xs:string" />
+          </OutputFile>
+          <SampleFile optional="true">
+            <File type="fieldNameString" inputType="file" optional="true" />
+            <Frequency type="xs:string" />
+          </SampleFile>
+          <Alpha type="xs:string" optional="true" />
+        </ReynoldsStresses>
+        <Threshold optional="true">
+          <Minimum optional="true">
+            <OutputFile optional="true">
+              <FileName type="xs:string" />
+            </OutputFile>
+            <ThresholdVar type="xs:string" optional="true" />
+            <ThresholdValue type="xs:string" />
+            <InitialValue type="xs:string" />
+            <StartTime type="xs:string" optional="true" />
+          </Minimum>
+          <Maximum optional="true">
+            <OutputFile optional="true">
+              <FileName type="xs:string" />
+            </OutputFile>
+            <ThresholdVar type="xs:string" optional="true" />
+            <ThresholdValue type="xs:string" />
+            <InitialValue type="xs:string" />
+            <StartTime type="xs:string" optional="true" />
+          </Maximum>
+        </Threshold>
+      </FilterType>
+    </Filter>
+    <Force repeatable="true" paramType="choice" optional="true">
+      <libhpc:documentation>An optional section of the file allows forcing functions to be defined.</libhpc:documentation>
+      <Absorption>
+        <Coeff type="xs:string" />
+        <RefFlow type="xs:string" />
+        <RefFlowTime type="xs:string" />
+      </Absorption>
+      <Body>
+        <BodyForce type="xs:string" />
+      </Body>
+      <Noise>
+        <Whitenoise type="positiveDouble" />
+        <UpdateFreq type="positiveDouble" optional="true" />
+        <Nsteps type="positiveDouble" optional="true" />
+      </Noise>
+    </Force>
+    <Function repeatable="true" optional="true">
+      <libhpc:documentation>Add in custom functions .</libhpc:documentation>
+      <FunctionName type="xs:string" />
+      <Expression repeatable="true">
+        <ExpressionVar type="xs:string" />
+        <ExpressionValue type="xs:string" />
+      </Expression>
+    </Function>
+  </AdditionalParameters>
+  <AdvancedParameters>
+    <libhpc:documentation>Advanced parameters which may improve results or numerical stability.</libhpc:documentation>
+    <CFL type="xs:string" optional="true" />
+    <Dealiasing optional="true" />
+    <SpectralhpDealiasing optional="true">
+      <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
+        can stablise certain simulations through the use of additional 
+        integration of the nonlinear convective terms.</libhpc:documentation>
+    </SpectralhpDealiasing>
+    <SpectralVanishingViscosity optional="true">
+      <libhpc:documentation>Adds additional damping for high-frequency modes 
+        which may help in stabilising underresolved simulations.</libhpc:documentation>
+      <SVVDiffCoeff type="positiveIncDouble" />
+      <SVVCutoffRatio type="positiveIncDouble01">
+        <libhpc:documentation>Dictates the frequencies of the coefficients to 
+          be damped. i.e. for polynomial order 7, a value of 0.75 means 
+          damping is only applied to modes 6 and 7.</libhpc:documentation>
+      </SVVCutoffRatio>
+    </SpectralVanishingViscosity>
+    <WeightPartitions type="xs:string" inputType="choice" optional="true">
+      <libhpc:documentation>If using a hybrid mesh of more than one element type 
+        , this should be set to NonUniform to give better parallel partitions.</libhpc:documentation>
+      <tempss:item>Uniform</tempss:item>
+      <tempss:item>NonUniform - DoF</tempss:item>
+      <tempss:item>NonUniform - Boundary</tempss:item>
+      <tempss:item>NonUniform - Both</tempss:item>
+    </WeightPartitions>
+  </AdvancedParameters>
+  <Optimisation>
+    <libhpc:documentation>Options to aid the computational performance of the simulation - performance
+      decreases may occur if improperly utilised!</libhpc:documentation>
+    <GlobalSysSolution repeatable="true" optional="true">
+      <libhpc:documentation>Global system solution parameters, dictate the type of solver
+        to be used for any implicit systems that are constructed.</libhpc:documentation>
+      <MatrixInversion repeatable="true">
+        <Field type="xs:string">
+          <libhpc:documentation>Choose the field e.g. pressure (p) or velocity (u,v).</libhpc:documentation>
+        </Field>
+        <InversionType paramType="choice">
+          <Direct>
+            <SubStructuring type="xs:string" inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+          </Direct>
+          <Iterative>
+            <SubStructuring type="xs:string" inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string" inputType="choice" optional="true">
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+            </Preconditioner>
+            <SuccessiveRHS type="positiveIncDouble" optional="true" />
+            <IterativeSolverTolerance type="positiveDouble" />
+          </Iterative>
+          <Xxt>
+            <SubStructuring type="xs:string" inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+              <tempss:item>MultiLevelStaticCondensation</tempss:item>
+            </SubStructuring>
+          </Xxt>
+          <PETSc>
+            <SubStructuring type="xs:string" inputType="choice">
+              <tempss:item>Full</tempss:item>
+              <tempss:item>StaticCondensation</tempss:item>
+              <tempss:item>MultiLevelStaticCondensation</tempss:item>
+            </SubStructuring>
+            <Preconditioner type="xs:string" inputType="choice" optional="true">
+              <tempss:item>Diagonal</tempss:item>
+              <tempss:item>FullLinearSpace</tempss:item>
+              <tempss:item>LowEnergyBlock</tempss:item>
+              <tempss:item>Block</tempss:item>
+              <tempss:item>FullLinearSpaceWithDiagonal</tempss:item>
+              <tempss:item>FullLinearSpaceWithLowEnergyBlock</tempss:item>
+              <tempss:item>FullLinearSpaceWithBlock</tempss:item>
+            </Preconditioner>
+            <IterativeSolverTolerance type="positiveDouble" />
+          </PETSc>
+        </InversionType>
+      </MatrixInversion>
+    </GlobalSysSolution>
+    <Collections paramType="choice" optional="true">
+      <libhpc:documentation>The Collections library adds optimisations to perform certain elemental operations collectively by applying an operator using a matrix-matrix operation, rather than a sequence of matrix-vector multiplications.</libhpc:documentation>
+      <NoCollection />
+      <AutoTuning />
+      <StdMat />
+      <SumFac />
+      <IterPerExp />
+      <Manual>
+        <Operator repeatable="true">
+          <OperatorType type="xs:string" inputType="choice">
+            <tempss:item>BWDTrans</tempss:item>
+            <tempss:item>IProductWRTBase</tempss:item>
+            <tempss:item>IProductWRTDerivBase</tempss:item>
+            <tempss:item>PhysDeriv</tempss:item>
+          </OperatorType>
+          <Element repeatable="true">
+            <ElementType type="xs:string" inputType="choice">
+              <tempss:item>Segment</tempss:item>
+              <tempss:item>Quadrilateral</tempss:item>
+              <tempss:item>Triangle</tempss:item>
+              <tempss:item>Hexahedron</tempss:item>
+              <tempss:item>Tetrahedron</tempss:item>
+              <tempss:item>Prism</tempss:item>
+              <tempss:item>Pyramid</tempss:item>
+            </ElementType>
+            <Order type="xs:string" />
+            <Implementation type="xs:string" inputType="choice">
+              <tempss:item>StdMat</tempss:item>
+              <tempss:item>SumFac</tempss:item>
+              <tempss:item>IterPerExp</tempss:item>
+            </Implementation>
+          </Element>
+        </Operator>
+      </Manual>
+    </Collections>
+  </Optimisation>
+</IncompressibleNavierStokes>
+

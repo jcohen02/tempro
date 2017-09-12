@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.libhpc.imperial.ac.uk" xmlns:libhpc="http://www.libhpc.imperial.ac.uk/SchemaAnnotation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.libhpc.imperial.ac.uk/SchemaAnnotation LibhpcSchemaAnnotation.xsd" targetNamespace="http://www.libhpc.imperial.ac.uk" elementFormDefault="qualified">
+  <xs:include schemaLocation="NektarTypes.xsd" />
+  <xs:element name="IncompressibleNavierStokes">
+    <xs:annotation>
+      <xs:appinfo>
+        <libhpc:documentation>The Nektar++ finite element PDE solver for fluid flow using the 
+    incompressible Navier-Stokes equation. Nektar++ user guide: 
+    http://www.nektar.info/docs/manual/user-guide-4.0.0.pdf</libhpc:documentation>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ProblemSpecification">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>ProblemSpecification defines the descriptive parameters of a simulation.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Dimensions">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation />
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="TwoDimensional">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="QuasiDimensions" minOccurs="0" maxOccurs="1">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="HomModesY" type="positiveDouble" />
+                                <xs:element name="LY" type="positiveDouble" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="ThreeDimensional">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="QuasiDimensions" minOccurs="0" maxOccurs="1">
+                            <xs:complexType>
+                              <xs:choice>
+                                <xs:element name="Single">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="HomModesZ" type="positiveDouble" />
+                                      <xs:element name="LZ" type="positiveDouble" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Double">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="HomModesY" type="positiveDouble" />
+                                      <xs:element name="LY" type="positiveDouble" />
+                                      <xs:element name="HomModesZ" type="positiveDouble" />
+                                      <xs:element name="LZ" type="positiveDouble" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:choice>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="ReynoldsNumber" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+              <xs:element name="Geometry" type="geometryFileName">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The geometry on which the problem is being solved. Provide a Nektar 
+        XML (with root NEKTAR element) containing a GEOMETRY element that
+        will be parsed to identify boundary regions.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="BoundaryDetails" type="BoundaryDetails">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Here you can set up your boundary conditions and name them.
+        When you add a geometry file, this will be parsed to identify and
+        build the boundary regions which will appear here automatically.
+        You can then Assign one of your boundary conditions to each region
+        as required.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="InitialConditions" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Variable" minOccurs="1" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Field" type="xs:string" />
+                          <xs:element name="Type">
+                            <xs:complexType>
+                              <xs:choice>
+                                <xs:element name="Expression" type="xs:string" />
+                                <xs:element name="File" type="inputNameString">
+                                  <xs:complexType>
+                                    <xs:sequence />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:choice>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="NumericalSpecification">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Specification of the numerical domain, i.e. solver and equation types.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SimulationType">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Dummy parameter which defines what kind of analysis you are performing.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="DirectNumericalSimulation">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="TimeIntegration">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Timing">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="TimeStep" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="NumSteps" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="FinTime" minOccurs="0" maxOccurs="1" type="xs:string">
+                                        <xs:annotation>
+                                          <xs:appinfo>
+                                            <libhpc:documentation>Simulated real time length.</libhpc:documentation>
+                                          </xs:appinfo>
+                                        </xs:annotation>
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="TimeIntegrationMethod" type="TimingType" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Driver" minOccurs="0" maxOccurs="1" type="DNSDriverType" />
+                          <xs:element name="Advection" minOccurs="0" maxOccurs="1" type="AdvectionType" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="StabilityAnalysis">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="TimeIntegration">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Timing">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="TimeStep" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="NumSteps" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="FinTime" minOccurs="0" maxOccurs="1" type="xs:string">
+                                        <xs:annotation>
+                                          <xs:appinfo>
+                                            <libhpc:documentation>Simulated real time length.</libhpc:documentation>
+                                          </xs:appinfo>
+                                        </xs:annotation>
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="TimeIntegrationMethod" type="TimingType" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Driver" minOccurs="0" maxOccurs="1" type="StabilityDriverType" />
+                          <xs:element name="EvolutionOperator" minOccurs="0" maxOccurs="1" type="EvolutionType" />
+                          <xs:element name="BaseFlow" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                              <xs:appinfo>
+                                <libhpc:documentation>Value of the solution at time 0.</libhpc:documentation>
+                              </xs:appinfo>
+                            </xs:annotation>
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Variable" minOccurs="1" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="VariableName" type="xs:string" />
+                                      <xs:element name="Type">
+                                        <xs:complexType>
+                                          <xs:choice>
+                                            <xs:element name="Expression" type="xs:string" />
+                                            <xs:element name="File" type="baseNameString">
+                                              <xs:complexType>
+                                                <xs:sequence />
+                                              </xs:complexType>
+                                            </xs:element>
+                                          </xs:choice>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="ModeType" minOccurs="0" maxOccurs="1" type="ModeType" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="SteadyStateStability">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="TimeIntegration">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Timing">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="TimeStep" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="NumSteps" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="FinTime" minOccurs="0" maxOccurs="1" type="xs:string">
+                                        <xs:annotation>
+                                          <xs:appinfo>
+                                            <libhpc:documentation>Simulated real time length.</libhpc:documentation>
+                                          </xs:appinfo>
+                                        </xs:annotation>
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="TimeIntegrationMethod" type="TimingType" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Driver" minOccurs="0" maxOccurs="1" type="SteadyStateDriverType" />
+                          <xs:element name="EvolutionOperator" minOccurs="0" maxOccurs="1" type="SteadyEvolutionType" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="SolverType">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>DirectNumericalSimulation: for standard flow problems
+        StabilityAnalysis: stability problems
+        SteadyStateStability: steady state stability problems</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="CoupledLinearisedNS">
+                      <xs:complexType>
+                        <xs:sequence />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="VelocityCorrectionScheme">
+                      <xs:complexType>
+                        <xs:choice>
+                          <xs:element name="Standard" />
+                          <xs:element name="WeakPressure" />
+                          <xs:element name="Mapping">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="MappingType">
+                                  <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                      <xs:enumeration value="Translation" />
+                                      <xs:enumeration value="XofZ" />
+                                      <xs:enumeration value="XofXZ" />
+                                      <xs:enumeration value="XYofZ" />
+                                      <xs:enumeration value="XYofXY" />
+                                      <xs:enumeration value="General" />
+                                    </xs:restriction>
+                                  </xs:simpleType>
+                                </xs:element>
+                                <xs:element name="Coords">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="Variable" minOccurs="1" maxOccurs="unbounded">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="Name" type="xs:string" />
+                                            <xs:element name="Value" type="xs:string" />
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Velocity">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="Variable" minOccurs="0" maxOccurs="unbounded">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="Name" type="xs:string" />
+                                            <xs:element name="Value" type="xs:string" />
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="TimeDependent" minOccurs="0" maxOccurs="1" />
+                                <xs:element name="AdvancedParameters">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="PressureTolerance" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+                                      <xs:element name="ViscousTolerance" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+                                      <xs:element name="PressureRelaxation" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+                                      <xs:element name="ViscousRelaxation" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+                                      <xs:element name="MappingImplicitPressure" minOccurs="0" maxOccurs="1" />
+                                      <xs:element name="MappingImplicitViscous" minOccurs="0" maxOccurs="1" />
+                                      <xs:element name="MappingNeglectViscous" minOccurs="0" maxOccurs="1" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:choice>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Equation">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>SteadyStokes
+        SteadyOseen
+        UnsteadyStokes
+        SteadyLinearisedNavierStokes
+        UnsteadyNavierStokes</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="SteadyStokes" />
+                    <xs:enumeration value="SteadyOseen" />
+                    <xs:enumeration value="UnsteadyStokes" />
+                    <xs:enumeration value="SteadyLinearisedNavierStokes" />
+                    <xs:enumeration value="UnsteadyNavierStokes" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Projection">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>ContinuousGalerkin: enforces continuity of solution across element boundaries
+        DiscontinuousGalerkin: doesn't enforce continuity, but better at 
+                               capturing shocks in solution</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="ContinuousGalerkin" />
+                    <xs:element name="DiscontinuousGalerkin" />
+                    <xs:element name="MixedGalerkin">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="SubStepping" minOccurs="0" maxOccurs="1" />
+                          <xs:element name="Scheme" minOccurs="0" maxOccurs="1">
+                            <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                <xs:enumeration value="ForwardEuler" />
+                                <xs:enumeration value="RungeKutta2" />
+                              </xs:restriction>
+                            </xs:simpleType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Expansion">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Specify details of how the solution function 
+      will be approximated.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="PolynomialOrder" type="xs:positiveInteger">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>The order of polynomial expansion used on each 
+          element. Higher order gives better approximation to the true solution. 
+          The number of modes is equal to PolyNomialOrder + 1.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="BasisType">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>The type of polynomials used as a basis to expand the solution 
+          function. There are two styles of basis polynomial: modal and nodal.
+           
+           Modal / hierarchical basis: don't need to redefine basis functions 
+           when increase the order (but have to be modified to get zero at boundary).
+           
+           Nodal: have to be redefined when the polynomial order is increased, 
+           but are naturally zero at the boundaries.
+           
+           Available choices:
+             MODIFIED: Legendre polynomials (modal) that have been multiplied 
+                       by two linear functions to make them zero at the boundaries.
+             GAUSS_LAGRANGE: Lagrange polynomials (nodal)
+             GLL_LAGRANGE: GLL is same as Gauss but with end points as well. 
+                           Gauss-Lobatto-Legendre
+             GLL_LAGRANGE_SMM: can only be used on  quadrilaterals and tetrehedrals
+             CHEBYSHEV: another modal approach (similar to Fourier modes).</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:enumeration value="MODIFIED" />
+                          <xs:enumeration value="GAUSS_LAGRANGE" />
+                          <xs:enumeration value="GLL_LAGRANGE" />
+                          <xs:enumeration value="GLL_LAGRANGE_SEM" />
+                          <xs:enumeration value="CHEBYSHEV" />
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="AdditionalParameters">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Commonly used parameters can be found here.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="KinematicViscosity" type="xs:string" />
+              <xs:element name="IOParams">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>This section contains parameters that specify administrative details.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="IO_CFLSteps" minOccurs="0" maxOccurs="1" type="xs:string" />
+                    <xs:element name="IO_CheckSteps" type="xs:string">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>The solution can be dumped out at regular intervals. This parameter 
+          specifies the number of time steps for this interval.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="IO_InfoSteps" type="xs:string">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Specify the interval in time steps between each 
+        print out of the current solution time.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="CustomInputs" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Add custom expressions and parameters.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="CustomExpression" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Name" type="xs:string" />
+                          <xs:element name="Value" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="CustomParameter" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Name" type="xs:string" />
+                          <xs:element name="Value" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Filter" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Filters are a method for calculating a variety of useful quantities
+        from the field variables as the solution evolves in time, such as
+        time-averaged fields and extracting the field variables at certain
+        points inside the domain.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="FilterType">
+                      <xs:complexType>
+                        <xs:choice>
+                          <xs:element name="AeroForces">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Boundary" type="xs:string">
+                                  <xs:annotation>
+                                    <xs:appinfo>
+                                      <libhpc:documentation>List boundarie(s) sequentially, i.e. for boundary 1 and 2: 1, 2.</libhpc:documentation>
+                                    </xs:appinfo>
+                                  </xs:annotation>
+                                  <xs:complexType>
+                                    <xs:sequence />
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Directions" minOccurs="0" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="Name" type="xs:string" />
+                                      <xs:element name="Value" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="AverageFields">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="SampleFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="File" minOccurs="0" maxOccurs="1" type="fieldNameString" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Checkpoint">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Energy">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="HistoryPoints">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Points" minOccurs="1" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="X" type="xs:string" />
+                                      <xs:element name="Y" type="xs:string" />
+                                      <xs:element name="Z" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="ModalEnergy">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="MovingAverage">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="SampleFrequency" type="xs:string" />
+                                <xs:element name="Tau" minOccurs="0" maxOccurs="1" type="xs:string" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="ReynoldsStresses">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="FileName" type="xs:string" />
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="SampleFile" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="File" minOccurs="0" maxOccurs="1" type="fieldNameString">
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                      <xs:element name="Frequency" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Alpha" minOccurs="0" maxOccurs="1" type="xs:string" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Threshold" minOccurs="0" maxOccurs="1">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Minimum" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="FileName" type="xs:string" />
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                      <xs:element name="ThresholdVar" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="ThresholdValue" type="xs:string" />
+                                      <xs:element name="InitialValue" type="xs:string" />
+                                      <xs:element name="StartTime" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Maximum" minOccurs="0" maxOccurs="1">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="OutputFile" minOccurs="0" maxOccurs="1">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element name="FileName" type="xs:string" />
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                      <xs:element name="ThresholdVar" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                      <xs:element name="ThresholdValue" type="xs:string" />
+                                      <xs:element name="InitialValue" type="xs:string" />
+                                      <xs:element name="StartTime" minOccurs="0" maxOccurs="1" type="xs:string" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:choice>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Force" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>An optional section of the file allows forcing functions to be defined.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="Absorption">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Coeff" type="xs:string" />
+                          <xs:element name="RefFlow" type="xs:string" />
+                          <xs:element name="RefFlowTime" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Body">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="BodyForce" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Noise">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Whitenoise" type="positiveDouble" />
+                          <xs:element name="UpdateFreq" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+                          <xs:element name="Nsteps" minOccurs="0" maxOccurs="1" type="positiveDouble" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Function" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Add in custom functions .</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="FunctionName" type="xs:string" />
+                    <xs:element name="Expression" minOccurs="1" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="ExpressionVar" type="xs:string" />
+                          <xs:element name="ExpressionValue" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="AdvancedParameters">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Advanced parameters which may improve results or numerical stability.</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CFL" minOccurs="0" maxOccurs="1" type="xs:string" />
+              <xs:element name="Dealiasing" minOccurs="0" maxOccurs="1" />
+              <xs:element name="SpectralhpDealiasing" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Enables the use of spectral/hp dealiasing, which 
+        can stablise certain simulations through the use of additional 
+        integration of the nonlinear convective terms.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="SpectralVanishingViscosity" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Adds additional damping for high-frequency modes 
+        which may help in stabilising underresolved simulations.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="SVVDiffCoeff" type="positiveIncDouble">
+                      <xs:complexType>
+                        <xs:sequence />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="SVVCutoffRatio" type="positiveIncDouble01">
+                      <xs:annotation>
+                        <xs:appinfo>
+                          <libhpc:documentation>Dictates the frequencies of the coefficients to 
+          be damped. i.e. for polynomial order 7, a value of 0.75 means 
+          damping is only applied to modes 6 and 7.</libhpc:documentation>
+                        </xs:appinfo>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:sequence />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="WeightPartitions" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>If using a hybrid mesh of more than one element type 
+        , this should be set to NonUniform to give better parallel partitions.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Uniform" />
+                    <xs:enumeration value="NonUniform - DoF" />
+                    <xs:enumeration value="NonUniform - Boundary" />
+                    <xs:enumeration value="NonUniform - Both" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Optimisation">
+          <xs:annotation>
+            <xs:appinfo>
+              <libhpc:documentation>Options to aid the computational performance of the simulation - performance
+      decreases may occur if improperly utilised!</libhpc:documentation>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GlobalSysSolution" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>Global system solution parameters, dictate the type of solver
+        to be used for any implicit systems that are constructed.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="MatrixInversion" minOccurs="1" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Field" type="xs:string">
+                            <xs:annotation>
+                              <xs:appinfo>
+                                <libhpc:documentation>Choose the field e.g. pressure (p) or velocity (u,v).</libhpc:documentation>
+                              </xs:appinfo>
+                            </xs:annotation>
+                            <xs:complexType>
+                              <xs:sequence />
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="InversionType">
+                            <xs:complexType>
+                              <xs:choice>
+                                <xs:element name="Direct">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="SubStructuring">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Full" />
+                                            <xs:enumeration value="StaticCondensation" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Iterative">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="SubStructuring">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Full" />
+                                            <xs:enumeration value="StaticCondensation" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                      <xs:element name="Preconditioner" minOccurs="0" maxOccurs="1">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Diagonal" />
+                                            <xs:enumeration value="FullLinearSpace" />
+                                            <xs:enumeration value="LowEnergyBlock" />
+                                            <xs:enumeration value="Block" />
+                                            <xs:enumeration value="FullLinearSpaceWithDiagonal" />
+                                            <xs:enumeration value="FullLinearSpaceWithLowEnergyBlock" />
+                                            <xs:enumeration value="FullLinearSpaceWithBlock" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                      <xs:element name="SuccessiveRHS" minOccurs="0" maxOccurs="1" type="positiveIncDouble">
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                      <xs:element name="IterativeSolverTolerance" type="positiveDouble">
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="Xxt">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="SubStructuring">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Full" />
+                                            <xs:enumeration value="StaticCondensation" />
+                                            <xs:enumeration value="MultiLevelStaticCondensation" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element name="PETSc">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="SubStructuring">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Full" />
+                                            <xs:enumeration value="StaticCondensation" />
+                                            <xs:enumeration value="MultiLevelStaticCondensation" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                      <xs:element name="Preconditioner" minOccurs="0" maxOccurs="1">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Diagonal" />
+                                            <xs:enumeration value="FullLinearSpace" />
+                                            <xs:enumeration value="LowEnergyBlock" />
+                                            <xs:enumeration value="Block" />
+                                            <xs:enumeration value="FullLinearSpaceWithDiagonal" />
+                                            <xs:enumeration value="FullLinearSpaceWithLowEnergyBlock" />
+                                            <xs:enumeration value="FullLinearSpaceWithBlock" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                      <xs:element name="IterativeSolverTolerance" type="positiveDouble">
+                                        <xs:complexType>
+                                          <xs:sequence />
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:choice>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Collections" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>The Collections library adds optimisations to perform certain elemental operations collectively by applying an operator using a matrix-matrix operation, rather than a sequence of matrix-vector multiplications.</libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="NoCollection" />
+                    <xs:element name="AutoTuning" />
+                    <xs:element name="StdMat" />
+                    <xs:element name="SumFac" />
+                    <xs:element name="IterPerExp" />
+                    <xs:element name="Manual">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Operator" minOccurs="1" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="OperatorType">
+                                  <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                      <xs:enumeration value="BWDTrans" />
+                                      <xs:enumeration value="IProductWRTBase" />
+                                      <xs:enumeration value="IProductWRTDerivBase" />
+                                      <xs:enumeration value="PhysDeriv" />
+                                    </xs:restriction>
+                                  </xs:simpleType>
+                                </xs:element>
+                                <xs:element name="Element" minOccurs="1" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="ElementType">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="Segment" />
+                                            <xs:enumeration value="Quadrilateral" />
+                                            <xs:enumeration value="Triangle" />
+                                            <xs:enumeration value="Hexahedron" />
+                                            <xs:enumeration value="Tetrahedron" />
+                                            <xs:enumeration value="Prism" />
+                                            <xs:enumeration value="Pyramid" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                      <xs:element name="Order" type="xs:string" />
+                                      <xs:element name="Implementation">
+                                        <xs:simpleType>
+                                          <xs:restriction base="xs:string">
+                                            <xs:enumeration value="StdMat" />
+                                            <xs:enumeration value="SumFac" />
+                                            <xs:enumeration value="IterPerExp" />
+                                          </xs:restriction>
+                                        </xs:simpleType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+

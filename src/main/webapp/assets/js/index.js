@@ -1,10 +1,19 @@
 (function($, document, window, log) {
 
+	/**
+	 * The frequency with which the keep alive call is made in seconds 
+	 */
+	var KEEP_ALIVE_FREQUENCY = 300;
+	
 	$(function() {
+		// Stores details of the files added to the fileupload form
+		var files = {};
+		
 		log("Index page - document ready...")
 
 		updateTemplateList();
-		disableProfileButtons(true);
+		disableClearTemplateButton(true);
+		disableSaveProfileButton(true);
 		disableGenerateInputButton(true);
 
 		// Variable to check whether a template has been edited
@@ -12,6 +21,11 @@
 		// Variable to check whether a profile has been loaded - used to 
 		// determine whether to refresh the template when loading a profile
 		window.profileLoaded = false;
+		
+		$('#template-select').select2({
+			theme: 'bootstrap',
+			minimumResultsForSearch: Infinity,
+		});
 		
 		$('#template-select').on('change', function(e) {
 			var target = e.currentTarget;
@@ -231,9 +245,216 @@
         $('#save-profile-btn-current').on('click', function(e) {
         	saveProfileCurrentClicked(e);
         });
-        	
+        
+        $('#add-template-init-btn').on('click', function(e) {
+        	$('#add-template-modal').modal('show');
+        });
+        // Initialise modal on opening
+        $('#add-template-modal').on('show.bs.modal', function(e) {
+    		// Empty the files dict scoped within this block since this  
+    		// retains the most recently selected file of each type otherwise.
+    		files = {};
+        	initAddTemplateModal(e);
+        })
+        
+        // This is the initial handler for the add template button. This is 
+        // removed when a file is selected and a new click handler is added to 
+        // submit the form with the file and form data.
+        $('#add-template-btn').on('click', function(e) {
+        	submitAddTemplateForm(null,null);
+        })
+        
+        // Pickup the loginsuccess event triggered on the body element and use 
+        // this to display the add template text
+        $('body').on('loginsuccess', function() {
+        	userLoginSuccessful();
+        });
+        
+        // Set up the keepalive call to run periodically to main an 
+        // active session
+        setInterval(function() {
+        	var time = new Date();
+			var keepalive = $.get('/tempss/api/keepalive');
+			keepalive.done(function() {
+				log("Keep alive request successful at: " + time.toLocaleString());
+			}).fail(function() {
+				log("Keep alive request FAILED at: " + time.toLocaleString());
+			});
+		}, 1000 * KEEP_ALIVE_FREQUENCY);
+        
+        // Configuration for the fileupload plugin. We don't want to upload 
+        // the selected file as soon as the user selects it (triggering the 
+        // done call). Instead we want to wait until the form is completed and 
+        // then upload the form data and the file all together.
+        $('#fileupload').fileupload({
+        	// Need to send the CSRF token with the request
+        	beforeSend: function(xhr, settings) {
+        		xhr.setRequestHeader("X-CSRFToken", $('#input[name="_csrf"]').val());
+        	},
+        	url: '/tempss/api/admin/template/',
+        	dataType: 'json',
+        	autoUpload: false,
+        	// Upload requires access to the file object for the selected file.
+        	// We can only get this when this function is called so we set up 
+        	// a closure passing the data to the handler function when the 
+        	// form submit button is clicked. 
+        	add: function(e, data) {
+        		log("Fileupload add callback triggered...");
+        		// First get the item that was triggered
+        		var targetName = e.delegatedEvent.target.name;
+        		
+        		// Get the name of the selected file and display it next to 
+        		// the button. Then set up the handler function. We need to 
+        		// cancel any existing handler function set for a previously 
+        		// selected file and add a new one for this selection.
+        		var fn = data.files.length ? data.files[0].name : "";
+        		$('#' + targetName + '-text').text(fn);
+        		files[targetName] = data.files[0];
+        		$('#add-template-btn').off('click').on('click', function(e) {
+        			submitAddTemplateForm(e, data, files);
+        		});
+        	},
+        	done: function(e, data) {
+        		log("Fileupload done callback triggered...");
+        	},
+        	progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('.progress .progress-bar').css('width', progress + '%').html(
+                		progress + '%');
+            }
+        });
+        
+        /***
+         * Event handlers for the fileupload form.
+         * Ensure that when a template name is entered, the option to select a
+         * template from the drop down list is disabled and vice versa
+         */
+        $('#templateNewId, #templateNewName').on('keyup', function(e) {
+        	var $currentName = $('#templateCurrentId');
+        	var $newId = $('#templateNewId');
+        	var $newName = $('#templateNewName');
+        	var idVal = $newId.val();
+        	var nameVal = $newName.val();
+        	if( (idVal == undefined || idVal == "") && 
+        			(nameVal == undefined || nameVal == "") ) {
+        		$currentName.removeAttr('disabled');
+        	}
+        	else {
+        		$currentName.val("NONE");
+        		$currentName.attr('disabled', 'disabled');
+        	}
+        });
+        
 	});
 	
+	/**
+	 * Called when the "Add Template" button on the add template modal is 
+	 * clicked. The e and data parameters are passed based on the closure set 
+	 * up when the user added a file. 
+	 */
+	function submitAddTemplateForm(e, data, files) {
+		if(e) e.preventDefault();
+		// Delete any existing error text
+		$('.addtemp-form-error').html("");
+		
+		var templateNewId = $('#templateNewId').val();
+		var templateNewName = $('#templateNewName').val();
+		var templateNewGroup = $('#templateNewGroup').val();
+		var templateCurrentId = $('#templateCurrentId').find("option:selected").val();
+		
+		var fileStr = "";
+		for(var key in files) fileStr += key + ": [" + files[key].name + "] ";
+		log('Add template form submitted with new name [' + templateNewName + 
+				'], existing id [' + templateCurrentId + '] and file details: '+
+				fileStr);
+		
+		// Validate the form content before trying to send anything.
+		// If neither template name is provided or existing template selected
+		var formErrors = false;
+		if( (templateNewId == undefined || templateNewId == "" || 
+				templateNewId.indexOf(' ') >= 0) && templateCurrentId == "NONE") {
+			$('#templateNewName-errors').html('You must enter an ID ' + 
+					'(containing no spaces) for the new template. ');
+			formErrors = true;
+		}
+		if( (templateNewName == undefined || templateNewName == "") &&
+				templateCurrentId == "NONE") {
+			$('#templateNewName-errors').html(
+				$('#templateNewName-errors').html() + 'You must enter a new ' +
+					'template name or select an existing template to update.');
+			formErrors = true;
+		}
+		if(files == null || files == {}) {
+			$('#fileupload-errors').html("You have not selected a file to upload.");
+			formErrors = true;
+		}
+		else if(!('file-schema' in files) || files['file-schema'] == "") {
+			$('#fileupload-errors').html("You must include a schema file. " +
+					"Transform and constraint files are optional.");
+			formErrors = true;
+		}
+		if(formErrors) return;
+		
+		var csrfToken = $('input[name="_csrf"]').val();
+		$.ajaxSetup({
+		    headers: {
+		        'X-CSRF-TOKEN': csrfToken
+		    }
+		});
+		var formData = $('#fileupload').serializeArray();
+		if(templateCurrentId != 'NONE') {
+			formData.push({'name':'templateCurrentName', 'value':$('#templateCurrentId').find("option:selected").text() });
+		}
+		data.formData = formData;
+		
+		// Before submitting the data, prepare the files and param names to 
+		// attach to the data object.
+		var paramNames = [];
+		var fileObjs = [];
+		for(var key in files) {
+			paramNames.push(key);
+			fileObjs.push(files[key]);
+		}
+		data.files = fileObjs;
+		data.paramName = paramNames;
+		var result = data.submit();
+		result.done(function (result, textStatus, jqXHR) {
+			log('File upload done with result <' + result + 
+					'> and textStatus <' + textStatus + '>');
+			if('result' in result && result['result'] == 'OK') {
+				$('#add-template-modal').modal('hide');
+				// Update the template list to pick up any new template names
+				setTimeout(function() {
+					var ts = $('#template-select');
+					var templateSelected = ts.val();
+					var tlUpdate = updateTemplateList();
+					tlUpdate.done(function() {
+						ts.val(templateSelected);
+						ts.trigger('change');
+					});
+				}, 0);
+			}
+			else {
+				swal("Error adding template", 
+						"Unable to add new/updated template: " + 
+						result['error'], "error");
+			}
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			var response = {};
+			var errorMsg = "An unknown error occurred.";
+			if('responseText' in jqXHR && jqXHR.responseText != undefined 
+					&& jqXHR.responseText != "") {
+				response = JSON.parse(jqXHR.responseText);
+				if('error' in response) errorMsg = response['error'];
+			}
+			log('File upload failed with status <' + textStatus + 
+					'> and error thrown <' + errorThrown + '>');
+			swal("Error adding template", 
+					"Unable to add new/updated template [" +errorThrown+ "]: "+ 
+					errorMsg, "error");
+		});
+	}
+
 	function saveProfileNewClicked(e) {
 		$('#save-existing-modal').modal('hide');
 		$('#save-profile-modal').modal('show');
@@ -256,10 +477,11 @@
 		$('#save-existing-error').text("");
 		$('#save-profile-btn-modal').prop('disabled', true);
 		if($('#template-container').data('saved')) {
-			$('#save-existing-modal').modal();
+
+			$('#save-existing-modal').modal('show');
 		}
 		else {
-			$('#save-profile-modal').modal();
+			$('#save-profile-modal').modal('show');
 		}
 	}
 
@@ -303,6 +525,10 @@
 		            $('#save-existing-modal').modal('hide');
 		            $('#template-container').data('saved', true);
 		            updateProfileList(templateId);
+
+                // Set the profile name in the editor panel header
+		            $('#editing-profile-name').text(profileName);
+
 		        } else {
 		            $('#profile-save-errors').html("<h6>An unknown error has occurred while trying to save the profile.</h6>");
 		        }
@@ -340,6 +566,38 @@
 		        $("#profile-saving").hide();
 		    }
 		);
+	}
+	
+	function userLoginSuccessful() {
+		$('#add-template-text').show();
+	}
+	
+	function initAddTemplateModal(e) {
+		// Remove any existing errors and zero the progress bar
+		$('.addtemp-form-error').html("");
+		$('#progress .progress-bar').css('width', '0%').html('');
+		// Remove any existing files and attach a new listener with no context
+		$('#file-schema-text').text("");
+		$('#file-transform-text').text("");
+		$('#file-constraint-text').text("");
+		$('#add-template-btn').off('click').on('click', function(e) {
+			submitAddTemplateForm(null, null);
+		});
+		
+		// Clear any existing entries in the name/id input boxes
+		$('#templateNewName').val('');
+		$('#templateNewId').val('');
+		$('#templateCurrentId').removeAttr('disabled');
+		$('#templateCurrentId').val('NONE');
+		$('.progress .progress-bar').css('width','0%').text('');
+		
+		// Initialise the modal by copying the list of available templates 
+		// from the main template list into the modal's template list. We also 
+		// add a modified placeholder as the first element.
+		var $options = $('#template-select > option:not(:first)').clone();
+		var $placeholder = $('<option value="NONE">Select an existing template to update...</option>');
+		$('#templateCurrentId').append($placeholder);
+		$('#templateCurrentId').append($options);
 	}
 	
 }(window.jQuery, document, window, window.log));

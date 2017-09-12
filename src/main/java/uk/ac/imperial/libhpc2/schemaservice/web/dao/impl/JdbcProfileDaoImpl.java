@@ -45,9 +45,7 @@
 
 package uk.ac.imperial.libhpc2.schemaservice.web.dao.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

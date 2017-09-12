@@ -33,7 +33,9 @@ valid profile and can be used to generate an input for for a job.
 #### Building and Running the Service
 
 TemPSS is a Java Web Service. The service can be built using
-[Apache Maven](http://maven.apache.org) and requires Java 1.7 (Java 7) or above. To build, clone
+[Apache Maven](http://maven.apache.org) and requires Java 1.7 (Java 7) or above. [npm](https://www.npmjs.com) is used to manage front-end dependencies and the [Grunt](https://gruntjs.com) plugin [grunt-npmcopy](https://github.com/timmywil/grunt-npmcopy) is used to copy the dependencies into the main application for deployment. This will all be handled transparently at build time, including installing a local copy of node/npm within the project tree.
+
+To build, clone
 the repository, and run `mvn package` in the project base directory.
 
 If the build completes successfully, output files will be generated in the

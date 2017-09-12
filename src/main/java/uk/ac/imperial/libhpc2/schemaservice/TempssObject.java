@@ -56,28 +56,37 @@ public class TempssObject {
     private String _schema;
     private String _transform;
     private String _constraints;
+    private String _path;
+    private String _group;
     private boolean _ignore;
 
     
     public TempssObject(String id, String name, String schema, String transform) {
-    	this(id, name, schema, transform, null, false);
+    	this(id, name, schema, transform, null, false, null);
     }
     
     public TempssObject(String id, String name, String schema, String transform, boolean ignore) {
-    	this(id, name, schema, transform, null, ignore);
+    	this(id, name, schema, transform, null, ignore, null);
     }
     
     public TempssObject(String id, String name, String schema, String transform, String constraints) {
-    	this(id, name, schema, transform, constraints, false);
+    	this(id, name, schema, transform, constraints, false, null);
     }
+
+    public TempssObject(String id, String name, String schema, String transform, String constraints, String group) {
+    	this(id, name, schema, transform, constraints, false, group);
+    }
+
     
-    public TempssObject(String id, String name, String schema, String transform, String constraints, boolean ignore) {
+    public TempssObject(String id, String name, String schema, String transform, String constraints, boolean ignore, String group) {
     	this._id = id;
         this._name = name;
         this._schema = schema;
         this._transform = transform;
         this._constraints = constraints;
+        this._path = null;
         this._ignore = ignore;
+        this._group = group;
     }
     
     public TempssObject(TempssObject pObj) {
@@ -86,7 +95,9 @@ public class TempssObject {
         this._schema = pObj.getSchema();
         this._transform = pObj.getTransform();
         this._constraints = pObj.getConstraints();
+        this._path = pObj.getPath();
         this._ignore = pObj.ignore();
+        this._group = pObj.getGroup();
     }
 
     public String getId() {
@@ -129,12 +140,28 @@ public class TempssObject {
         this._constraints = constraints;
     }
     
+    public String getPath() {
+        return _path;
+    }
+    
+    public void setPath(String path) {
+        this._path = path;
+    }
+    
     public boolean ignore() {
     	return this._ignore;
     }
     
     public void setIgnore(boolean ignore) {
     	this._ignore = ignore;
+    }
+    
+    public String getGroup() {
+        return _group;
+    }
+    
+    public void setGroup(String group) {
+        this._group = group;
     }
     
     @Override
@@ -145,7 +172,9 @@ public class TempssObject {
         s.append("\n\tSchema: " + getSchema());
         s.append("\n\tTransform: " + getTransform());
         s.append("\n\tConstraints: " + getConstraints());
+        s.append("\n\tComponent path: " + ((getPath() == null) ? "Default resource path" : getPath()));
         s.append("\n\tIgnore template? " + ((ignore()) ? "YES" : "NO"));
+        s.append("\n\tTemplate group? " + getGroup());
         return s.toString();
     }
 }

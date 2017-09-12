@@ -98,7 +98,7 @@ public class TemplateRestResource {
     private static final Logger sLog = LoggerFactory.getLogger(TemplateRestResource.class.getName());
 
     /**
-     * ServletContext obejct used to access template data
+     * ServletContext object used to access template data
      * Injected via @Context annotation
      */
     ServletContext _context;
@@ -124,6 +124,9 @@ public class TemplateRestResource {
                 componentObj.put("name", component.getName());
                 componentObj.put("schema", component.getSchema());
                 componentObj.put("transform", component.getTransform());
+                if(component.getGroup() != null) {
+                	componentObj.put("group", component.getGroup());
+                }
             } catch (JSONException e) {
                 sLog.error("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage());
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to add component data <" + component.toString() + "> to JSON object: " + e.getMessage()).build();
@@ -229,9 +232,13 @@ public class TemplateRestResource {
     		TempssObject metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
     		templateHtml = _getTemplateHtml(templateId, metadata);
     	} catch(UnknownTemplateException e) {
-    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_NOT_FOUND\"," +
+					"  \"error\":\"The requested template could not be found: " + e.getMessage() + "\"}";
+    		return Response.status(Status.NOT_FOUND).entity(responseText).build();
     	} catch(TemplateProcessorException e) {
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_PROCESSING_ERROR\"," +
+					"  \"error\":\"Unable to generate HTML for template: " + e.getMessage() + "\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
     	}
     	
     	return Response.ok(templateHtml, MediaType.TEXT_HTML).build();
@@ -249,9 +256,13 @@ public class TemplateRestResource {
     		metadata = TemplateResourceUtils.getTemplateMetadata(templateId, _context);
     		templateHtml = _getTemplateHtml(templateId, metadata);
     	} catch(UnknownTemplateException e) {
-    		return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_NOT_FOUND\"," +
+					"  \"error\":\"The requested template could not be found: " + e.getMessage() + "\"}";
+    		return Response.status(Status.NOT_FOUND).entity(responseText).build();
     	} catch(TemplateProcessorException e) {
-    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    		String responseText = "{\"status\":\"ERROR\", \"code\":\"TEMPLATE_PROCESSING_ERROR\"," +
+					"  \"error\":\"Unable to generate HTML for template: " + e.getMessage() + "\"}";
+    		return Response.status(Status.INTERNAL_SERVER_ERROR).entity(responseText).build();
     	}
     	
     	JSONObject templateObj = new JSONObject();

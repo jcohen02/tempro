@@ -53,8 +53,12 @@ function updateTemplateList() {
             // Success callback function:
             function(data) {
                 // Remove current content excluding the placeholder
-                $('#template-select option:gt(0)').remove();
-                var templateSelect = $('#template-select');
+            	var $templateSelect = $('#template-select');
+            	$templateSelect.find('option:gt(0)').remove();
+                $templateSelect.find('optgroup').remove();
+                
+                var templateDict = {'Other templates':[]}
+                var templateList = [];
                 var components = data.components;
                 components.sort(function(a, b) {
                     if (a.name.toLowerCase() < b.name.toLowerCase()) {
@@ -64,10 +68,37 @@ function updateTemplateList() {
                         return 1;
                     }
                 });
+                // Process template items
                 for (var i = 0; i < components.length; i++) {
                     var item = components[i];
-                    templateSelect.append("<option value=\"" + item.id + "\">" + item.id + " - " + item.name + "</option>");
+                    var group = 'Other templates';
+                    if('group' in item) group = item['group'];
+                	if(!(group in templateDict)) {
+                		templateDict[group] = [];
+                	}
+                	templateDict[group].push("<option value=\"" + 
+                			item.id + "\">" + item.name + " (id: " + 
+                			item.id +")</option>");
                 }
+                // Now prepare a large list containing all the templates
+            	// which we can add to the UI DOM.
+            	var sortedGroups = Object.keys(templateDict).sort(
+        			function(a, b) {
+        				if (a.toLowerCase() < b.toLowerCase())
+        					return -1;
+        				if (a.toLowerCase() > b.toLowerCase())
+        					return 1;
+        			}
+            	); 
+            	for(var index in sortedGroups) {
+            		var templates = templateDict[sortedGroups[index]];
+            		templateList.push('<optgroup label="' + sortedGroups[index] + '">');
+            		templateList.push.apply(templateList, templates);
+            	}
+
+                // Now add template items to the document
+            	$("#template-select").append(templateList);
+                
                 $("#template-loading").hide(0);
             },
             // Error callback function:
@@ -119,7 +150,8 @@ function displayTemplate(templateID, templateText) {
     log("About to display tree for template with ID <" + templateID + "> and text <" + templateText + ">");
 
     if (templateID == "NONE") {
-        disableProfileButtons(true);
+    	disableClearTemplateButton(true);
+    	disableSaveProfileButton(true);
         disableGenerateInputButton(true);
         hideTreeExpandCollapseButtons(true);
         hideConstraintButtons(true);
@@ -152,12 +184,14 @@ function displayTemplate(templateID, templateText) {
             var templateName = $templateNameNode.text();
             
             // Enable the profile buttons for saving/clearing template content
-            // and show the expand/collapse buttons
+            // and show the expand/collapse buttons. Enable save profile button
+            // if the user is authenticated
+            disableClearTemplateButton(false);
             if(data.authenticated) {
-            	disableProfileButtons(false);
+            	disableSaveProfileButton(false);
             }
             else {
-            	disableProfileButtons(true);
+            	disableSaveProfileButton(true);
             }
             
             // If this template has constraints, and the constraint functions
@@ -187,7 +221,10 @@ function displayTemplate(templateID, templateText) {
         // Error callback function
         function(data) {
             log('Error getting HTML tree: ' + JSON.stringify(data));
+            var response = data['responseJSON'];
             $("#template-tree-loading").hide(0);
+            swal("Error loading template tree", "An error has occurred " +
+            		"loading the template tree: " + response['error'], "error");
             dfd.reject();
         }
     );
@@ -273,19 +310,34 @@ function updateProfileList(templateID) {
 }
 
 /**
- * Disable the buttons used for saving a profile or
- * clearing profile content. These should only be enabled
- * when a template is selected.
+ * Disable/enable the button used for saving a profile.
+ * This should only be enabled when a user is signed in
+ * and a template is selected.
  *
- * @param disable disable or enable buttons
+ * @param disable <code>true</code> to disable button, 
+ *                <code>false</code> enable button
  */
-function disableProfileButtons(disable) {
+function disableSaveProfileButton(disable) {
     if (disable) {
-        $('#clear-profile-btn').prop('disabled', true);
         $('#save-as-profile-btn').prop('disabled', true);
     } else {
-        $('#clear-profile-btn').removeProp('disabled');
         $('#save-as-profile-btn').removeProp('disabled');
+    }
+}
+
+/**
+ * Disable/enable the button used for clearing and selected/entered
+ * values from a profile tree. This should only be enabled when 
+ * a template is selected.
+ *
+ * @param disable <code>true</code> to disable button, 
+ *                <code>false</code> enable button
+ */
+function disableClearTemplateButton(disable) {
+    if (disable) {
+        $('#clear-profile-btn').prop('disabled', true);
+    } else {
+        $('#clear-profile-btn').removeProp('disabled');
     }
 }
 
@@ -734,7 +786,7 @@ function handleAjaxLogin(e, modalSource) {
 			else {
 				$('#navbar .dropdown-toggle').dropdown('toggle');	
 			}
-			
+			$('body').trigger('loginsuccess');
 		}
 	}).fail(function(jqXHR, textStatus, errorThrown) {
 		log('Error logging user in....');
@@ -746,19 +798,6 @@ function handleAjaxLogin(e, modalSource) {
 		else {
 			$('#signin-form-errors').html('An incorrect user name or password was entered. Login failed.');
 		}
-		/*
-		BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_DANGER,
-			title: 'Login failed',
-            message: 'Invalid credentials entered, login failed. Please retry.',
-            buttons: [{
-                label: 'Close',
-                action: function(dialog) {
-                    dialog.close();
-                }
-            }]
-        });
-        */
 	});
 	
 }
@@ -916,4 +955,6 @@ window.log = function(message) {
         console.log(message);
     }
 }
+
 var log = window.log;
+

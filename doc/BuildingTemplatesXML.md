@@ -8,6 +8,16 @@ TemPSS templates are tree-style structures that represent all the possible param
 
 A TemPSS template is specified by a developer or domain expert user in XML format and is then processed and displayed to users as an HTML tree within the TemPSS web application. Templates were originally specified using an XML Schema format but this was considered to be overly complex and verbose so a new XML format is available. This is the format described in this document. The legacy XML Schema format is still used behind the scenes and old schema-based template definitions will still work correctly within TemPSS.
 
+Creating a new template involves a series of steps:
+
+1. An XML file which defines the template structure must be created. It should include all necessary parameter choices for a given application. Built-in template schemas can be found in the `src/main/resources/Schema` directory.
+2. When a user interacts with the template and sets configuration values, they will ultimately want to convert the values entered in the template tree into an application input file to run their task. You need to provide an XSLT transformation that converts the XML template structure, combined with the user's choices, into the desired format. Transforms are stored in the `src/main/resources/Transform` directory and you will see examples here from the built in templates.
+3. An _optional_ constraints specification file can be included if you want to add constraints to your template. Details of how to create this file are provided in [Defining Constraints](DefiningConstraints.md).
+4. Finally, the template needs to be registered by creating a property file that provides some basic metadata and provides links to the different files described above. The property files are placed in the `src/main/resources/Template` directory. See [Creating a template property file](#property-file) for more information.
+
+###### Note that if you are making use of the functionlity to add templates dynamically to a running TemPSS instance (via the "Add/update Template" button that appears in the user interface when signed in), the properties file is automatically generated for you and you only need to upload a template definition file and optionally Transform and Constraint files. These are not stored in the directories defined above but in the `${HOME}/.libhpc/templates/` directory of the user running the web appication server. 
+
+
 ## Template XML Format Reference
 
 ##### Template structure
@@ -195,3 +205,34 @@ Information about how template conversion is carried out.
 ## Specifying constraints
 
 Constraints between parameters in a template tree are specified in a separate file. In this section we describe the XML constraint file format and explain how to define constraints between parameters. 
+
+<a name="property-file"></a>
+## Creating a template property file
+
+Once a template XML definition, an associated transform file and, optionally, a constraint definition file have been created, a properties file must be created so that the new template is detected by TemPSS. The format of these files is shown in the following example:
+
+```
+component.id=simple-example
+simple-example.name=My Simple Example
+simple-example.schema=SimpleExample.xsd
+simple-example.transform=SimpleExample.xsl
+simple-example.group=My Template Group
+```
+
+A template properties file contains:
+
+- `component.id`: a simple text string with no spaces which uniquely identifies the template.
+
+All subsequent properties must include the value of the component id as the first item in the property name, e.g. if `component.id` is set to `my-template`, the name property will be referenced as `my-template.name`. `id` is used in place of the component ID in the properties below:
+
+- `id.name`: a more descriptive name for the template.
+- `id.schema`: the name of the file containing the schema.
+- `id.transform`: the name of the file containing the transform.
+- `id.constraints`:the name of a file containing constraint information.
+- `id.ignore`: No value requried - if present, the template will not be shown in the template list.
+- id.group: An _optional_ group name. If provided, this property defines the section that the template will be placed in when it appears in the list of templates in the user interface.
+
+A properties file should be saved with a filename that ends in `.properties` and places in the `src/main/resources/Template` directory. Once the TemPSS service is restarted, the new template will become available.
+
+Note that multiple component IDs can be registered in the same `.properties`
+file; see `gromacs.properties` for an example of how this is done.

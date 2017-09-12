@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017, Imperial College London
- * Copyright (c) 2017, The University of Edinburgh
+ * Copyright (c) 2015, The University of Edinburgh
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,35 +42,40 @@
  *   - libhpc Stage II: A Long-term Solution for the Usability, Maintainability
  *     and Sustainability of HPC Software (EP/K038788/1).
  */
+
 package uk.ac.imperial.libhpc2.schemaservice.api;
 
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import uk.ac.imperial.libhpc2.schemaservice.web.db.TempssUser;
-import uk.ac.imperial.libhpc2.schemaservice.web.service.TempssUserDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-public class ApiUtils {
+/**
+ * Jersey REST class providing a keepalive heartbeat endpoint to 
+ * avoid session timeout when a user keeps a page open in their 
+ * browser for longer than the session timeout without any other
+ * activity (e.g. when building a large profile).
+ * @author jhc02
+ *
+ */
+@Component
+@Path("keepalive")
+public class KeepaliveRestResource {
 
-	/**
-     * Get the details of the currently authenticated user.
-     *  
-     * @return null if no user is authenticated or the TempssUser object of the
-     *         authenticated user if a user is logged in.
+    /**
+     * Logger
      */
-    protected static TempssUser getAuthenticatedUser() {
-    	Authentication authToken = 
-    			SecurityContextHolder.getContext().getAuthentication();
-    	
-    	TempssUserDetails userDetails = null;
-		TempssUser user = null;
-		if( (authToken != null) && !(authToken instanceof AnonymousAuthenticationToken) ) {
-			userDetails = (TempssUserDetails) authToken.getPrincipal();
-			user = userDetails.getUser();
-		}
-		
-		return user;
-    }
+    private static final Logger sLog = LoggerFactory.getLogger(TemplateRestResource.class.getName());
 
+    @GET
+    public Response keepalive(@Context HttpServletRequest pRequest) {
+    	sLog.debug("Keepalive request from client <{}>.", pRequest.getRemoteAddr());
+        return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
 }

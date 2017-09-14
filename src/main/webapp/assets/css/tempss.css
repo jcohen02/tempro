@@ -158,3 +158,28 @@ div.constraint-header a {
 	margin-left: 10px;
 	cursor: pointer;
 }
+
+/*
+ * Styling for the "candlestick" toggles to make them more clearly visible
+ */
+.candlestick-wrapper {
+	top: 4px;
+	left: 0px;
+}
+
+.candlestick-disabled {
+	cursor: default;
+}
+
+.candlestick-disabled .candlestick-toggle:hover {
+	cursor: default;
+}
+
+.candlestick-toggle {
+	border: !important 1px solid #b9b9b9;
+	left: !important 14px;
+}
+
+.candlestick-bg {
+	border: !important 2px solid #c8c8c8;
+}

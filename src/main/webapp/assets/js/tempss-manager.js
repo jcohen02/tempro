@@ -178,7 +178,7 @@ function displayTemplate(templateID, templateText) {
             $templateContainer.html(data.TreeHtml);
             // Instantiate the tree plugin on the tree
             $templateContainer.LibhpcParameterTree();
-
+            
             treeRoot = $('#template-container ul[role="tree"]');
             var $templateNameNode = treeRoot.find("> li.parent_li > span[data-fqname]");
             var templateName = $templateNameNode.text();
@@ -670,6 +670,20 @@ function attachChangeHandlers() {
     		var templateId = $('#template-select option:selected').val();
 
     		constraints.updateConstraints(templateName, templateId, $(e.currentTarget).parent());
+    	}
+    });
+    
+    // For tri-state toggles, no events are triggered on change so the handler
+    // for storing constraint related information is called via the afterSetting
+    // callback the is setup through the options passed on configuration.
+    treeRoot.on('tristate_toggle_set', 'input.toggle_button', function(e) {
+    	var $parentLI = $(e.currentTarget).closest('li.parent_li');
+    	if($parentLI.hasClass("constraint")) {
+    		log("tristate toggle with constraints changed - triggering constraint solver...");
+    		var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
+    		var templateId = $('#template-select option:selected').val();
+
+    		constraints.updateConstraints(templateName, templateId, $parentLI);
     	}
     });
 }

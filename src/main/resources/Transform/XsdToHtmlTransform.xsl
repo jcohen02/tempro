@@ -146,13 +146,26 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <!-- Add optional toggle button here, javascript addition is too slow -->
         <xsl:if test="$optional">
           <xsl:element name="span">
-            <xsl:attribute name="class">toggle_button</xsl:attribute>
+
+            <xsl:attribute name="class">toggle_button_tristate</xsl:attribute>
             <xsl:attribute name="title">Optional branch inactive - click to activate</xsl:attribute>
             <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            <xsl:attribute name="data-toggle">tooltip</xsl:attribute>
+
+            <!-- 
             <xsl:element name="i">
               <xsl:attribute name="class">toggle_button enable_button</xsl:attribute>
             </xsl:element>
-          </xsl:element>
+            -->
+            <xsl:element name="input">
+              <xsl:attribute name="class">toggle_button</xsl:attribute>
+              <xsl:attribute name="type">checkbox</xsl:attribute>
+              <xsl:attribute name="value"></xsl:attribute>
+              <xsl:attribute name="id"><xsl:value-of select="$trueNodeName"/></xsl:attribute>
+              <xsl:attribute name="title">Optional branch inactive - click to activate</xsl:attribute>
+              <xsl:attribute name="aria-hidden">true</xsl:attribute>
+            </xsl:element>
+          </xsl:element> 
         </xsl:if>
         <!-- Add repeatable add section button here, javascript addition is too slow -->
         <xsl:if test="$repeatable">

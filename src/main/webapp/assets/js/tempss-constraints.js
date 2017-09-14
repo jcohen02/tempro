@@ -719,7 +719,7 @@ var constraints = {
 		'constraint change that set this switch or ' +
 		'reset the constraints.';
 		var originalTitle = ($toggleSpan.attr('title') != "") ? $toggleSpan.attr('title') : $toggleSpan.attr('data-original-title');
-		$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('show');
+		$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle');
 		$toggleSpan.attr('data-old-title', originalTitle);
 	},
 	

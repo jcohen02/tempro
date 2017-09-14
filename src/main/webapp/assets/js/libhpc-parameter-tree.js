@@ -550,6 +550,29 @@ function isInteger(valueToCheck) {
              */
             setupTristateToggles: function() {
                 var $toggleBtns = this._tree.find('.toggle_button[type="checkbox"]');
+                // Since there can be multiple IDs for the toggle buttons that 
+                // are the same in the generated HTML, we need to remove these 
+                // clashes by running through and modifying the IDs so that 
+                // they're all unique. This also ensures that we don't get 
+                // strange behaviour caused by having multiple toggles with 
+                // the same ID.
+                // Build a dictionary to keep track of the nodes we've seen
+                var repeatedNodes = {};
+                $toggleBtns.each(function() {
+                	var $this = $(this);
+                	// When this is run all the IDs are at their original vals
+                	// so we don't need to do a substring to remove any trailing
+                	// values since these haven't yet been added.
+                	var id = $this.attr('id');
+                	if(id in repeatedNodes) {
+                		var count = repeatedNodes[id];
+                		$this.attr('id', id+"-"+count);
+                		repeatedNodes[id] = count + 1;
+                	}
+                	else {
+                		repeatedNodes[id] = 1;
+                	}
+                });
                 $toggleBtns.candlestick({
                 	swipe:false, 
                 	size: 'sm', 
@@ -557,6 +580,7 @@ function isInteger(valueToCheck) {
                 	afterSetting: function(input, wrapper, value) {
                 		log("Tristate setting callback with value: " + value);
                 		var $closestUL = input.closest('ul');
+                		var $closestSpan = input.closest('span.toggle_button_tristate');
                 		// If the value that was set is different to the value
                 		// of the optional node, toggle it
                 		if($closestUL.hasClass("disabled") && value == "1") {
@@ -565,6 +589,7 @@ function isInteger(valueToCheck) {
                 		else if((!$closestUL.hasClass("disabled")) && value == "0") {
                 			toggleBranch($closestUL);	
                 		}
+                		$closestSpan.tooltip('disable');
                 		input.trigger('tristate_toggle_set', [value]);
                 	},
                 });
@@ -893,8 +918,22 @@ function isInteger(valueToCheck) {
             
             // Activate element if disabled
             if ($owningUL.data('disabled') === true) {
-                console.log('Toggling branch');
-                toggleBranch($owningUL[0]);
+            	// We may be dealing with a tri-state toggle or a standard 
+            	// toggle. If its a stnadard toggle we can call toggleBranch
+            	// but a tri-state toggle requires use of the candlestick API
+                if($owningUL.children('li.parent_li').children('span.toggle_button_tristate').length > 0) {
+                	console.log('Enabling tri-state toggle for optional branch');
+                	var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
+                	var $toggleInput = $toggleSpan.find('input.toggle_button');
+                	$toggleInput.candlestick('on');
+                	var newTooltipText = "Optional branch. Click to toggle.";
+                	$toggleSpan.tooltip('hide').tooltip('fixTitle').data('original-title', newTooltipText);
+                	$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('hide');
+                }
+                else {
+                	console.log('Toggling branch');
+                	toggleBranch($owningUL[0]);
+                }
             }
             // Check to see if this has been populated already (for repeated elements).
             // If so need to create another.

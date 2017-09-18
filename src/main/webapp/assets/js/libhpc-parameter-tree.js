@@ -548,8 +548,11 @@ function isInteger(valueToCheck) {
              * use the jquery candlestick plugin, see: 
              * https://github.com/EdouardTack/candlestick 
              */
-            setupTristateToggles: function() {
-                var $toggleBtns = this._tree.find('.toggle_button[type="checkbox"]');
+            setupTristateToggles: function(root) {
+            	if(root === undefined) {
+            		root = this._tree;
+            	}
+                var $toggleBtns = root.find('.toggle_button[type="checkbox"]');
                 // Since there can be multiple IDs for the toggle buttons that 
                 // are the same in the generated HTML, we need to remove these 
                 // clashes by running through and modifying the IDs so that 
@@ -593,10 +596,11 @@ function isInteger(valueToCheck) {
                 		input.trigger('tristate_toggle_set', [value]);
                 	},
                 });
+                $toggleBtns.candlestick('default');
                 $toggleBtns.candlestick('enable');
-                this._tree.find('div.candlestick-toggle').css('left','15px');
-                this._tree.find('div.candlestick-toggle').css('border','1px solid #b9b9b9');
-                this._tree.find('.toggle_button_tristate .candlestick-nc').off('click');
+                root.find('div.candlestick-toggle').css('left','15px');
+                root.find('div.candlestick-toggle').css('border','1px solid #b9b9b9');
+                root.find('.toggle_button_tristate .candlestick-nc').off('click');
             }
     };
 
@@ -827,9 +831,13 @@ function isInteger(valueToCheck) {
     	$toggles.each(function() {
     		var $this = $(this);
     		var $thisInput = $this.find('input.toggle_button');
-    		var thisId = $thisInput.attr('id');
+    		var thisId = $thisInput.attr('id'); 
     		$thisInput.attr('id', thisId + '-' + numElementsInc);
-    	})
+    		$thisInput.attr('type','checkbox');
+    		$thisInput.attr('aria-hidden','true');
+    		$thisInput.attr('title', 'Optional branch inactive - click to activate');
+    		$this.html($thisInput);
+    	});
     	
     	
     	// Copy this UL and insert into the tree directly after.
@@ -849,6 +857,12 @@ function isInteger(valueToCheck) {
     			$(this).trigger('click');
     		}
     	});
+    	
+    	// Call the tristate toggle initialisation function to initialise any
+    	// tristate toggles in this block
+    	console.log('Setting up tristate toggles in cloned tree node...');
+    	$newElement.LibhpcParameterTree();
+    	$newElement.data(treePluginName).setupTristateToggles($newElement);
         
         $newElement.trigger('change');
     };

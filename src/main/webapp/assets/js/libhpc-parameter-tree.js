@@ -819,6 +819,19 @@ function isInteger(valueToCheck) {
     		$(this).removeClass('valid');
     	});
         
+    	// Tri-state toggle switches rely on their ID for configuration. Since 
+    	// we have cloned the branch, there will be clashing IDs on the toggles.
+    	// Find all the toggles and append the numElements count to their IDs
+    	var $toggles = $newElement.find('span.toggle_button_tristate');
+    	var numElementsInc = numElements+1;
+    	$toggles.each(function() {
+    		var $this = $(this);
+    		var $thisInput = $this.find('input.toggle_button');
+    		var thisId = $thisInput.attr('id');
+    		$thisInput.attr('id', thisId + '-' + numElementsInc);
+    	})
+    	
+    	
     	// Copy this UL and insert into the tree directly after.
         if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
         	$newElement.insertAfter($ul).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');

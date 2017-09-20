@@ -905,6 +905,13 @@ function isInteger(valueToCheck) {
     		}
     	});
     	
+    	// If we have any select nodes in the tree and these are constrained to 
+    	// one value, it is not possible to change them but the branch that they
+    	// represent may not be expanded. To ensure that all selects that are 
+    	// constrained to a single value are expanded, trigger a change event 
+    	// on each one.
+    	$newElement.find('li.parent_li.constraint').find('> select').trigger('change');
+    	
     	// Call the tristate toggle initialisation function to initialise any
     	// tristate toggles in this block
     	console.log('Setting up tristate toggles in cloned tree node...');

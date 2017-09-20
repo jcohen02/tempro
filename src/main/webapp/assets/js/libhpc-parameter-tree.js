@@ -115,10 +115,20 @@
                         	$owningUL.children('li').children('ul').not('.valid, [chosen="false"]').each(function(i, childUL) {
                                 // If any remaining ul's are not disabled then is not valid.
                                 // TODO: Convert this into check on class="disabled" for performance?
-                                if ($(childUL).data('disabled') !== true) {
+                                var $childUL = $(childUL);
+                        		if ($childUL.data('disabled') !== true) {
                                     isValid = false;
                                     // Break out of .each loop
                                     return false;
+                                }
+                                else {
+                                	if($childUL.children('li.parent_li').children('span.toggle_button_tristate').length) {
+                                		if($childUL.children('li.parent_li').children('span.toggle_button_tristate').find('input.toggle_button').val() == "") {
+                                			isValid = false;
+                                			// Break out of .each loop
+                                            return false;
+                                		}
+                        			}
                                 }
                             });
                         }
@@ -299,7 +309,7 @@ function isInteger(valueToCheck) {
                 }
                 
                 // Set up tristate switches using "candlestick" plugin
-                this.setupTristateToggles();
+                this.setupTristateToggles(true);
 
             },
 
@@ -548,10 +558,14 @@ function isInteger(valueToCheck) {
              * use the jquery candlestick plugin, see: 
              * https://github.com/EdouardTack/candlestick 
              */
-            setupTristateToggles: function(root) {
+            setupTristateToggles: function(initial, root) {
             	if(root === undefined) {
             		root = this._tree;
             	}
+            	if(initial === undefined) {
+            		initial = true;
+            	}
+            	
                 var $toggleBtns = root.find('.toggle_button[type="checkbox"]');
                 // Since there can be multiple IDs for the toggle buttons that 
                 // are the same in the generated HTML, we need to remove these 
@@ -564,7 +578,12 @@ function isInteger(valueToCheck) {
                 $toggleBtns.each(function() {
                 	var $this = $(this);
                 	var id = $this.attr('id');
-                	$this.attr('id', id+"-"+getSimpleUid(8));
+                	if(initial) {
+                		$this.attr('id', id+"-"+getSimpleUid(8));
+                	}
+                	else {
+                		$this.attr('id', id.substring(0, id.length-8) + getSimpleUid(8));
+                	}
                 });
                 $toggleBtns.candlestick({
                 	swipe:false, 
@@ -581,6 +600,16 @@ function isInteger(valueToCheck) {
                 		}
                 		else if((!$closestUL.hasClass("disabled")) && value == "0") {
                 			toggleBranch($closestUL);	
+                		}
+                		else if($closestUL.hasClass("disabled") && value == "0") {
+                			log("Initial set of toggle to disabled - removing disabled class to trigger update");
+                			// When a tri-state toggle is initially configured it is set to disabled so that the tree
+                			// is processed correctly. If we now trigger a toggleBranch, the toggle function thinks 
+                			// that the switch is off and we're toggling it to on. To avoid this we remove the disabled
+                			// class to force the toggle function to set the switch to off.
+                			$closestUL.removeClass("disabled");
+                			$closestUL.removeData("disabled");
+                			toggleBranch($closestUL);
                 		}
                 		$closestSpan.tooltip('disable');
                 		input.trigger('tristate_toggle_set', [value]);
@@ -700,6 +729,10 @@ function isInteger(valueToCheck) {
      * Disable a branch.
      */
     var toggleBranch = function(elementUL) {
+    	// With tristate toggles, on the initial setting of the switch, it 
+    	// doesn't have a data-disabled value set so neither of the states 
+    	// below is triggered. We therefore check the state of the toggle here
+    	//if($(elementUL).data('disabled'))
         if ($(elementUL).data('disabled') === true) {
             // Enable branch
             $(elementUL).removeClass('disabled')
@@ -806,8 +839,12 @@ function isInteger(valueToCheck) {
     	// Now reset the fields in the repeated block
     	var $inputItems = $newElement.find('input[type="text"]');
     	$inputItems.each(function() { $(this).val(""); });
-    	var $selectItems = $newElement.find('select option');
-    	$selectItems.each(function() { $(this).prop('selected', false); });
+    	var $selectItems = $newElement.find('select');
+    	$selectItems.each(function() {
+    		var $this = $(this);
+    		$this.find('option').prop('selected', false);
+    		$this.trigger('change');
+    	});
     	var $validEl = $newElement.find('.valid');
     	$validEl.each(function() {
     		$(this).removeClass('valid');
@@ -815,14 +852,16 @@ function isInteger(valueToCheck) {
         
     	// Tri-state toggle switches rely on their ID for configuration. Since 
     	// we have cloned the branch, there will be clashing IDs on the toggles.
-    	// Find all the toggles and append the numElements count to their IDs
+    	// Find all the toggles, remove the existing 8 character uid from the ID
+    	// and add a new UID
     	var $toggles = $newElement.find('span.toggle_button_tristate');
     	var numElementsInc = numElements+1;
     	$toggles.each(function() {
+    		// ID updates moved to toggle setup function
     		var $this = $(this);
     		var $thisInput = $this.find('input.toggle_button');
-    		var thisId = $thisInput.attr('id'); 
-    		$thisInput.attr('id', thisId + '-' + numElementsInc);
+    		//var thisId = $thisInput.attr('id'); 
+    		//$thisInput.attr('id', thisId.substring(0, thisId.length-8) + getSimpleUid(8));
     		$thisInput.attr('type','checkbox');
     		$thisInput.attr('aria-hidden','true');
     		$thisInput.attr('title', 'Optional branch inactive - click to activate');
@@ -852,7 +891,7 @@ function isInteger(valueToCheck) {
     	// tristate toggles in this block
     	console.log('Setting up tristate toggles in cloned tree node...');
     	$newElement.LibhpcParameterTree();
-    	$newElement.data(treePluginName).setupTristateToggles($newElement);
+    	$newElement.data(treePluginName).setupTristateToggles(false, $newElement);
         
         $newElement.trigger('change');
     };

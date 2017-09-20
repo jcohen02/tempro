@@ -559,22 +559,12 @@ function isInteger(valueToCheck) {
                 // they're all unique. This also ensures that we don't get 
                 // strange behaviour caused by having multiple toggles with 
                 // the same ID.
-                // Build a dictionary to keep track of the nodes we've seen
-                var repeatedNodes = {};
+                // Update: This has been simplified by just adding a short UID
+                // to each node's ID.
                 $toggleBtns.each(function() {
                 	var $this = $(this);
-                	// When this is run all the IDs are at their original vals
-                	// so we don't need to do a substring to remove any trailing
-                	// values since these haven't yet been added.
                 	var id = $this.attr('id');
-                	if(id in repeatedNodes) {
-                		var count = repeatedNodes[id];
-                		$this.attr('id', id+"-"+count);
-                		repeatedNodes[id] = count + 1;
-                	}
-                	else {
-                		repeatedNodes[id] = 1;
-                	}
+                	$this.attr('id', id+"-"+getSimpleUid(8));
                 });
                 $toggleBtns.candlestick({
                 	swipe:false, 
@@ -1955,4 +1945,16 @@ function resetEnableCandlestick($input) {
 	
 	$input.candlestick('reset');
 	$input.candlestick('enable');
+}
+
+function getSimpleUid(uidLength) {
+	var domain = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	// Pick a random value, mod it with the length of domain and then select the
+	// value at that location. Repeat "length" times to give a random id.
+	uid = ""
+	for(var i = 0; i < uidLength; i++) {
+		var rand = Math.floor(Math.random()*domain.length);
+		uid += domain[rand]
+	}
+	return uid;
 }

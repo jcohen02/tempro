@@ -637,10 +637,28 @@ function isInteger(valueToCheck) {
 
         $(node).children('ul:not([chosen="false"])').each(function(i, childUL) {
             // Ignore disabled nodes of tree
-            if (!($(childUL).data('disabled'))) {
-                var isLeaf = ($(childUL).data('leaf') === true);
+        	// UPDATE: While we don't want to process the contents of nodes that
+        	// are disabled, in the case of tristate toggle switch nodes, we 
+        	// differentiate between nodes that are off and those that are 
+        	// unset. Here we check if a disabled node is a tristate toggle and 
+        	// then see if it is actually disabled or just unset.
+        	var $childUL = $(childUL); 
+            if (($childUL.data('disabled'))) {
+            	var $toggleSpan = $childUL.find('> li.parent_li > span.toggle_button_tristate');
+            	if($toggleSpan.length > 0) {
+            		log("We have a disabled toggle button.....");
+            		var toggleValue = $toggleSpan.find('input.toggle_button').val();
+            		if(toggleValue == "0") {
+            			var nodeName = $.trim($toggleSpan.parent().data('fqname'));
+            			// Write out an element noting that this toggle is set to off.
+            			xmlString += depthString + '<' + nodeName + ' toggle-value="off"/>\n';
+            		}
+            	}
+            }
+            else {
+                var isLeaf = ($childUL.data('leaf') === true);
 
-                $(childUL).children('li').each(function(j, childLI) {
+                $childUL.children('li').each(function(j, childLI) {
                     // Name is in span element
                     var nodeName = $.trim($(childLI).data('fqname'));
                     var inputValue = '';
@@ -972,19 +990,32 @@ function isInteger(valueToCheck) {
             	//$elementLI.children('span.badge').trigger('click');
             }
             
+            var tval = this.getAttribute('toggle-value');
+            if(tval) {
+            	console.log('Got toggle value attribute: ' + tval);
+            }
+            
             // Activate element if disabled
             if ($owningUL.data('disabled') === true) {
             	// We may be dealing with a tri-state toggle or a standard 
             	// toggle. If its a stnadard toggle we can call toggleBranch
             	// but a tri-state toggle requires use of the candlestick API
                 if($owningUL.children('li.parent_li').children('span.toggle_button_tristate').length > 0) {
-                	console.log('Enabling tri-state toggle for optional branch');
-                	var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
-                	var $toggleInput = $toggleSpan.find('input.toggle_button');
-                	$toggleInput.candlestick('on');
-                	var newTooltipText = "Optional branch. Click to toggle.";
-                	$toggleSpan.tooltip('hide').tooltip('fixTitle').data('original-title', newTooltipText);
-                	$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('hide');
+                	if(tval && tval == "off") {
+                		console.log('Setting tri-state toggle for optional branch to disabled');
+                		var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
+	                	var $toggleInput = $toggleSpan.find('input.toggle_button');
+	                	$toggleInput.candlestick('off');
+                	}
+                	else {
+	                	console.log('Enabling tri-state toggle for optional branch');
+	                	var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
+	                	var $toggleInput = $toggleSpan.find('input.toggle_button');
+	                	$toggleInput.candlestick('on');
+	                	var newTooltipText = "Optional branch. Click to toggle.";
+	                	$toggleSpan.tooltip('hide').tooltip('fixTitle').data('original-title', newTooltipText);
+	                	$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('hide');
+                	}
                 }
                 else {
                 	console.log('Toggling branch');

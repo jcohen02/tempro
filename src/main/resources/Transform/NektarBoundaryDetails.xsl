@@ -66,7 +66,7 @@
     <xsl:variable name="icount"><xsl:number/></xsl:variable>
     
     <REGION>
-      <xsl:attribute name="REF"><xsl:value-of select="BoundaryConditionReference"/></xsl:attribute>
+      <xsl:attribute name="REF"><xsl:value-of select="exslt:node-set($mappings)/MAPPING[@BCNAME=$bcname]/@ID"/></xsl:attribute>
       <!-- <xsl:apply-templates select="Variable" mode ="BCVariable"/> -->
       <xsl:choose>
         <xsl:when  test="Variable/CoupledLinearisedNS-2D">

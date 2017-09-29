@@ -393,29 +393,10 @@
         </Threshold>
       </FilterType>
     </Filter>
-
-    <Force repeatable="true" paramType="choice" optional="true">
+    
+    <Function repeatable="true" optional="true" function="functionSource">
       <libhpc:documentation>
-        An optional section of the file allows forcing functions to be defined.
-      </libhpc:documentation>
-      <Absorption>
-        <Coeff type="xs:string"/>
-        <RefFlow type="xs:string"/>
-        <RefFlowTime type="xs:string"/>
-      </Absorption>
-      <Body>
-        <BodyForce type="xs:string"/>
-      </Body>
-      <Noise>
-        <Whitenoise type="positiveDouble"/>
-        <UpdateFreq type="positiveDouble" optional="true"/>
-        <Nsteps type="positiveDouble" optional="true"/>
-      </Noise>
-    </Force>
-
-    <Function repeatable="true" optional="true">
-      <libhpc:documentation>
-        Add in custom functions .
+        Add in custom functions.
       </libhpc:documentation>
       <FunctionName type="xs:string"/>
         <Expression repeatable="true">
@@ -423,6 +404,29 @@
           <ExpressionValue type="xs:string"/>
         </Expression>
     </Function>
+
+    <Force repeatable="true" paramType="choice" optional="true">
+      <libhpc:documentation>
+        An optional section of the file allows forcing functions to be defined. 
+      </libhpc:documentation>
+      <Absorption>
+        <Coeff type="xs:string"/>
+        <RefFlow type="xs:string"/>
+        <RefFlowTime type="xs:string"/>
+      </Absorption>
+      <Body>
+        <BodyForce function="functionTarget">
+          <libhpc:documentation>
+            A function describing how the bodyforce is applied. Add a new function under Additional Parameters -> Function and it will appear in the list here for selection.
+          </libhpc:documentation>
+        </BodyForce>
+      </Body>
+      <Noise>
+        <Whitenoise type="positiveDouble"/>
+        <UpdateFreq type="positiveDouble" optional="true"/>
+        <Nsteps type="positiveDouble" optional="true"/>
+      </Noise>
+    </Force>
   </AdditionalParameters>
 
   <AdvancedParameters>

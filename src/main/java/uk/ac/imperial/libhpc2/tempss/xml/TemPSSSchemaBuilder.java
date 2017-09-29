@@ -268,6 +268,8 @@ public class TemPSSSchemaBuilder {
 			if(node.hasAttributes()) {
 				Attribute optionalAttr = node.getAttribute("optional");
 				Attribute repeatableAttr = node.getAttribute("repeatable");
+				Attribute functionAttr = node.getAttribute("function");
+				String functionType = "";
 				boolean optional = false;
 				if(optionalAttr != null) {
 					try {
@@ -307,6 +309,15 @@ public class TemPSSSchemaBuilder {
 					// Don't need to put maxOccurs if we didn't have minOccurs
 					if(optionalAttr != null) {
 						e.setAttribute("maxOccurs", "1");
+					}
+				}
+				if(functionAttr != null) {
+					functionType = functionAttr.getValue();
+					if(functionType.equals("functionSource")) {
+						e.setAttribute("type", "FunctionType");
+					}
+					else if(functionType.equals("functionTarget")) {
+						e.setAttribute("type", "FunctionTargetType");
 					}
 				}
 			}

@@ -414,5 +414,10 @@
       </xs:sequence>
     </xs:element>
   </xs:complexType>
+  
+  <xs:simpleType name="FunctionTargetType">
+    <xs:restriction base="xs:string">
+    </xs:restriction>
+  </xs:simpleType>
 
 </xs:schema>

@@ -47,6 +47,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:param name="optional" select="@minOccurs = '0'"/>
     <!-- Test to see if element is repeatable, based on maxOccurs -->
     <xsl:param name="repeatable" select="@maxOccurs and @maxOccurs != '1'"/>
+    
     <xsl:element name="ul">
       <!-- If this is a repeatable element, add a count with the data-repeat
            attribute.  -->
@@ -100,6 +101,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <xsl:attribute name="data-fqname">
           <xsl:value-of select="$nodeName"/>
         </xsl:attribute>
+        <xsl:if test="@type='FunctionType'">
+          <xsl:attribute name="data-function">true</xsl:attribute>
+        </xsl:if>
+        <xsl:if test="@type='FunctionTargetType'">
+          <xsl:attribute name="data-function-target">true</xsl:attribute>
+        </xsl:if>
         <xsl:element name="span">
           <!-- Add optional class if required, and optional data attribute -->
           <xsl:choose>

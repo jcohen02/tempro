@@ -115,10 +115,20 @@
                         	$owningUL.children('li').children('ul').not('.valid, [chosen="false"]').each(function(i, childUL) {
                                 // If any remaining ul's are not disabled then is not valid.
                                 // TODO: Convert this into check on class="disabled" for performance?
-                                if ($(childUL).data('disabled') !== true) {
+                                var $childUL = $(childUL);
+                        		if ($childUL.data('disabled') !== true) {
                                     isValid = false;
                                     // Break out of .each loop
                                     return false;
+                                }
+                                else {
+                                	if($childUL.children('li.parent_li').children('span.toggle_button_tristate').length) {
+                                		if($childUL.children('li.parent_li').children('span.toggle_button_tristate').find('input.toggle_button').val() == "") {
+                                			isValid = false;
+                                			// Break out of .each loop
+                                            return false;
+                                		}
+                        			}
                                 }
                             });
                         }
@@ -299,7 +309,7 @@ function isInteger(valueToCheck) {
                 }
                 
                 // Set up tristate switches using "candlestick" plugin
-                this.setupTristateToggles();
+                this.setupTristateToggles(true);
 
             },
 
@@ -548,10 +558,14 @@ function isInteger(valueToCheck) {
              * use the jquery candlestick plugin, see: 
              * https://github.com/EdouardTack/candlestick 
              */
-            setupTristateToggles: function(root) {
+            setupTristateToggles: function(initial, root) {
             	if(root === undefined) {
             		root = this._tree;
             	}
+            	if(initial === undefined) {
+            		initial = true;
+            	}
+            	
                 var $toggleBtns = root.find('.toggle_button[type="checkbox"]');
                 // Since there can be multiple IDs for the toggle buttons that 
                 // are the same in the generated HTML, we need to remove these 
@@ -559,21 +573,16 @@ function isInteger(valueToCheck) {
                 // they're all unique. This also ensures that we don't get 
                 // strange behaviour caused by having multiple toggles with 
                 // the same ID.
-                // Build a dictionary to keep track of the nodes we've seen
-                var repeatedNodes = {};
+                // Update: This has been simplified by just adding a short UID
+                // to each node's ID.
                 $toggleBtns.each(function() {
                 	var $this = $(this);
-                	// When this is run all the IDs are at their original vals
-                	// so we don't need to do a substring to remove any trailing
-                	// values since these haven't yet been added.
                 	var id = $this.attr('id');
-                	if(id in repeatedNodes) {
-                		var count = repeatedNodes[id];
-                		$this.attr('id', id+"-"+count);
-                		repeatedNodes[id] = count + 1;
+                	if(initial) {
+                		$this.attr('id', id+"-"+getSimpleUid(8));
                 	}
                 	else {
-                		repeatedNodes[id] = 1;
+                		$this.attr('id', id.substring(0, id.length-8) + getSimpleUid(8));
                 	}
                 });
                 $toggleBtns.candlestick({
@@ -591,6 +600,16 @@ function isInteger(valueToCheck) {
                 		}
                 		else if((!$closestUL.hasClass("disabled")) && value == "0") {
                 			toggleBranch($closestUL);	
+                		}
+                		else if($closestUL.hasClass("disabled") && value == "0") {
+                			log("Initial set of toggle to disabled - removing disabled class to trigger update");
+                			// When a tri-state toggle is initially configured it is set to disabled so that the tree
+                			// is processed correctly. If we now trigger a toggleBranch, the toggle function thinks 
+                			// that the switch is off and we're toggling it to on. To avoid this we remove the disabled
+                			// class to force the toggle function to set the switch to off.
+                			$closestUL.removeClass("disabled");
+                			$closestUL.removeData("disabled");
+                			toggleBranch($closestUL);
                 		}
                 		$closestSpan.tooltip('disable');
                 		input.trigger('tristate_toggle_set', [value]);
@@ -618,10 +637,28 @@ function isInteger(valueToCheck) {
 
         $(node).children('ul:not([chosen="false"])').each(function(i, childUL) {
             // Ignore disabled nodes of tree
-            if (!($(childUL).data('disabled'))) {
-                var isLeaf = ($(childUL).data('leaf') === true);
+        	// UPDATE: While we don't want to process the contents of nodes that
+        	// are disabled, in the case of tristate toggle switch nodes, we 
+        	// differentiate between nodes that are off and those that are 
+        	// unset. Here we check if a disabled node is a tristate toggle and 
+        	// then see if it is actually disabled or just unset.
+        	var $childUL = $(childUL); 
+            if (($childUL.data('disabled'))) {
+            	var $toggleSpan = $childUL.find('> li.parent_li > span.toggle_button_tristate');
+            	if($toggleSpan.length > 0) {
+            		log("We have a disabled toggle button.....");
+            		var toggleValue = $toggleSpan.find('input.toggle_button').val();
+            		if(toggleValue == "0") {
+            			var nodeName = $.trim($toggleSpan.parent().data('fqname'));
+            			// Write out an element noting that this toggle is set to off.
+            			xmlString += depthString + '<' + nodeName + ' toggle-value="off"/>\n';
+            		}
+            	}
+            }
+            else {
+                var isLeaf = ($childUL.data('leaf') === true);
 
-                $(childUL).children('li').each(function(j, childLI) {
+                $childUL.children('li').each(function(j, childLI) {
                     // Name is in span element
                     var nodeName = $.trim($(childLI).data('fqname'));
                     var inputValue = '';
@@ -710,6 +747,10 @@ function isInteger(valueToCheck) {
      * Disable a branch.
      */
     var toggleBranch = function(elementUL) {
+    	// With tristate toggles, on the initial setting of the switch, it 
+    	// doesn't have a data-disabled value set so neither of the states 
+    	// below is triggered. We therefore check the state of the toggle here
+    	//if($(elementUL).data('disabled'))
         if ($(elementUL).data('disabled') === true) {
             // Enable branch
             $(elementUL).removeClass('disabled')
@@ -816,8 +857,12 @@ function isInteger(valueToCheck) {
     	// Now reset the fields in the repeated block
     	var $inputItems = $newElement.find('input[type="text"]');
     	$inputItems.each(function() { $(this).val(""); });
-    	var $selectItems = $newElement.find('select option');
-    	$selectItems.each(function() { $(this).prop('selected', false); });
+    	var $selectItems = $newElement.find('select');
+    	$selectItems.each(function() {
+    		var $this = $(this);
+    		$this.find('option').prop('selected', false);
+    		$this.trigger('change');
+    	});
     	var $validEl = $newElement.find('.valid');
     	$validEl.each(function() {
     		$(this).removeClass('valid');
@@ -825,14 +870,16 @@ function isInteger(valueToCheck) {
         
     	// Tri-state toggle switches rely on their ID for configuration. Since 
     	// we have cloned the branch, there will be clashing IDs on the toggles.
-    	// Find all the toggles and append the numElements count to their IDs
+    	// Find all the toggles, remove the existing 8 character uid from the ID
+    	// and add a new UID
     	var $toggles = $newElement.find('span.toggle_button_tristate');
     	var numElementsInc = numElements+1;
     	$toggles.each(function() {
+    		// ID updates moved to toggle setup function
     		var $this = $(this);
     		var $thisInput = $this.find('input.toggle_button');
-    		var thisId = $thisInput.attr('id'); 
-    		$thisInput.attr('id', thisId + '-' + numElementsInc);
+    		//var thisId = $thisInput.attr('id'); 
+    		//$thisInput.attr('id', thisId.substring(0, thisId.length-8) + getSimpleUid(8));
     		$thisInput.attr('type','checkbox');
     		$thisInput.attr('aria-hidden','true');
     		$thisInput.attr('title', 'Optional branch inactive - click to activate');
@@ -862,7 +909,7 @@ function isInteger(valueToCheck) {
     	// tristate toggles in this block
     	console.log('Setting up tristate toggles in cloned tree node...');
     	$newElement.LibhpcParameterTree();
-    	$newElement.data(treePluginName).setupTristateToggles($newElement);
+    	$newElement.data(treePluginName).setupTristateToggles(false, $newElement);
         
         $newElement.trigger('change');
     };
@@ -943,19 +990,32 @@ function isInteger(valueToCheck) {
             	//$elementLI.children('span.badge').trigger('click');
             }
             
+            var tval = this.getAttribute('toggle-value');
+            if(tval) {
+            	console.log('Got toggle value attribute: ' + tval);
+            }
+            
             // Activate element if disabled
             if ($owningUL.data('disabled') === true) {
             	// We may be dealing with a tri-state toggle or a standard 
             	// toggle. If its a stnadard toggle we can call toggleBranch
             	// but a tri-state toggle requires use of the candlestick API
                 if($owningUL.children('li.parent_li').children('span.toggle_button_tristate').length > 0) {
-                	console.log('Enabling tri-state toggle for optional branch');
-                	var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
-                	var $toggleInput = $toggleSpan.find('input.toggle_button');
-                	$toggleInput.candlestick('on');
-                	var newTooltipText = "Optional branch. Click to toggle.";
-                	$toggleSpan.tooltip('hide').tooltip('fixTitle').data('original-title', newTooltipText);
-                	$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('hide');
+                	if(tval && tval == "off") {
+                		console.log('Setting tri-state toggle for optional branch to disabled');
+                		var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
+	                	var $toggleInput = $toggleSpan.find('input.toggle_button');
+	                	$toggleInput.candlestick('off');
+                	}
+                	else {
+	                	console.log('Enabling tri-state toggle for optional branch');
+	                	var $toggleSpan = $($owningUL.children('li.parent_li').children('span.toggle_button_tristate')[0])
+	                	var $toggleInput = $toggleSpan.find('input.toggle_button');
+	                	$toggleInput.candlestick('on');
+	                	var newTooltipText = "Optional branch. Click to toggle.";
+	                	$toggleSpan.tooltip('hide').tooltip('fixTitle').data('original-title', newTooltipText);
+	                	$toggleSpan.tooltip('hide').attr('data-original-title', newTooltipText).tooltip('fixTitle').tooltip('hide');
+                	}
                 }
                 else {
                 	console.log('Toggling branch');
@@ -1955,4 +2015,16 @@ function resetEnableCandlestick($input) {
 	
 	$input.candlestick('reset');
 	$input.candlestick('enable');
+}
+
+function getSimpleUid(uidLength) {
+	var domain = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	// Pick a random value, mod it with the length of domain and then select the
+	// value at that location. Repeat "length" times to give a random id.
+	uid = ""
+	for(var i = 0; i < uidLength; i++) {
+		var rand = Math.floor(Math.random()*domain.length);
+		uid += domain[rand]
+	}
+	return uid;
 }

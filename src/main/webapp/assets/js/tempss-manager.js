@@ -215,6 +215,9 @@ function displayTemplate(templateID, templateText) {
             // Attach handlers for BoundaryCondition/BoundaryRegion processing
             attachBoundaryConditionHandlers();
 
+            // Attach handlers for custom Function element processing
+            attachCustomFunctionHandlers();
+            
             $("#template-tree-loading").hide(0);
             dfd.resolve();
         },
@@ -711,6 +714,25 @@ function attachBoundaryConditionHandlers() {
     	});
 }
 
+function attachCustomFunctionHandlers() {
+    // Handles custom functions and links them to nodes that require selection
+	// of a custom function. When a node that accepts a function is rendered, 
+	// it is given a select node which is initially empty. When a function is 
+	// set up and the function node becomes valid, an update is triggered on 
+	// nodes that have lists of available custom functions to add/remove the
+	// function from the list.
+    $('li.parent_li[data-function="true"]').parent(
+    	).on('nodeValid', function(e) {
+    		updateDynamicOptionList(e, 
+    				$('li.parent_li[data-fqname="FunctionName"]'), 
+    				'input', $('li.parent_li[data-function-target="true"]'));
+    	}).on('nodeInvalid', function(e) {
+    		updateDynamicOptionList(e, 
+    				$('li.parent_li[data-fqname="FunctionName"]'), 
+    				'input', $('li.parent_li[data-function-target="true"]'));
+    	});
+}
+
 function setEditingProfileName(profileName) {
     if(profileName == "NONE") {
         profileName = "";
@@ -939,6 +961,62 @@ function updateBoundaryRegions(event, valid) {
 			$select.val(previousValue);
 		}
 		$select.attr("onChange", "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + BCNameList + "}');");
+		$select.trigger('change');
+	});
+}
+
+/**
+ * A general function to update a dynamic option list that varies depending on 
+ * some other repeatable element. We need to 
+ * @param event The event that generated triggered this function
+ * @param $sourceLi The base li.parent_li element for the source items
+ * @param sourcePath A selector string containing the path from the $sourceLi 
+ *                   element to the node containing the values
+ * @param $targetElement The target element where the values should be updated
+ * @returns
+ */
+function updateDynamicOptionList(event, $sourceLi, sourcePath, $targetElement) {
+	// Iterate over all the nodes containing source values and compile a list 
+	// of the values. We then add them to the target nodes with updated 
+	// validation criteria.
+	var values = [];
+	$sourceLi.find(sourcePath).each(function() {
+		if(!$(this).parent().parent().parent().parent().hasClass('disabled')) {
+			var value = $(this).val();
+			if(value != null && value != "") {
+				values.push(value);
+			}
+		}
+	});
+	
+	// Format the list of value names to a string that can be placed into the 
+	// change handler for validation processing. Also prepare the HTML 
+	// containing the list of options to add to the select.
+	log("Value list for updated target selects: " + values);
+	var valuesStr = "[";
+	var optionHtml = '<option value="Select from list">Select from list</option>';
+	for(var i = 0; i < values.length; i++) {
+		optionHtml += '<option value="' + values[i] + '">' + values[i] + '</option>';
+		valuesStr += '"' + values[i] + '"';
+		if(i < values.length-1) {
+			valuesStr += ", ";
+		}
+	}
+	valuesStr += ']';
+
+	$targetElement.each(function() {
+		var $select = $(this).children('select');
+		// Before removing options from the existing list, get the current value
+		// from the select. If this is present in the new array, then we 
+		// re-select it after updating the available options. An alternative 
+		// would be to only remove an option if it is not in the list.
+		var previousValue = $select.find(":selected").val();
+		$select.find('option').remove();
+		$select.append($(optionHtml));
+		if(values.indexOf(previousValue) >= 0) {
+			$select.val(previousValue);
+		}
+		$select.attr("onChange", "validateEntries($(this), 'xs:string', '{\"xs:enumeration\": " + valuesStr + "}');");
 		$select.trigger('change');
 	});
 }

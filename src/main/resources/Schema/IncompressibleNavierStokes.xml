@@ -304,7 +304,7 @@
           </OutputFile>
           <Boundary type="xs:string">        
             <libhpc:documentation>
-              List boundarie(s) sequentially, i.e. for boundary 1 and 2: 1, 2.
+              List boundaries sequentially, i.e. for boundary 1 and 2: 1, 2.
             </libhpc:documentation>
           </Boundary>
           <Directions repeatable="true" optional="true">

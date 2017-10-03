@@ -147,17 +147,21 @@
     <xs:choice>
       <xs:element name="ClassicalSFD">
         <xs:complexType>
-          <xs:element name="ControlCoefficient" type="xs:string"/>
-          <xs:element name="FilterWidth" type="xs:string"/>http://localhost:8080/tempss/profiles/
-          <xs:element name="Tolerance" type="xs:string"/>
+          <xs:sequence>
+            <xs:element name="ControlCoefficient" type="xs:string"/>
+            <xs:element name="FilterWidth" type="xs:string"/>
+            <xs:element name="Tolerance" type="xs:string"/>
+          </xs:sequence>
         </xs:complexType>  
       </xs:element>
       <xs:element name="AdaptiveSFD">
         <xs:complexType>
+        <xs:sequence>
           <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
           <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
           <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
           <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
         </xs:complexType>  
       </xs:element>
     </xs:choice>
@@ -181,30 +185,34 @@
       <xs:element name="Standard"/>
       <xs:element name="ModifiedArnoldi">
         <xs:complexType>
-          <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:sequence>
+            <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>
         </xs:complexType>  
       </xs:element>
       <xs:element name="Arpack">
         <xs:complexType>
-          <xs:element name="ArpackType">
-            <xs:simpleType>
-              <xs:restriction base="xs:string">
-                <xs:enumeration value="LargestMag"/>
-                <xs:enumeration value="SmallestMag"/>
-                <xs:enumeration value="LargestReal"/>
-                <xs:enumeration value="SmallestReal"/>
-                <xs:enumeration value="LargestImag"/>
-                <xs:enumeration value="SmallestImag"/>
-              </xs:restriction>
-            </xs:simpleType>        
-          </xs:element>
-          <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:sequence>
+            <xs:element name="ArpackType">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="LargestMag"/>
+                  <xs:enumeration value="SmallestMag"/>
+                  <xs:enumeration value="LargestReal"/>
+                  <xs:enumeration value="SmallestReal"/>
+                  <xs:enumeration value="LargestImag"/>
+                  <xs:enumeration value="SmallestImag"/>
+                </xs:restriction>
+              </xs:simpleType>        
+            </xs:element>
+            <xs:element name="kdim" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="nvec" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="evtol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="nits" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>
         </xs:complexType>  
       </xs:element>
     </xs:choice>
@@ -227,7 +235,7 @@
   
   <xs:complexType name="BoundaryDetails">
     <xs:sequence>
-      <xs:element name="BoundaryCondition" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="BoundaryCondition" minOccurs="1" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>
@@ -241,14 +249,14 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="BoundaryConditionReference" type="xs:string"/>
-            <xs:element name="Variable">
+            <xs:element name="Variables">
               <xs:complexType>
-                <xs:choice>
-                  <xs:element name="CoupledLinearisedNS-2D" type="CoupledLinearisedNS-2D"/>
-                  <xs:element name="CoupledLinearisedNS-3D" type="CoupledLinearisedNS-3D"/>
-                  <xs:element name="VelocityCorrectionScheme-2D" type="VelocityCorrectionScheme-2D"/>
-                  <xs:element name="VelocityCorrectionScheme-3D" type="VelocityCorrectionScheme-3D"/>
-                </xs:choice>
+                <xs:sequence>
+                  <xs:element name="u-velocity" type="NewBoundaryType"/>
+                  <xs:element name="v-velocity" type="NewBoundaryType"/>
+                  <xs:element name="w-velocity" type="NewBoundaryType" minOccurs="0" maxOccurs="1"/>
+                  <xs:element name="p-pressure" type="NewBoundaryType" minOccurs="0" maxOccurs="1"/>
+                </xs:sequence>
               </xs:complexType>
           </xs:element>
           </xs:sequence>
@@ -258,48 +266,71 @@
   </xs:complexType>
 
   <xs:complexType name="CoupledLinearisedNS-2D">
-    <xs:element name="u-velocity" type="BoundaryType"/>
-    <xs:element name="v-velocity" type="BoundaryType"/>
+    <xs:sequence>
+      <xs:element name="u-velocity" type="BoundaryType"/>
+      <xs:element name="v-velocity" type="BoundaryType"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="VelocityCorrectionScheme-2D">
-    <xs:element name="u-velocity" type="BoundaryType"/>
-    <xs:element name="v-velocity" type="BoundaryType"/>
-    <xs:element name="p-pressure" type="BoundaryType"/>
+    <xs:sequence>
+      <xs:element name="u-velocity" type="BoundaryType"/>
+      <xs:element name="v-velocity" type="BoundaryType"/>
+      <xs:element name="p-pressure" type="BoundaryType"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="CoupledLinearisedNS-3D">
-    <xs:element name="u-velocity" type="BoundaryType"/>
-    <xs:element name="v-velocity" type="BoundaryType"/>
-    <xs:element name="w-velocity" type="BoundaryType"/>
+    <xs:sequence>
+      <xs:element name="u-velocity" type="BoundaryType"/>
+      <xs:element name="v-velocity" type="BoundaryType"/>
+      <xs:element name="w-velocity" type="BoundaryType"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="VelocityCorrectionScheme-3D">
-    <xs:element name="u-velocity" type="BoundaryType"/>
-    <xs:element name="v-velocity" type="BoundaryType"/>
-    <xs:element name="w-velocity" type="BoundaryType"/>
-    <xs:element name="p-pressure" type="BoundaryType"/>
+    <xs:sequence>
+      <xs:element name="u-velocity" type="BoundaryType"/>
+      <xs:element name="v-velocity" type="BoundaryType"/>
+      <xs:element name="w-velocity" type="BoundaryType"/>
+      <xs:element name="p-pressure" type="BoundaryType"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="BoundaryType">
-    <xs:complexType>
       <xs:sequence>
         <xs:element name="ConditionType">
           <xs:complexType>
             <xs:choice>
+              <!-- 
               <xs:element name="Dirichlet" type="Values"/>
               <xs:element name="Neumann" type="Values"/>
               <xs:element name="Robin" type="Values"/>
               <xs:element name="Periodic" type="PeriodicValues"/>
+               -->
             </xs:choice>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
-    </xs:complexType>
+  </xs:complexType>
+  
+  <xs:complexType name="NewBoundaryType">
+      <xs:sequence>
+        <xs:element name="ConditionType">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="Dirichlet"/>
+              <xs:enumeration value="Neumann"/>
+              <xs:enumeration value="Robin"/>
+              <xs:enumeration value="Periodic"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="ConditionValues" type="ConditionValuesType"/>
+      </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="Values">
-    <xs:element name="Options">
+  <xs:complexType name="ConditionValuesType">
       <xs:sequence>
         <xs:element name="ConditionValue">
           <xs:complexType>
@@ -356,6 +387,27 @@
         </xs:element>
         <xs:element name="PrimaryCoefficient" minOccurs="0" maxOccurs="1">
           <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Expression" type="xs:string">
+                <xs:annotation>
+                  <xs:appinfo>
+                    <libhpc:documentation>
+                      Provide a function describing this boundary condition.
+                    </libhpc:documentation>
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="PeriodicValues">
+    <xs:sequence>
+      <xs:element name="Options">
+        <xs:complexType>
+          <xs:sequence>
             <xs:element name="Expression" type="xs:string">
               <xs:annotation>
                 <xs:appinfo>
@@ -365,54 +417,38 @@
                 </xs:appinfo>
               </xs:annotation>
             </xs:element>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:element>
-  </xs:complexType>
-
-  <xs:complexType name="PeriodicValues">
-    <xs:element name="Options">
-      <xs:sequence>
-        <xs:element name="Expression" type="xs:string">
-          <xs:annotation>
-            <xs:appinfo>
-              <libhpc:documentation>
-                Provide a function describing this boundary condition.
-              </libhpc:documentation>
-            </xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
-          <xs:complexType>
-            <xs:choice>
-              <xs:element name="ExistingType">
-                <xs:simpleType>
-                  <xs:restriction base="xs:string">
-                    <xs:enumeration value="Flowrate"/>
-                    <xs:enumeration value="HighOrderPressure"/>
-                    <xs:enumeration value="HOutflow"/>
-                    <xs:enumeration value="MovingBody"/>
-                    <xs:enumeration value="Radiation"/>
-                    <xs:enumeration value="TimeDependent"/>
-                    <xs:enumeration value="Wormesley"/>
-                  </xs:restriction>
-                </xs:simpleType>
-              </xs:element>
-              <xs:element name="CustomExpression" type="xs:string">
-                <xs:annotation>
-                  <xs:appinfo>
-                    <libhpc:documentation>
-                      Provide a function describing this boundary condition.
-                    </libhpc:documentation>
-                  </xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-            </xs:choice>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:element>
+            <xs:element name="UserDefinedType" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:choice>
+                  <xs:element name="ExistingType">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:enumeration value="Flowrate"/>
+                        <xs:enumeration value="HighOrderPressure"/>
+                        <xs:enumeration value="HOutflow"/>
+                        <xs:enumeration value="MovingBody"/>
+                        <xs:enumeration value="Radiation"/>
+                        <xs:enumeration value="TimeDependent"/>
+                        <xs:enumeration value="Wormesley"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="CustomExpression" type="xs:string">
+                    <xs:annotation>
+                      <xs:appinfo>
+                        <libhpc:documentation>
+                          Provide a function describing this boundary condition.
+                        </libhpc:documentation>
+                      </xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:choice>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
   
   <xs:simpleType name="FunctionTargetType">

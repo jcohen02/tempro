@@ -20,6 +20,7 @@
         </domain>
       </variable>              
 
+      <!--
       <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variable" name="Variable">
         <domain>
           <value>CoupledLinearisedNS-2D</value>
@@ -28,7 +29,90 @@
           <value>VelocityCorrectionScheme-3D</value>
         </domain>
       </variable>              
+      -->
+      
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.w-velocity" name="w-velocity">
+        <domain>
+          <value>On</value>
+          <value>Off</value>
+        </domain>
+      </variable>
+      
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.p-pressure" name="p-pressure">
+        <domain>
+          <value>On</value>
+          <value>Off</value>
+        </domain>
+      </variable>
+      
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.u-velocity.ConditionType" name="uConditionType">
+        <domain>
+          <value>Dirichlet</value>
+          <value>Neumann</value>
+          <value>Robin</value>
+          <value>Periodic</value>
+        </domain>
+      </variable>
+      
+      <!--
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.v-velocity.ConditionType" name="vConditionType">
+        <domain>
+          <value>Dirichlet</value>
+          <value>Neumann</value>
+          <value>Robin</value>
+          <value>Periodic</value>
+        </domain>
+      </variable>
 
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.w-velocity.ConditionType" name="wConditionType">
+        <domain>
+          <value>Dirichlet</value>
+          <value>Neumann</value>
+          <value>Robin</value>
+          <value>Periodic</value>
+        </domain>
+      </variable>
+      
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.p-pressure.ConditionType" name="pConditionType">
+        <domain>
+          <value>Dirichlet</value>
+          <value>Neumann</value>
+          <value>Robin</value>
+          <value>Periodic</value>
+        </domain>
+      </variable>
+      -->
+      
+      <!-- PrimaryCoefficient values for u, v, w and p variables -->
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.u-velocity.ConditionValues.PrimaryCoefficient" name="uPrimaryCoefficient">
+        <domain>
+          <value>On</value>
+          <value>Off</value>
+        </domain>
+      </variable>
+      
+      <!-- 
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.v-velocity.ConditionValues.PrimaryCoefficient" name="vPrimaryCoefficient">
+        <domain>
+          <value>On</value>
+          <value>Off</value>
+        </domain>
+      </variable>
+      
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.w-velocity.ConditionValues.PrimaryCoefficient" name="wPrimaryCoefficient">
+        <domain>
+          <value>On</value>
+          <value>Off</value>
+        </domain>
+      </variable>
+      
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.p-pressure.ConditionValues.PrimaryCoefficient" name="pPrimaryCoefficient">
+        <domain>
+          <value>On</value>
+          <value>Off</value>
+        </domain>
+      </variable>
+      -->
       <variable path="NumericalSpecification.SolverType" name="SolverType">
         <domain>
           <value>CoupledLinearisedNS</value>
@@ -110,25 +194,24 @@
     </variables>
     
     <constraints>
-      <!-- Mapping of dimensions with boundary conditions -->
-      <mapping variable="Dimensions" varvalue="TwoDimensional" targetVariable="Variable">
-        <targetValue>VelocityCorrectionScheme-2D</targetValue>
-        <targetValue>CoupledLinearisedNS-2D</targetValue>
+      <!-- Mapping of dimensions with w variable which is not applicable for 2D problems -->
+      <mapping variable="Dimensions" varvalue="TwoDimensional" targetVariable="w-velocity">
+        <targetValue>Off</targetValue>
       </mapping>
-      <mapping variable="Dimensions" varvalue="ThreeDimensional" targetVariable="Variable">
-        <targetValue>VelocityCorrectionScheme-3D</targetValue>
-        <targetValue>CoupledLinearisedNS-3D</targetValue>
+      
+      <mapping variable="Dimensions" varvalue="ThreeDimensional" targetVariable="w-velocity">
+        <targetValue>On</targetValue>
       </mapping>
 
-      <!-- Mapping of boundary conditions with solvertype -->
-      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Variable">
-        <targetValue>CoupledLinearisedNS-2D</targetValue>
-        <targetValue>CoupledLinearisedNS-3D</targetValue>
+      <!-- Mapping of solvertype to pressure variable. p is only relevant in VelocityCorrectionScheme problems -->
+      <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="p-pressure">
+        <targetValue>Off</targetValue>
       </mapping>
-      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="Variable">
-        <targetValue>VelocityCorrectionScheme-2D</targetValue>
-        <targetValue>VelocityCorrectionScheme-3D</targetValue>
+      <mapping variable="SolverType" varvalue="VelocityCorrectionScheme" targetVariable="p-pressure">
+        <targetValue>On</targetValue>
       </mapping>
+
+     
 
       <!-- Mapping of equation type with solvertype -->
       <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Equation">
@@ -162,6 +245,7 @@
         <targetValue>DiscontinuousGalerkin</targetValue>
         <targetValue>MixedGalerkin</targetValue>
       </mapping>
+      
       <mapping variable="SolverType" varvalue="CoupledLinearisedNS" targetVariable="Projection">
         <targetValue>ContinuousGalerkin</targetValue>
       </mapping>
@@ -184,6 +268,32 @@
       <mapping variable="Equation" varvalue="SteadyOseen" targetVariable="SteadyTimeIntegrationMethod">
         <targetValue>NotProvided</targetValue>
       </mapping> -->
+      
+      <!-- Constraint mappings for primary cofficient for u, v, w and p vars -->
+      <mapping variable="uPrimaryCoefficient" varvalue="Off" targetVariable="uConditionType">
+        <targetValue>Dirichlet</targetValue>
+        <targetValue>Neumann</targetValue>
+        <targetValue>Robin</targetValue>
+        <targetValue>Periodic</targetValue>
+      </mapping>
+      
+      <mapping variable="uPrimaryCoefficient" varvalue="On" targetVariable="uConditionType">
+        <targetValue>Dirichlet</targetValue>
+        <targetValue>Neumann</targetValue>
+        <targetValue>Robin</targetValue>
+      </mapping>
+      <!--
+      <mapping variable="vPrimaryCoefficient" varvalue="Off" targetVariable="vConditionType">
+        <targetValue>Periodic</targetValue>
+      </mapping>
+      <mapping variable="wPrimaryCoefficient" varvalue="Off" targetVariable="wConditionType">
+        <targetValue>Periodic</targetValue>
+      </mapping>
+      <mapping variable="pPrimaryCoefficient" varvalue="Off" targetVariable="pConditionType">
+        <targetValue>Periodic</targetValue>
+      </mapping>
+      -->
+      
     </constraints>              
                   
 </PrismConstraints>

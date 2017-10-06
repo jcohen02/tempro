@@ -256,7 +256,7 @@ function isInteger(valueToCheck) {
         this._options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = pluginName;
-
+        
         this.init();
     }
 
@@ -356,6 +356,26 @@ function isInteger(valueToCheck) {
                 topLi.children('ul').children('li').show();
             },
 
+            /**
+             * Hide all the nodes of a subtree below the base element $base.
+             */
+            collapseSubtree: function($base) {
+
+                // Hide all li nodes
+                $base.find('li').hide();
+
+                // Hide all ul nodes that are choices
+                // (i.e. have choice-id attribute).
+                // This ensures when we click on a choice bubble which has
+                // been selected, nothing will show.
+                // This is a trick. We are using the fact that the tree
+                // javascript only acts on li nodes.
+                $base.find('ul[choice-id]').hide();
+
+                // Show the root element of the tree (li child of tree ul).
+                $base.children('li').show();
+            },
+            
             /**
              * Expand the tree.
              */
@@ -799,9 +819,9 @@ function isInteger(valueToCheck) {
     window.toggleBranch = toggleBranch;
 
     /**
-     * Repeat this branch.
+     * Repeat this branch (old implementation).
      */
-    var repeatBranch = function(elementUL) {
+    var repeatBranchOld = function(elementUL) {
         // Get the name of the item we're repeating
     	var $ul = $(elementUL);
     	var choice_path = $ul.find('select.choice').attr('choice-path');
@@ -920,6 +940,53 @@ function isInteger(valueToCheck) {
         
         $newElement.trigger('change');
     };
+    
+    /**
+     * Repeat this branch - new implementation using stored branch content
+     */
+    var repeatBranch = function(elementUL) {
+    	var $ul = $(elementUL);
+    	var choice_path = $ul.find('select.choice').attr('choice-path');
+    	// Get the branch path and check if we have a copy of the original node
+    	// stored in the cache.
+    	var branchPath = getNodeFullPath($ul);
+    	log('Repeating branch for branch path: ' + branchPath + '    Choice path: ' + choice_path);
+    	if(!window.hasOwnProperty('repeatableBranches') && 
+    			!window.repeatableBranches.hasOwnProperty(branchPath)) {
+    		log('ERROR: Unable to find branch content, can\'t repeat branch');
+    	}
+    	
+    	// Get the branch content from the cache and store it
+    	var $branchContent = window.repeatableBranches[branchPath].clone();
+    	var numElements = $ul.parent().find('select[choice-path="' + choice_path + '"]').length;
+        $branchContent.attr('data-repeat', numElements+1);
+        
+        // Copy this UL and insert into the tree directly after.
+        if ($ul.children('li.parent_li').children('span.repeat_button_remove').length == 0) {
+        	$branchContent.insertAfter($ul).children('li.parent_li').children('span.badge').after('&nbsp;<span class="repeat_button repeat_button_remove" title="Click to remove this copy" aria-hidden="true"><i class="repeat_button repeat_button_remove"></i></span>&nbsp;');
+        }
+        else {
+        	$branchContent.insertAfter($ul);
+        }
+        
+    	// If we have any select nodes in the tree and these are constrained to 
+    	// one value, it is not possible to change them but the branch that they
+    	// represent may not be expanded. To ensure that all selects that are 
+    	// constrained to a single value are expanded, trigger a change event 
+    	// on each one.
+    	$branchContent.find('li.parent_li.constraint').find('> select').trigger('change');
+    	
+    	// Call the tristate toggle initialisation function to initialise any
+    	// tristate toggles in this block
+    	console.log('Setting up tristate toggles in repeated branch...');
+    	$branchContent.LibhpcParameterTree();
+    	$branchContent.data(treePluginName).setupTristateToggles(false, $branchContent);
+        
+    	$branchContent.trigger('change');
+    	
+    	// Collapse all the subtree nodes.
+    	$branchContent.data(treePluginName).collapseSubtree($branchContent);
+    }
 
     /**
      * Remove this branch.
@@ -2034,4 +2101,32 @@ function getSimpleUid(uidLength) {
 		uid += domain[rand]
 	}
 	return uid;
+}
+
+/**
+ * Given a template node's ul or li.parent_li DOM node, get the fully qualified 
+ * path to this node. The returned path DOES NOT INCLUDE the root template name. 
+ */
+function getNodeFullPath($node) {
+	var $li = null;
+	if($node.length == 1 && $node[0].tagName == "LI" && 
+			$node.hasClass('parent_li')) {
+		$li = $node;
+	}
+	else {
+		$li = $node.children('li.parent_li');
+		if($li.length != 1) $li = null;
+	}
+	if($li == null) {
+		return null;
+	}
+	
+	var path = $li.attr('data-fqname');
+	var $lis = $li.parents('li.parent_li');
+	$lis.each(function() {
+		var $this = $(this);
+		if($this.attr('data-fqname') == undefined) return path;
+		path = $this.attr('data-fqname') + '.' + path;
+	});
+	return path;
 }

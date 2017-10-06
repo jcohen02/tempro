@@ -20,6 +20,13 @@ window.treeRoot = null;
 window.$templateContainer = $('#template-container');
 
 /**
+ * Attach a dictionary to the window object which will be used to store the 
+ * clean content for each branch. 
+ */
+window.repeatableBranches = {};
+
+
+/**
  * This function is called via a setTimeout call when the selected
  * template is changed.
  */
@@ -176,6 +183,20 @@ function displayTemplate(templateID, templateText) {
             log('Got HTML tree from server');
             // Data that comes back is the raw HTML to place into the page
             $templateContainer.html(data.TreeHtml);
+            
+            // Take copies of the repeated branches so that we can add a clean   
+            // copy of a branch when a duplicate is requested.
+
+            var $repeatableNodes = $('span.repeat_button_add');
+            log('We have <' + $repeatableNodes.length + '> repeatable branches.');
+
+            $repeatableNodes.each(function() {
+            	var $ul = $(this).closest('ul');
+            	var path = getNodeFullPath($ul);
+            	log('Storing path for repeated node: ' + path);
+            	window.repeatableBranches[path] = $ul.clone();
+            });
+            
             // Instantiate the tree plugin on the tree
             $templateContainer.LibhpcParameterTree();
             

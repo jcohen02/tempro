@@ -171,9 +171,9 @@
 		<dependency>
 		  <groupId>uk.ac.imperial.jhc02.prism</groupId>
 		  <artifactId>prism-constraints-xml</artifactId>
-		  <version>0.0.1</version>
+		  <version>0.0.2</version>
 		  <scope>system</scope>
-		  <systemPath>${basedir}/lib/prism-constraints-xml-0.0.1.jar</systemPath>
+		  <systemPath>${basedir}/lib/prism-constraints-xml-0.0.2.jar</systemPath>
 		</dependency>
 	</dependencies>
 	<build>

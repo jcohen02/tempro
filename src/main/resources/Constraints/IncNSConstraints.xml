@@ -45,7 +45,10 @@
         </domain>
       </variable>
       
-      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.u-velocity.ConditionType" name="uConditionType">
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.u-velocity.ConditionType" 
+                name="uConditionType"
+                repeatable="true"
+                repeat-id="u-velocity-group">
         <domain>
           <value>Dirichlet</value>
           <value>Neumann</value>
@@ -84,7 +87,10 @@
       -->
       
       <!-- PrimaryCoefficient values for u, v, w and p variables -->
-      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.u-velocity.ConditionValues.PrimaryCoefficient" name="uPrimaryCoefficient">
+      <variable path="ProblemSpecification.BoundaryDetails.BoundaryCondition.Variables.u-velocity.ConditionValues.PrimaryCoefficient" 
+                name="uPrimaryCoefficient"
+                repeatable="true"
+                repeat-id="u-velocity-group">
         <domain>
           <value>On</value>
           <value>Off</value>
@@ -273,13 +279,10 @@
       <mapping variable="uPrimaryCoefficient" varvalue="Off" targetVariable="uConditionType">
         <targetValue>Dirichlet</targetValue>
         <targetValue>Neumann</targetValue>
-        <targetValue>Robin</targetValue>
         <targetValue>Periodic</targetValue>
       </mapping>
       
       <mapping variable="uPrimaryCoefficient" varvalue="On" targetVariable="uConditionType">
-        <targetValue>Dirichlet</targetValue>
-        <targetValue>Neumann</targetValue>
         <targetValue>Robin</targetValue>
       </mapping>
       <!--

@@ -173,6 +173,7 @@ public class ConstraintsRestResource {
     			JSONObject constraintObject = new JSONObject();
 	    		constraintObject.put("variable1", c.getVariable1FQName());
 	    		constraintObject.put("variable2", c.getVariable2FQName());
+	    		constraintObject.put("repeatable", c.isRepeatable());
 	    		
 	    		Variable v1 = varMap.get(c.getVariable1FQName());
 	    		JSONArray mappingArray = new JSONArray();

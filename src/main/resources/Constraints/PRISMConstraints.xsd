@@ -20,6 +20,14 @@
          This path can exclude the solver name which will be automatically added.  
          Path elements should be dot-separated. -->
     <attribute name="path" type="string" />
+    <!-- Denotes whether a constraint variable is repeatable (i.e. it is 
+         attached to a repeatable element and many independent instances of 
+         this variable may appear in a template. -->
+    <attribute name="repeatable" type="boolean" />
+    <!-- An ID that can be used to group sets of variables that are related 
+         within a template subtree. Every instance of this group of variables 
+         will have its constraints evaluated as an independent local set. -->
+    <attribute name="repeat-id" type="string" />
   </complexType>
 
   <complexType name="variables">

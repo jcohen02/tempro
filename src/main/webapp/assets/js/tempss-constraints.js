@@ -357,7 +357,14 @@ var constraints = {
 		}.bind(this)).catch(swal.noop);
 	},
 	
-	resetConstraints: function(e) {
+	/**
+	 * Reset the constraints back to their original settings. This function can 
+	 * also be used to setup constraints on a newly added repeated branch  
+	 * where constraints have not previously been setup - in this case, the 
+	 * root element of the new branch is passed in and the constraint data is 
+	 * applied to the new branch as necessary.
+	 */
+	resetConstraints: function(e, $rootNode) {
 		var $rootUl = $('#template-container ul[role="tree"]');
 		var $templateNameNode = $rootUl.find("> li.parent_li > span[data-fqname]");
 		var templateName = $templateNameNode.data('fqname');
@@ -366,41 +373,15 @@ var constraints = {
 			return;
 		}
 		var constraintData = window.constraints[templateName];
+		
+		var branchPath = null;
+		if(typeof $rootNode !== undefined) {
+			branchPath = getNodeFullPath($rootNode);
+		}
+		
 		for(var key in constraintData) {
-			var $element = $($templateNameNode.parent()[0]);
-			var keyElements = key.split('.');
-			for(var i = 0; i < keyElements.length; i++) {
-				$element = $element.find('> ul > li.parent_li[data-fqname="' + keyElements[i] + '"]');
-			}
-			if($element.children('select').length > 0) {
-				var $select = $element.children('select');
-				$select.html(constraintData[key]);
-				// Now re-initialise this select field
-				var changeStr = $select.attr("onchange");
-				if(changeStr.indexOf("validateEntries") == 0) {
-					// We have a select dropdown (text inputs also use
-					// this approach but we've already filtered for 
-					// select above).
-					// Restrictions JSON needs to be passed as a string
-					var restrictionsJSON = changeStr.substring(
-							changeStr.indexOf("\'\{")+1,
-							changeStr.lastIndexOf("\}\'")+1
-					);
-					// Run the validation
-					validateEntries($select, 'xs:string', restrictionsJSON);
-				}
-				else if(changeStr.indexOf("selectChoiceItem") == 0) {
-					// Can't trigger the change event on the choice 
-					// select directly but need to call selectChoiceItem
-					var event = {target: $select[0]};
-					selectChoiceItem(event);
-				}
-			}
-			else if($element.children('span.toggle_button_tristate').length > 0) {
-				var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
-				var $toggleSpan = $input.closest('.toggle_button_tristate');
-				$input.closest('li.parent_li').attr('data-run-solver', false);
-				resetEnableCandlestick($input);
+			if(branchPath == null || (key.startsWith(branchPath))) {
+				this._processConstraint(constraintData, key, $templateNameNode);
 			}
 		}
 		// Remove the set_by_constraint from any toggle nodes...
@@ -422,6 +403,44 @@ var constraints = {
 		// re-evaluating the content following the field reset.
 		$('li.parent_li.constraint .val-help').closest('ul').removeClass('invalid');
 	
+	},
+	
+	_processConstraint: function(constraintData, key, $templateNameNode) {			
+		var $element = $($templateNameNode.parent()[0]);
+		var keyElements = key.split('.');
+		for(var i = 0; i < keyElements.length; i++) {
+			$element = $element.find('> ul > li.parent_li[data-fqname="' + keyElements[i] + '"]');
+		}
+		if($element.children('select').length > 0) {
+			var $select = $element.children('select');
+			$select.html(constraintData[key]);
+			// Now re-initialise this select field
+			var changeStr = $select.attr("onchange");
+			if(changeStr.indexOf("validateEntries") == 0) {
+				// We have a select dropdown (text inputs also use
+				// this approach but we've already filtered for 
+				// select above).
+				// Restrictions JSON needs to be passed as a string
+				var restrictionsJSON = changeStr.substring(
+						changeStr.indexOf("\'\{")+1,
+						changeStr.lastIndexOf("\}\'")+1
+				);
+				// Run the validation
+				validateEntries($select, 'xs:string', restrictionsJSON);
+			}
+			else if(changeStr.indexOf("selectChoiceItem") == 0) {
+				// Can't trigger the change event on the choice 
+				// select directly but need to call selectChoiceItem
+				var event = {target: $select[0]};
+				selectChoiceItem(event);
+			}
+		}
+		else if($element.children('span.toggle_button_tristate').length > 0) {
+			var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
+			var $toggleSpan = $input.closest('.toggle_button_tristate');
+			$input.closest('li.parent_li').attr('data-run-solver', false);
+			resetEnableCandlestick($input);
+		}
 	},
 	
 	/**

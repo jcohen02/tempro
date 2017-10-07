@@ -976,6 +976,11 @@ function isInteger(valueToCheck) {
     	// on each one.
     	$branchContent.find('li.parent_li.constraint').find('> select').trigger('change');
     	
+    	// Set any optional branches to disabled
+    	var optionalULs = $branchContent.find('ul[data-optional="true"]');
+        var optionalLIs = optionalULs.children('li.parent_li');
+        setupOptionalBranches(optionalULs, optionalLIs);
+    	
     	// Call the tristate toggle initialisation function to initialise any
     	// tristate toggles in this block
     	console.log('Setting up tristate toggles in repeated branch...');
@@ -983,6 +988,11 @@ function isInteger(valueToCheck) {
     	$branchContent.data(treePluginName).setupTristateToggles(false, $branchContent);
         
     	$branchContent.trigger('change');
+    	
+    	// Now we need to initialise constraints on the repeated branch.
+    	if(window.hasOwnProperty("constraints")) {
+    		constraints.resetConstraints(null, $branchContent)
+    	}
     	
     	// Collapse all the subtree nodes.
     	$branchContent.data(treePluginName).collapseSubtree($branchContent);

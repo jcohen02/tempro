@@ -53,9 +53,14 @@ var constraints = {
     		//log("Handling key <" + key + ">...");
     		var pathItems = key.split(".");
     		// Search for the element that needs the constraint icon adding...
+    		// Also check if the constraint is within a repeatable branch
+    		var constraintRepeatable = false;
     		var $li = $rootLi;
     		for(var i = 0; i < pathItems.length; i++) {
     			$li = $li.find('> ul > li[data-fqname="' + pathItems[i] + '"]');
+    			if(typeof $li.parent().attr("data-repeat") !== 'undefined') {
+    				constraintRepeatable = true;
+    			}
     		}
     		var $link = $('<i class="glyphicon glyphicon-link link-icon"' +
     				' title="' + constraintMessages[key] + 
@@ -68,6 +73,9 @@ var constraints = {
     			$link.insertBefore($firstUl);
     		}
     		$li.addClass('constraint');
+    		if(constraintRepeatable) {
+    			$li.attr('constraint-id', getSimpleUid(8));
+    		}
     	}
     	
 		// Store the base state in the undo/redo constraint stack
@@ -137,6 +145,7 @@ var constraints = {
 	    			$link.insertBefore($firstUl);
 	    		}
 	    		$li.addClass('constraint');
+	    		$li.attr('constraint-id', getSimpleUid(8));
     		}
     	}
 	},
@@ -235,9 +244,17 @@ var constraints = {
 		// submit them to the server.
 		// Create form data object to post the params to the server
 	    var formDict = {};
+	    var triggerValue = {};
 	    for(var i = 0; i < constraintElements.length; i++) {
 	    	var $el = constraintElements[i]['element'];
 	    	var name = constraintElements[i]['name'];
+	    	
+	    	// See if this constraint is a repeated constraint with a 
+	    	// constraint ID. If so, we add the ID to the constraint path
+	    	if(typeof $el.attr('constraint-id') !== "undefined") {
+	    		name += "__" + $el.attr('constraint-id');
+	    	}
+	    	
 			var value = "";
 			if($el.children('select.choice').length > 0) {
 				log("Preparing constraints - we have a select node...");
@@ -288,9 +305,30 @@ var constraints = {
 			}
 			log("Name: " + name + "    Value: " + value);
 			formDict[name] = value;
+			
+			if($el.is($triggerElement)) {
+				var nodePath = getNodeFullPath($el);
+				triggerValue[nodePath] = value;
+			}
 		}
 		
 		var csrfToken = $('input[name="_csrf"]').val();
+		
+		// Before we post the files off to the server, map duplicate nodes to
+		// their base value
+		var constraintMapping = {};
+		for(var key in formDict) {
+			if(key.lastIndexOf('__') > 0) {
+				var baseKey = key.substring(0,key.lastIndexOf('__'));
+				if(!(baseKey in constraintMapping)) {
+					constraintMapping[baseKey] = [];
+				}
+				constraintMapping[baseKey].push(key);
+				formDict[baseKey] = formDict[key]; 
+				delete formDict[key];
+			}
+		}
+		formDict[nodePath] = triggerValue[nodePath];
 		
 		// Now we need to post the constraintParams to the server
 		var solveRequest = $.ajax({

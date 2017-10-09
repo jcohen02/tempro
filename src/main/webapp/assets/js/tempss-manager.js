@@ -220,7 +220,10 @@ function displayTemplate(templateID, templateText) {
             // click button to get constraint details
             if(data.hasOwnProperty('constraints') && data.constraints &&
             		window.hasOwnProperty("constraints")) {
-            	hideConstraintButtons(false);
+            	// Store the constraint info for use when initialising repeated
+            	// branches
+            	window.constraints['constraintInfo'] = data.constraintInfo;
+            	hideConstraintButtons(false);            	
             	constraints.setup(data, $templateNameNode, treeRoot);
             }
             else {

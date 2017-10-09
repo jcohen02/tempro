@@ -77,6 +77,70 @@ var constraints = {
 
 	},
 	
+	/**
+	 * Setup constraints for a local branch. This is used to set up constraints 
+	 * on a repeated branch where the rest of the template has already had 
+	 * constraints setup but they need to be added to the local branch that has
+	 * been dynamically inserted into the template. 
+	 */
+	setupLocalBranch: function(constraintInfo, $branchRoot) {
+		log("Request to setup constraints for local branch...");
+		
+		// Get the path of the branch root element
+		var branchPath = getNodeFullPath($branchRoot);
+		
+		// Build a string for each element that has constraints listing the 
+    	// other element(s) it is linked to. This will be displayed as a 
+    	// tooltip alongside the link icon
+    	var constraintMessages = {}
+    	for(var key in constraintInfo) {
+    		if(key.startsWith(branchPath)) {
+	    		var mappings = constraintInfo[key];
+	    		// Split and get the last item from the variable fq name
+	    		var node = key.split(".").pop();
+	    		var msg = node + " has a constraint relationship with ";
+	    		for(var i = 0; i < mappings.length; i++) {
+	    			msg += mappings[i].split(".").pop();
+	    			if(i == mappings.length-1) msg+= ".";
+	    			else if(i == mappings.length-2) msg+= " and ";
+	    			else msg += ", ";
+	    		}
+	    		constraintMessages[key] = msg;
+    		}
+    	}
+    	
+    	// Add a constraint icon to each template node involved in a 
+    	// constraint relationship. We only process constraint keys that relate 
+    	// to the current local branch and we only need to search within that
+    	// branch...
+    	var $baseLi = $branchRoot.children("li.parent_li");
+    	for(var key in constraintInfo) {
+    		if(key.startsWith(branchPath)) {
+	    		// We need to search for the target node relative to the base 
+    			// node. Therefore, before splitting the path into sections, 
+    			// remove the branchPath element from the path...we already 
+    			// know that any node processed here will begin with branchPath
+    			var regex = new RegExp("^" + branchPath + "\.");
+    			var pathItems = key.replace(regex, "").split(".");
+	    		var $li = $baseLi;
+	    		for(var i = 0; i < pathItems.length; i++) {
+	    			$li = $li.find('> ul > li[data-fqname="' + pathItems[i] + '"]');
+	    		}
+	    		var $link = $('<i class="glyphicon glyphicon-link link-icon"' +
+	    				' title="' + constraintMessages[key] + 
+	    				'" data-toggle="tooltip" data-placement="right"></i>');
+	    		var $firstUl = $li.children('ul:first');
+	    		if($firstUl.length == 0) {
+	    			$li.append($link);
+	    		}
+	    		else {
+	    			$link.insertBefore($firstUl);
+	    		}
+	    		$li.addClass('constraint');
+    		}
+    	}
+	},
+	
 	// Get the initial constraint state as a dict of parameters an all their values
 	getInitialConstraintState: function(data, solverName, $treeRoot) {
 		var constraintData = {};
@@ -357,14 +421,7 @@ var constraints = {
 		}.bind(this)).catch(swal.noop);
 	},
 	
-	/**
-	 * Reset the constraints back to their original settings. This function can 
-	 * also be used to setup constraints on a newly added repeated branch  
-	 * where constraints have not previously been setup - in this case, the 
-	 * root element of the new branch is passed in and the constraint data is 
-	 * applied to the new branch as necessary.
-	 */
-	resetConstraints: function(e, $rootNode) {
+	resetConstraints: function(e) {
 		var $rootUl = $('#template-container ul[role="tree"]');
 		var $templateNameNode = $rootUl.find("> li.parent_li > span[data-fqname]");
 		var templateName = $templateNameNode.data('fqname');
@@ -373,15 +430,41 @@ var constraints = {
 			return;
 		}
 		var constraintData = window.constraints[templateName];
-		
-		var branchPath = null;
-		if(typeof $rootNode !== undefined) {
-			branchPath = getNodeFullPath($rootNode);
-		}
-		
 		for(var key in constraintData) {
-			if(branchPath == null || (key.startsWith(branchPath))) {
-				this._processConstraint(constraintData, key, $templateNameNode);
+			var $element = $($templateNameNode.parent()[0]);
+			var keyElements = key.split('.');
+			for(var i = 0; i < keyElements.length; i++) {
+				$element = $element.find('> ul > li.parent_li[data-fqname="' + keyElements[i] + '"]');
+			}
+			if($element.children('select').length > 0) {
+				var $select = $element.children('select');
+				$select.html(constraintData[key]);
+				// Now re-initialise this select field
+				var changeStr = $select.attr("onchange");
+				if(changeStr.indexOf("validateEntries") == 0) {
+					// We have a select dropdown (text inputs also use
+					// this approach but we've already filtered for 
+					// select above).
+					// Restrictions JSON needs to be passed as a string
+					var restrictionsJSON = changeStr.substring(
+							changeStr.indexOf("\'\{")+1,
+							changeStr.lastIndexOf("\}\'")+1
+					);
+					// Run the validation
+					validateEntries($select, 'xs:string', restrictionsJSON);
+				}
+				else if(changeStr.indexOf("selectChoiceItem") == 0) {
+					// Can't trigger the change event on the choice 
+					// select directly but need to call selectChoiceItem
+					var event = {target: $select[0]};
+					selectChoiceItem(event);
+				}
+			}
+			else if($element.children('span.toggle_button_tristate').length > 0) {
+				var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
+				var $toggleSpan = $input.closest('.toggle_button_tristate');
+				$input.closest('li.parent_li').attr('data-run-solver', false);
+				resetEnableCandlestick($input);
 			}
 		}
 		// Remove the set_by_constraint from any toggle nodes...
@@ -403,44 +486,6 @@ var constraints = {
 		// re-evaluating the content following the field reset.
 		$('li.parent_li.constraint .val-help').closest('ul').removeClass('invalid');
 	
-	},
-	
-	_processConstraint: function(constraintData, key, $templateNameNode) {			
-		var $element = $($templateNameNode.parent()[0]);
-		var keyElements = key.split('.');
-		for(var i = 0; i < keyElements.length; i++) {
-			$element = $element.find('> ul > li.parent_li[data-fqname="' + keyElements[i] + '"]');
-		}
-		if($element.children('select').length > 0) {
-			var $select = $element.children('select');
-			$select.html(constraintData[key]);
-			// Now re-initialise this select field
-			var changeStr = $select.attr("onchange");
-			if(changeStr.indexOf("validateEntries") == 0) {
-				// We have a select dropdown (text inputs also use
-				// this approach but we've already filtered for 
-				// select above).
-				// Restrictions JSON needs to be passed as a string
-				var restrictionsJSON = changeStr.substring(
-						changeStr.indexOf("\'\{")+1,
-						changeStr.lastIndexOf("\}\'")+1
-				);
-				// Run the validation
-				validateEntries($select, 'xs:string', restrictionsJSON);
-			}
-			else if(changeStr.indexOf("selectChoiceItem") == 0) {
-				// Can't trigger the change event on the choice 
-				// select directly but need to call selectChoiceItem
-				var event = {target: $select[0]};
-				selectChoiceItem(event);
-			}
-		}
-		else if($element.children('span.toggle_button_tristate').length > 0) {
-			var $input = $element.find('> span.toggle_button_tristate input.toggle_button');
-			var $toggleSpan = $input.closest('.toggle_button_tristate');
-			$input.closest('li.parent_li').attr('data-run-solver', false);
-			resetEnableCandlestick($input);
-		}
 	},
 	
 	/**

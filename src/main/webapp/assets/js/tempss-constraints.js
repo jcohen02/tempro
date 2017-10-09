@@ -27,12 +27,18 @@ var constraints = {
     		'Reset constraints</button></div>');
     	$constraintHtml.insertAfter($nameNode);
     	
-    	// Build a string for each element that has constraints listing the 
-    	// other element(s) it is linked to. This will be displayed as a 
-    	// tooltip alongside the link icon
-    	var constraintMessages = {}
+    	var $rootLi = $treeRoot.children("li.parent_li");
+    	
+    	var constraintMessages = {}    	
     	for(var key in data.constraintInfo) {
-    		var mappings = data.constraintInfo[key];
+        	// Build a string for each element that has constraints listing the 
+        	// other element(s) it is linked to. This will be displayed as a 
+        	// tooltip alongside the link icon
+    		if(!('targets' in data.constraintInfo[key])) {
+    			log("ERROR: No constraint target info provided for [" + key + "]");
+    			continue;
+    		}
+    		var mappings = data.constraintInfo[key].targets;
     		// Split and get the last item from the variable fq name
     		var node = key.split(".").pop();
     		var msg = node + " has a constraint relationship with ";
@@ -43,13 +49,10 @@ var constraints = {
     			else msg += ", ";
     		}
     		constraintMessages[key] = msg;
-    	}
     	
-    	// Add a constraint icon to each template node involved in a 
-    	// constraint relationship. The constraint FQ name doesn't include the 
-    	// top-level name - we search down from the top level.
-    	var $rootLi = $treeRoot.children("li.parent_li");
-    	for(var key in data.constraintInfo) {
+	    	// Add a constraint icon to each template node involved in a 
+	    	// constraint relationship. The constraint FQ name doesn't include  
+	    	// the top-level name - we search down from the top level.    	
     		//log("Handling key <" + key + ">...");
     		var pathItems = key.split(".");
     		// Search for the element that needs the constraint icon adding...
@@ -97,13 +100,23 @@ var constraints = {
 		// Get the path of the branch root element
 		var branchPath = getNodeFullPath($branchRoot);
 		
-		// Build a string for each element that has constraints listing the 
-    	// other element(s) it is linked to. This will be displayed as a 
-    	// tooltip alongside the link icon
+		var $baseLi = $branchRoot.children("li.parent_li");
+		
+		// A simple unique ID that will be applied to all local constraints on
+		// this repeated branch.
+		var localConstraintID = getSimpleUid(8);
+		
     	var constraintMessages = {}
     	for(var key in constraintInfo) {
     		if(key.startsWith(branchPath)) {
-	    		var mappings = constraintInfo[key];
+        		if(!('targets' in constraintInfo[key])) {
+        			log("ERROR: No constraint target info provided for [" + key + "]");
+        			continue;
+        		}
+    			// Build a string for each element that has constraints   
+    	    	// listing the other element(s) it is linked to. This will be   
+    	    	// displayed as a tooltip alongside the link icon
+	    		var mappings = constraintInfo[key].targets;
 	    		// Split and get the last item from the variable fq name
 	    		var node = key.split(".").pop();
 	    		var msg = node + " has a constraint relationship with ";
@@ -114,16 +127,12 @@ var constraints = {
 	    			else msg += ", ";
 	    		}
 	    		constraintMessages[key] = msg;
-    		}
-    	}
     	
-    	// Add a constraint icon to each template node involved in a 
-    	// constraint relationship. We only process constraint keys that relate 
-    	// to the current local branch and we only need to search within that
-    	// branch...
-    	var $baseLi = $branchRoot.children("li.parent_li");
-    	for(var key in constraintInfo) {
-    		if(key.startsWith(branchPath)) {
+		    	// Add a constraint icon to each template node involved in a 
+		    	// constraint relationship. We only process constraint keys  
+		    	// that relate to the current local branch and we only need to 
+		    	// search within that branch...
+    	
 	    		// We need to search for the target node relative to the base 
     			// node. Therefore, before splitting the path into sections, 
     			// remove the branchPath element from the path...we already 
@@ -145,7 +154,11 @@ var constraints = {
 	    			$link.insertBefore($firstUl);
 	    		}
 	    		$li.addClass('constraint');
-	    		$li.attr('constraint-id', getSimpleUid(8));
+	    		if( ('local' in constraintInfo[key]) && 
+	    				constraintInfo[key].local) {
+	    			$li.attr('constraint-local-id', localConstraintID);	
+	    		}
+	    		
     		}
     	}
 	},
@@ -235,10 +248,17 @@ var constraints = {
 			return;
 		}
 		
+		// If the trigger element has a constraint-local-id, then we're only
+		// going to operate on a set of local nodes with the same localID.
+		var localId = null;
+		if(typeof $triggerElement.attr('constraint-local-id') != "undefined") {
+			localId = $triggerElement.attr('constraint-local-id');
+		}
+		
 		// Both the storing of constraint undo data and the preparation of form 
 		// content to send to the solver need references to all the constraint 
 		// elements in the tree. We get a list of these elements here
-		var constraintElements = this._getConstraintElements(templateName);
+		var constraintElements = this._getConstraintElements(templateName, localId);
 				
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
@@ -592,9 +612,17 @@ var constraints = {
 	 * name property containing the fully qualified name as a string and the 
 	 * element property containing a jQuery object for the element.
 	 */
-	_getConstraintElements: function(templateName) {
+	_getConstraintElements: function(templateName, localId) {
 		var constraintElements = [];
-		$('.constraint').each(function(index, el) {
+		var $constraintItems = null;
+		if(localId != null) {
+			$constraintItems = $('.constraint[constraint-local-id="' + localId + '"]'); 
+		}
+		else {
+			$constraintItems = $('.constraint:not([constraint-local-id])');
+		}
+		
+		$constraintItems.each(function(index, el) {
 			// constraint elements are li.parent_li nodes
 			// The data-fqname attribute only gives us the local name so we 
 			// need to search up the tree to build the correct fq name.

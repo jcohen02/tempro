@@ -244,7 +244,8 @@ public class TemplateRestResource {
     	return Response.ok(templateHtml, MediaType.TEXT_HTML).build();
     }
     
-    @GET
+    @SuppressWarnings("unchecked")
+	@GET
     @Produces("application/json")
     @Path("id/{templateId}")
     public Response getTemplatesHtmlJson(@PathParam("templateId") String templateId,
@@ -279,20 +280,34 @@ public class TemplateRestResource {
             	CSProblemDefinition problem = null;
             	try {
 					 problem = TemplateResourceUtils.getConstraintData(templateId, this._context);
-					 List<Constraint> constraintList = problem.getConstraints();
 					 // Constraint map will be used to build a two way mapping between constraint variable relationships
-					 Map<String, Set<String>> constraintMap = new HashMap<String, Set<String>>();
+					 Map<String, Map<String, Object>> constraintMap = new HashMap<String, Map<String, Object>>();
 					 for(Constraint c : problem.getConstraints()) {
 						 String varName = c.getVariable1FQName();
 						 String var2Name = c.getVariable2FQName();
 						 if(!constraintMap.containsKey(varName)) {
-							 constraintMap.put(varName, new HashSet<String>());
+							 Map<String, Object> constraintData = new HashMap<String, Object>();
+							 constraintData.put("targets", new HashSet<String>());
+							 constraintData.put("localTargets", new HashSet<String>());
+							 constraintData.put("local", c.isLocal());
+							 constraintMap.put(varName, constraintData);
 						 }
-						 constraintMap.get(varName).add(var2Name);
+						 ((Set<String>)constraintMap.get(varName).get("targets")).add(var2Name);
+						 if(c.isLocal()) {
+							 ((Set<String>)constraintMap.get(varName).get("localTargets")).add(var2Name);
+						 }
+						 
 						 if(!constraintMap.containsKey(var2Name)) {
-							 constraintMap.put(var2Name, new HashSet<String>());
+							 Map<String, Object> constraintData = new HashMap<String, Object>();
+							 constraintData.put("targets", new HashSet<String>());
+							 constraintData.put("localTargets", new HashSet<String>());
+							 constraintData.put("local", c.isLocal());
+							 constraintMap.put(var2Name, constraintData);
 						 }
-						 constraintMap.get(var2Name).add(varName);
+						 ((Set<String>)constraintMap.get(var2Name).get("targets")).add(varName);
+						 if(c.isLocal()) {
+							 ((Set<String>)constraintMap.get(var2Name).get("localTargets")).add(varName);
+						 }
 					 }
 		            templateObj.put("constraintInfo", constraintMap);
 				} catch (UnknownTemplateException | ConstraintsException e) {

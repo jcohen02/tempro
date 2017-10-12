@@ -991,7 +991,8 @@ function isInteger(valueToCheck) {
     	
     	// Now we need to initialise constraints on the repeated branch.
     	if(window.hasOwnProperty("constraints") && window.constraints.hasOwnProperty("constraintInfo")) {
-    		constraints.setupLocalBranch(window.constraints.constraintInfo, $branchContent);
+    		var constraintInfoClone = JSON.parse(JSON.stringify(window.constraints.constraintInfo));
+    		constraints.setupLocalBranch(constraintInfoClone, $branchContent);
     	}
     	
     	// Collapse all the subtree nodes.

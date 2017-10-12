@@ -993,6 +993,7 @@ function isInteger(valueToCheck) {
     	if(window.hasOwnProperty("constraints") && window.constraints.hasOwnProperty("constraintInfo")) {
     		var constraintInfoClone = JSON.parse(JSON.stringify(window.constraints.constraintInfo));
     		constraints.setupLocalBranch(constraintInfoClone, $branchContent);
+    		constraints.updateUndoStateWithNewBranch($branchContent);
     	}
     	
     	// Collapse all the subtree nodes.

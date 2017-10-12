@@ -12,10 +12,6 @@ var constraints = {
 			log("There is no constraints information in the provided data object.");
 			return;
 		}
-		// Store the initial constraint state for this solver
-		if(!window.hasOwnProperty("constraints")) window.constraints = {};
-		var solverName = $nameNode.text();
-		window.constraints[solverName] = this.getInitialConstraintState(data, solverName, $treeRoot);
 				
 		// Add a comment to the root node with a link to display the constraint
 		// information
@@ -86,6 +82,11 @@ var constraints = {
     		}
     		$li.addClass('constraint');
     	}
+    	
+		// Store the initial constraint state for this solver
+		if(!window.hasOwnProperty("constraints")) window.constraints = {};
+		var solverName = $nameNode.text();
+		window.constraints[solverName] = this.getInitialConstraintState(data, solverName, $treeRoot);
     	
 		// Store the base state in the undo/redo constraint stack
 		var constraintElements = this._getConstraintElements(solverName);
@@ -164,6 +165,9 @@ var constraints = {
 	    				constraintInfo[key].local) {
 	    			$li.attr('constraint-local-id', localConstraintID);	
 	    		}
+	    		else {
+	    			$li.attr('constraint-id', localConstraintID);
+	    		}
 	    		
 	    		delete constraintInfo[key]
     		}
@@ -187,6 +191,12 @@ var constraints = {
 				if($element.length == 0) {
 					log("Error finding node <" + targetName + "> during setup of initial constraints.");
 					continue;
+				}
+				if($element.attr('constraint-id') !== undefined) {
+					prop += '$$' + $element.attr('constraint-id');
+				}
+				else if($element.attr('constraint-local-id') !== undefined) {
+					prop += '__' + $element.attr('constraint-local-id');
 				}
 				if($element.children('select').length > 0) {
 					var $select = $element.children('select');
@@ -477,8 +487,10 @@ var constraints = {
 					}
 					$('#constraint-redo').addClass('disabled');
 				}
-				// Now store the state and increment the stack pointer
-				this.storeConstraintData(constraintElements, this.constraintChangeStack);
+				// Now store the state and increment the stack pointer - we 
+				// need to get the full set of constraint information to store
+				var allConstElements = this._getConstraintElements(templateName);
+				this.storeConstraintData(allConstElements, this.constraintChangeStack);
 				this.constraintChangeStackPointer++;
 				// If the undo icon is currently disabled, we now enable it.
 				$('#constraint-undo').removeClass('disabled');
@@ -635,15 +647,21 @@ var constraints = {
 	 * qualified name. The returned list contains objects each of which has a 
 	 * name property containing the fully qualified name as a string and the 
 	 * element property containing a jQuery object for the element.
+	 * 
+	 * $baseElement is a jQuery object representing an element that is the 
+	 *              base for the search for constraint elements
 	 */
-	_getConstraintElements: function(templateName, localId) {
+	_getConstraintElements: function(templateName, localId, $baseElement) {
 		var constraintElements = [];
 		var $constraintItems = null;
-		if(localId != null) {
-			$constraintItems = $('.constraint[constraint-local-id="' + localId + '"]'); 
+		if(typeof $baseElement !== "undefined") {
+			$constraintItems = $baseElement.find('.constraint');
 		}
 		else {
-			$constraintItems = $('.constraint:not([constraint-local-id])');
+			$constraintItems = $('.constraint');
+		}
+		if(localId != null) {
+			$constraintItems = $constraintItems.filter('[constraint-local-id="' + localId + '"]'); 
 		}
 		
 		$constraintItems.each(function(index, el) {
@@ -652,13 +670,21 @@ var constraints = {
 			// need to search up the tree to build the correct fq name.
 			var name = "";
 			var $element = $(el);
+			var customId = null;
+			if($element.attr('constraint-local-id') !== undefined) {
+				customId = "__" + $element.attr('constraint-local-id');
+			}
+			else if($element.attr('constraint-id') !== undefined) {
+				customId = "$$" + $element.attr('constraint-id');
+			}
 			while($element.attr("data-fqname") && $element.data('fqname') != templateName) {
 				log("Processing name: " + $element.data('fqname'));
 				if(name == "") name = $element.data('fqname'); 
 				else name = $element.data('fqname') + "." + name;
 				$element = $element.parent().closest('li.parent_li');
-				if($element.length == 0) break;	
+				if($element.length == 0) break;
 			}
+			if(customId != null) name += customId;
 			constraintElements.push({ name: name, element: $(el)});
 		});
 		return constraintElements;
@@ -672,8 +698,23 @@ var constraints = {
 	 */
 	_processConstraintData: function(constraintData) {
 		for(var i = 0; i < constraintData.length; i++) {
-			var $targetEl = getNodeFromPath(
-					constraintData[i]['name'], window.treeRoot);
+			var constraintName = constraintData[i]['name'];
+			var localId = null;
+			if(constraintName.lastIndexOf("$$") > 0) {
+				localId = constraintName.substring(constraintName.lastIndexOf("$$")+2);
+				constraintName = constraintName.substring(0, constraintName.lastIndexOf("$$"));
+			}
+			else if(constraintName.lastIndexOf("__") > 0) {
+				localId = constraintName.substring(constraintName.lastIndexOf("__")+2);
+				constraintName = constraintName.substring(0, constraintName.lastIndexOf("__"));
+			}
+			var $targetEl = null;
+			if(localId != null) {
+				$targetEl = getNodeFromPath(constraintName, window.treeRoot, localId);
+			}
+			else {
+				$targetEl = getNodeFromPath(constraintName, window.treeRoot);
+			}
 			
 			if(!$targetEl) {
 				log("Couldn't find the target element for path <" 
@@ -769,9 +810,13 @@ var constraints = {
 	 * stack.
 	 * 
 	 * constraintElements is the list of constraint elements to store data from
-	 * stack is a reference to a stack on which to store the data.
+	 * stack              is a reference to a stack on which to store the data.
+	 * updateStack        if this is false, the data is not actually stored to  
+	 *                    the stack but is returned for alternative processing.  
+	 *                    This is true by default
 	 */
-	storeConstraintData: function(constraintElements, stack) {
+	storeConstraintData: function(constraintElements, stack, updateStack) {
+		if(typeof updateStack === "undefined") updateStack = true;
 		// Go through the list of constraint items and, depending on their type, 
 		// store either the list of available values, the value entered (if its 
 		// a text node) or the 
@@ -848,11 +893,10 @@ var constraints = {
 			if(constraintItem.hasOwnProperty("type"))
 				constraintData.push(constraintItem);
 		}
-		stack.push(constraintData);
-		//if(typeof action !== undefined) {
-		//	if($('#constraint-' + action).hasClass('disabled'))
-		//		$('#constraint-' + action).removeClass('disabled');
-		//}
+		if(updateStack)
+			stack.push(constraintData);
+		
+		return constraintData;
 	},
 	
 	candlestickUpdatedByConstraint: function($input) {
@@ -919,6 +963,25 @@ var constraints = {
 			selectChoiceItem(event);
 		}
 
+	},
+	
+	/**
+	 * Called when a new branch is added to a template. We need to update the 
+	 * undo state stack with the new state of the added data. This ensures that 
+	 * if constraints are edited on the new branch, undo still works.
+	 */
+	updateUndoStateWithNewBranch: function($branchContent) {
+		// Get the constraint data for the new branch content but DON'T let 
+		// storeConstraintData store it to the stack.
+		var templateName = window.treeRoot.find('> li.parent_li > span').data('fqname');
+		var constraintElements = this._getConstraintElements(templateName, null, $branchContent);
+		var cData = this.storeConstraintData(constraintElements, 
+				this.constraintChangeStack, false);
+		// Manually add the values from the new constraintElements into the 
+		// item at the top of the stack.
+		for(var i = 0; i < cData.length; i++) {
+			this.constraintChangeStack[this.constraintChangeStackPointer].push(cData[i]);
+		}
 	},
 };
 window.constraints = constraints;

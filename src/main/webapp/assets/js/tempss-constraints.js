@@ -30,7 +30,7 @@ var constraints = {
     	var $rootLi = $treeRoot.children("li.parent_li");
     	
     	var constraintMessages = {}
-    	// Clone the constraintInfo obkject
+    	// Clone the constraintInfo object
     	var constraintInfo = JSON.parse(JSON.stringify(data.constraintInfo));
     	for(var key in constraintInfo) {
         	// Build a string for each element that has constraints listing the 

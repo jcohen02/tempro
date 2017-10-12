@@ -1050,14 +1050,20 @@ function updateDynamicOptionList(event, $sourceLi, sourcePath, $targetElement) {
  * to an element, this function will return the element at the specified path 
  * as a jQuery object.
  */
-function getNodeFromPath(path, $rootNode) {
+function getNodeFromPath(path, $rootNode, localId) {
 	if((path == "" ) || (typeof $rootNode === "undefined")) {
 		return null;
 	}
 	var pathSections = path.split(".");
 	var $targetEl = $rootNode.find('li.parent_li[data-fqname="' + pathSections[0] + '"]');
+
 	for(var i = 1; i < pathSections.length; i++) {
-		$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"]')
+		if(i == pathSections.length-1 && (typeof localId !== "undefined")) {
+			$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"][constraint-local-id="' + localId + '"]');
+		}
+		else {
+			$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"]');
+		}
 	}
 	if(!$targetEl.length) {
 		return null;

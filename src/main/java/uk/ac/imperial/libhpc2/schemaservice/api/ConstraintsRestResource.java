@@ -327,6 +327,32 @@ public class ConstraintsRestResource {
 			return Response.serverError().build();
 		}
     	
+    	// If we have a restricted variable set, create a cut down version of the 
+    	// CSProblemDefinition containing only the required variables
+    	if(dataParams.size() != definition.getVariables().size()) {
+    		// We have a restricted variable set - create a simplified problem definition
+    		LOG.debug("CSProblemDefinition contains {} variables, we have details for {}.", 
+    				definition.getVariables().size(), dataParams.size());
+    		List<Variable> newVars = new ArrayList<Variable>();
+    		List<Constraint> newConstraints = new ArrayList<Constraint>();
+    		
+    		// Iterate through existing Variables to find the ones used here and put them in the
+    		// new constraint list.....
+    		for(Variable var : definition.getVariables()) {
+    			if(dataParams.containsKey(var.getName())) {
+    				newVars.add(var);
+    			}
+    		}
+    		for(Constraint c : definition.getConstraints()) {
+    			if(dataParams.containsKey(c.getVariable1FQName()) && dataParams.containsKey(c.getVariable2FQName())) {
+    				newConstraints.add(c);
+    			}
+    		}
+    		
+    		definition = CSProblemDefinition.fromVarsAndConstraints(definition.getSolverName(), newVars, newConstraints);
+    		
+    	}
+    	
     	List<AssignedVariable> avList = new ArrayList<AssignedVariable>();
     	// Now go through the variables 
     	for(String key : dataParams.keySet()) {

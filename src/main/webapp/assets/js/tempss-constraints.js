@@ -29,16 +29,18 @@ var constraints = {
     	
     	var $rootLi = $treeRoot.children("li.parent_li");
     	
-    	var constraintMessages = {}    	
-    	for(var key in data.constraintInfo) {
+    	var constraintMessages = {}
+    	// Clone the constraintInfo obkject
+    	var constraintInfo = JSON.parse(JSON.stringify(data.constraintInfo));
+    	for(var key in constraintInfo) {
         	// Build a string for each element that has constraints listing the 
         	// other element(s) it is linked to. This will be displayed as a 
         	// tooltip alongside the link icon
-    		if(!('targets' in data.constraintInfo[key])) {
+    		if(!('targets' in constraintInfo[key])) {
     			log("ERROR: No constraint target info provided for [" + key + "]");
     			continue;
     		}
-    		var mappings = data.constraintInfo[key].targets;
+    		var mappings = constraintInfo[key].targets;
     		// Split and get the last item from the variable fq name
     		var node = key.split(".").pop();
     		var msg = node + " has a constraint relationship with ";
@@ -57,14 +59,21 @@ var constraints = {
     		var pathItems = key.split(".");
     		// Search for the element that needs the constraint icon adding...
     		// Also check if the constraint is within a repeatable branch
-    		var constraintRepeatable = false;
+    		var localBranchHandled = false;
     		var $li = $rootLi;
     		for(var i = 0; i < pathItems.length; i++) {
     			$li = $li.find('> ul > li[data-fqname="' + pathItems[i] + '"]');
     			if(typeof $li.parent().attr("data-repeat") !== 'undefined') {
-    				constraintRepeatable = true;
+    				// An updated version of the constraint info is returned 
+    				// excluding the constraints processed in the local branch
+    				// setup process. 
+    				constraintInfo = this.setupLocalBranch(constraintInfo, $li.parent());
+    				localBranchHandled = true;
+    				break;
     			}
     		}
+    		if(localBranchHandled) continue;
+    		
     		var $link = $('<i class="glyphicon glyphicon-link link-icon"' +
     				' title="' + constraintMessages[key] + 
     				'" data-toggle="tooltip" data-placement="right"></i>');
@@ -76,9 +85,6 @@ var constraints = {
     			$link.insertBefore($firstUl);
     		}
     		$li.addClass('constraint');
-    		if(constraintRepeatable) {
-    			$li.attr('constraint-id', getSimpleUid(8));
-    		}
     	}
     	
 		// Store the base state in the undo/redo constraint stack
@@ -159,8 +165,10 @@ var constraints = {
 	    			$li.attr('constraint-local-id', localConstraintID);	
 	    		}
 	    		
+	    		delete constraintInfo[key]
     		}
     	}
+    	return constraintInfo;
 	},
 	
 	// Get the initial constraint state as a dict of parameters an all their values
@@ -381,7 +389,23 @@ var constraints = {
 					//	log("ERROR, couldn't find tree node for variable <" + name + ">");
 					//	continue;
 					//}
-					var $targetEl = getNodeFromPath(name, window.treeRoot);
+					
+					// If we have a localId defining that we've been working 
+					// with constraints in a local block where we only want to 
+					// update instances of a node in that block. The localId
+					// is passed to the function that finds the node 
+					var $targetEl = null;
+					if(localId != null) {
+						log("Looking for node [" + name + "] with localId: " 
+								+ localId);
+						$targetEl = getNodeFromPath(name, window.treeRoot, localId);
+					}
+					else {
+						log("No local ID, looking for all nodes with name [" +
+								name + "]");
+						$targetEl = getNodeFromPath(name, window.treeRoot);
+					}
+					
 					if(!$targetEl.length) {
 						log("ERROR, couldn't find tree node for variable <" + name + ">");
 						continue;

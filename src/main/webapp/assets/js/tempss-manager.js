@@ -1061,9 +1061,12 @@ function getNodeFromPath(path, $rootNode, localId) {
 		if(i == pathSections.length-1 && (typeof localId !== "undefined")) {
 			// If a localId is provided look for elements that have either the 
 			// constraint-local-id or constraint-id attribute set
-			$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"][constraint-local-id="' + localId + '"]');
-			if(!$targetEl.length) {
+			var $targetElTmp = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"][constraint-local-id="' + localId + '"]');
+			if(!$targetElTmp.length) {
 				$targetEl = $targetEl.find('li.parent_li[data-fqname="' + pathSections[i] + '"][constraint-id="' + localId + '"]');
+			}
+			else {
+				$targetEl = $targetElTmp;
 			}
 		}
 		else {

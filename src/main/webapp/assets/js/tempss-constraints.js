@@ -281,7 +281,8 @@ var constraints = {
 		// Find all the constraint items and prepare a form request to 
 		// submit them to the server.
 		// Create form data object to post the params to the server
-	    var formDict = {};
+		//var formDictList = [];
+		var formDict = {};
 	    var triggerValue = {};
 	    for(var i = 0; i < constraintElements.length; i++) {
 	    	var $el = constraintElements[i]['element'];

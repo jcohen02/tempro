@@ -268,20 +268,19 @@ var constraints = {
 		
 		// If the trigger element has a constraint-local-id, then we're only
 		// going to operate on a set of local nodes with the same localID.
+		/*
 		var localId = null;
 		if(typeof $triggerElement.attr('constraint-local-id') != "undefined") {
 			localId = $triggerElement.attr('constraint-local-id');
 		}
+		*/
 		
 		// Both the storing of constraint undo data and the preparation of form 
 		// content to send to the solver need references to all the constraint 
 		// elements in the tree. We get a list of these elements here
-		var constraintElements = this._getConstraintElements(templateName, localId);
-				
-		// Find all the constraint items and prepare a form request to 
-		// submit them to the server.
-		// Create form data object to post the params to the server
-		//var formDictList = [];
+		var constraintElements = this._getConstraintElements(templateName);
+
+		// Create HTML form data object to post the params to the server
 		var formDict = {};
 	    var triggerValue = {};
 	    for(var i = 0; i < constraintElements.length; i++) {
@@ -290,9 +289,11 @@ var constraints = {
 	    	
 	    	// See if this constraint is a repeated constraint with a 
 	    	// constraint ID. If so, we add the ID to the constraint path
+	    	/*
 	    	if(typeof $el.attr('constraint-id') !== "undefined") {
 	    		name += "__" + $el.attr('constraint-id');
 	    	}
+	    	*/
 	    	
 			var value = "";
 			if($el.children('select.choice').length > 0) {
@@ -344,15 +345,17 @@ var constraints = {
 			}
 			log("Name: " + name + "    Value: " + value);
 			formDict[name] = value;
-			
+			/*
 			if($el.is($triggerElement)) {
 				var nodePath = getNodeFullPath($el);
 				triggerValue[nodePath] = value;
 			}
+			*/
 		}
 		
 		var csrfToken = $('input[name="_csrf"]').val();
 		
+		/*
 		// Before we post the files off to the server, map duplicate nodes to
 		// their base value
 		var constraintMapping = {};
@@ -367,7 +370,8 @@ var constraints = {
 				delete formDict[key];
 			}
 		}
-		formDict[nodePath] = triggerValue[nodePath];
+		*/
+		//formDict[nodePath] = triggerValue[nodePath];
 		
 		// Now we need to post the constraintParams to the server
 		var solveRequest = $.ajax({
@@ -391,29 +395,27 @@ var constraints = {
 					var solution = data.solutions[i];
 					log("Processing constraint variable: " + solution['variable']);
 					var name = solution['variable'];
-					//var nameParts = name.split(".");
-					//var $targetEl = window.treeRoot.find('li.parent_li[data-fqname="' + nameParts[0] + '"]');
-					//for(var j = 1; j < nameParts.length; j++) {
-					//	$targetEl = $targetEl.find('li.parent_li[data-fqname="' + nameParts[j] + '"]')
-					//}
-					//if(!$targetEl.length) {
-					//	log("ERROR, couldn't find tree node for variable <" + name + ">");
-					//	continue;
-					//}
-					
-					// If we have a localId defining that we've been working 
-					// with constraints in a local block where we only want to 
-					// update instances of a node in that block. The localId
-					// is passed to the function that finds the node 
+
+					// See whether we have a node name relating to a repeatable 
+					// element (either a global or local node in a repeatable
+					// block) 
 					var $targetEl = null;
-					if(localId != null) {
+					var id = null;
+					var localId = null;
+					if(name.lastIndexOf("$$") > 0) {
+						log("Looking for node [" + name + "] with id: " + id); 
+						id = name.substring(name.lastIndexOf("$$")+2);
+						name = name.substring(0, name.lastIndexOf("$$"));
+						$targetEl = getNodeFromPath(name, window.treeRoot, id);
+					}
+					else if(name.lastIndexOf("__") > 0) {
 						log("Looking for node [" + name + "] with localId: " 
 								+ localId);
+						localId = name.substring(name.lastIndexOf("__")+2);
+						name = name.substring(0, name.lastIndexOf("__"));
 						$targetEl = getNodeFromPath(name, window.treeRoot, localId);
 					}
 					else {
-						log("No local ID, looking for all nodes with name [" +
-								name + "]");
 						$targetEl = getNodeFromPath(name, window.treeRoot);
 					}
 					

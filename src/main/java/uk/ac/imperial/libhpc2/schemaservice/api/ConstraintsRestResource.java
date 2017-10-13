@@ -329,6 +329,7 @@ public class ConstraintsRestResource {
     	
     	// If we have a restricted variable set, create a cut down version of the 
     	// CSProblemDefinition containing only the required variables
+    	/*
     	if(dataParams.size() != definition.getVariables().size()) {
     		// We have a restricted variable set - create a simplified problem definition
     		LOG.debug("CSProblemDefinition contains {} variables, we have details for {}.", 
@@ -352,22 +353,72 @@ public class ConstraintsRestResource {
     		definition = CSProblemDefinition.fromVarsAndConstraints(definition.getSolverName(), newVars, newConstraints);
     		
     	}
+    	*/
+    	// We'll be removing the unique IDs from variable names so we need to keep a list of them to 
+    	// put them back onto the variable names before we return the data.
+    	Map<String, List<String>> varIdMap = new HashMap<String, List<String>>();
+    	Map<String, Map<String, String>> solveMap = new HashMap<String, Map<String, String>>();
+    	// Create a solve map for the global element solve
+    	solveMap.put("global", new HashMap<String, String>());
     	
-    	List<AssignedVariable> avList = new ArrayList<AssignedVariable>();
-    	// Now go through the variables 
     	for(String key : dataParams.keySet()) {
-    		if(!dataParams.getFirst(key).equals("NONE")) {
-    			LOG.debug("Handling initial value for variable <{}>", key);
-    			Variable v = definition.getVariable(key);
-    			avList.add(new AssignedVariable(v, dataParams.getFirst(key)));
+    		LOG.debug("Handling data parameter key [{}]...", key);
+    		if(key.indexOf("$$") > 0) {
+    			String baseKey = key.substring(0, key.indexOf("$$"));
+    			String id = key.substring(key.indexOf("$$")+2);
+    			String value = dataParams.getFirst(key);
+    			if(!varIdMap.containsKey(baseKey)) {
+    				varIdMap.put(baseKey, new ArrayList<String>());
+    			}
+    			varIdMap.get(baseKey).add(id);
+    			solveMap.get("global").put(baseKey, value);
+    		}
+    		else if(key.indexOf("__") > 0) {
+    			String baseKey = key.substring(0, key.indexOf("__"));
+    			String id = key.substring(key.indexOf("__")+2);
+    			String value = dataParams.getFirst(key);
+    			if(!solveMap.containsKey(id)) {
+    				solveMap.put(id, new HashMap<String, String>());
+    			}
+    			solveMap.get(id).put(baseKey, value);
+    		}
+    		else {
+    			solveMap.get("global").put(key, dataParams.getFirst(key));
     		}
     	}
-    	CSProblem problem = new CSProblem(definition, avList);
-    	CSPSolver solver = new BacktrackingSolver(problem);
-    	List<Solution> solutions = solver.solve();
+    	
+    	// Run the various solves
+    	Map<String, Set<String>> results = new HashMap<String, Set<String>>();
+    	for(String key : solveMap.keySet()) {
+    		Map<String, String> solveData = solveMap.get(key);
+    		// Run the solver and get a list of solutions back
+    		List<Solution> localSolutions = _runSolver(definition, solveData);
+    		Map<String, Set<String>> localResults = processSolutions(localSolutions);
+    		Map<String, Set<String>> newLocalResults = new HashMap<String, Set<String>>();
+    		// Process the global data set
+    		if(key.equals("global")) {
+    			for(String mapKey : localResults.keySet()) {
+    				if(varIdMap.containsKey(mapKey)) {
+    					for(String idItem : varIdMap.get(mapKey)) {
+    						newLocalResults.put(mapKey + "$$" + idItem, localResults.get(mapKey));
+    					}
+    				}
+    				else {
+    					newLocalResults.put(mapKey, localResults.get(mapKey));
+    				}
+    			}
+    		}
+			else {
+				String localId = key;
+				for(String mapKey : localResults.keySet()) {
+					newLocalResults.put(mapKey + "__" + localId, localResults.get(mapKey));
+				}
+    		}
+    		results.putAll(newLocalResults);
+    	}
     	
     	// Process the list of solutions from the solver
-    	Map<String, Set<String>> results = processSolutions(solutions);
+    	// Map<String, Set<String>> results = processSolutions(solutions);
     	JSONObject responseJson = new JSONObject();
     	try {
     		JSONArray varItemArray = new JSONArray();
@@ -386,6 +437,40 @@ public class ConstraintsRestResource {
     	}
 
     	return Response.ok(responseJson.toString(), MediaType.APPLICATION_JSON).build();
+    }
+    
+    private List<Solution> _runSolver(CSProblemDefinition definition, Map<String, String> data) {
+		// Iterate through existing Variables to find the ones used here and put them in the
+		// new constraint list. Use the base problem definition as the source of global variables
+    	// and mappings.
+    	List<Variable> solverVars = new ArrayList<Variable>();
+    	List<Constraint> solverConstraints = new ArrayList<Constraint>();
+		for(Variable var : definition.getVariables()) {
+			if(data.containsKey(var.getName())) {
+				solverVars.add(var);
+			}
+		}
+		for(Constraint c : definition.getConstraints()) {
+			if(data.containsKey(c.getVariable1FQName()) && data.containsKey(c.getVariable2FQName())) {
+				solverConstraints.add(c);
+			}
+		}
+		
+		CSProblemDefinition newDefinition = CSProblemDefinition.fromVarsAndConstraints(definition.getSolverName(), 
+																solverVars, solverConstraints);
+    	List<AssignedVariable> avList = new ArrayList<AssignedVariable>();
+    	// Now go through the variables 
+    	for(String key : data.keySet()) {
+    		if(!data.get(key).equals("NONE")) {
+    			LOG.debug("Handling initial value for variable <{}>", key);
+    			Variable v = newDefinition.getVariable(key);
+    			avList.add(new AssignedVariable(v, data.get(key)));
+    		}
+    	}
+    	CSProblem problem = new CSProblem(newDefinition, avList);
+    	CSPSolver solver = new BacktrackingSolver(problem);
+    	List<Solution> solutions = solver.solve();
+    	return solutions;
     }
     
     private Map<String, Set<String>> processSolutions(List<Solution> pSolutions) {

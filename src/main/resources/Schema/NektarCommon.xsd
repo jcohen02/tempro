@@ -84,6 +84,26 @@ PA: why is this necessary?
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- This can't currently be handled by the validation framework or
+       the transform which doesn't know how to render it at present.
+  -->
+  <!-- 
+  <xs:simpleType name="KinvisType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:double">
+          <xs:minExclusive value="0"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="1/Re"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  -->
+  
   <xs:complexType name="boundaryCondition">
     <xs:sequence>
       <xs:element name ="Type">

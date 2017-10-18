@@ -148,7 +148,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:locationInFile"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:value-of select="$trueNodeName"/>
+          <xsl:choose>
+            <xsl:when test="xs:annotation/xs:appinfo/libhpc:displayName">
+              <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:displayName"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$trueNodeName"/>  
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:element><!-- </span> -->
         <!-- Add optional toggle button here, javascript addition is too slow -->
         <xsl:if test="$optional">
@@ -503,6 +510,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </xsl:apply-templates>
   </xsl:template>
 
+  <xsl:template match="libhpc:displayName" mode="findChildNodes"/>
   <xsl:template match="libhpc:documentation" mode="findChildNodes"/>
   <xsl:template match="libhpc:alias" mode="findChildNodes"/>
   <xsl:template match="libhpc:units" mode="findChildNodes"/>

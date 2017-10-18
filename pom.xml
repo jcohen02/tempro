@@ -227,7 +227,7 @@
 				<version>9.2.6.v20141205</version>
 				<configuration>
      					<webAppConfig>
-      						<contextPath>/${project.artifactId}</contextPath>
+      						<contextPath>/tempss</contextPath>
      					</webAppConfig>
     				</configuration>
 			</plugin>

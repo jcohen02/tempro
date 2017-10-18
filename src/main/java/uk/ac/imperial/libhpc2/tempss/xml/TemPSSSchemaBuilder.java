@@ -249,6 +249,8 @@ public class TemPSSSchemaBuilder {
 	private Element _processNode(Content pNode) {
 		Element e = null;
 		String name = "";
+		boolean haveDisplayName = false;
+		String dispName = "";
 		
 		switch(pNode.getCType()) {
 		case Element:
@@ -262,6 +264,14 @@ public class TemPSSSchemaBuilder {
 			}
 			e = new Element("element", _namespaces.get("xs"));
 			e.setAttribute("name", name);
+			
+			// See if a displayName is set, if it is, set the flag and we add this value as a libhpc:displayName
+			// sub-element later.
+			Attribute dispNameAttr = node.getAttribute("displayName");
+			if(dispNameAttr != null) {
+				haveDisplayName = true;
+				dispName = dispNameAttr.getValue();
+			}
 			
 			// Now see if we have optional or repeatable tags set to true
 			// If so, we add relevant minOccurs and maxOccurs attributes
@@ -376,7 +386,7 @@ public class TemPSSSchemaBuilder {
 			}
 			
 			// If we have either units or documentation, add the data
-			if(haveUnits || haveDoc || haveDefault) {
+			if(haveUnits || haveDoc || haveDefault || haveDisplayName) {
 				Element annot = new Element("annotation", _namespaces.get("xs"));
 				Element appinf = new Element("appinfo", _namespaces.get("xs"));
 				if(haveDoc) {
@@ -393,6 +403,13 @@ public class TemPSSSchemaBuilder {
 					Element defEl = new Element("default", _namespaces.get("libhpc"));
 					defEl.setText(defaultStr);
 					appinf.addContent(defEl);
+				}
+				if(haveDisplayName) {
+					if(dispName != null && (!dispName.equals(""))) {
+						Element nameEl = new Element("displayName", _namespaces.get("libhpc"));
+						nameEl.setText(dispName);
+						appinf.addContent(nameEl);
+					}
 				}
 				annot.addContent(appinf);
 				e.addContent(annot);

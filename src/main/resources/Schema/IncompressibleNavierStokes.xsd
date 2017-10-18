@@ -403,9 +403,10 @@ When running a specific problem through the solver, the incompressible Navier-St
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="KinematicViscosity" type="positiveDouble">
+              <xs:element name="KinematicViscosity" type="xs:string">
                 <xs:annotation>
                   <xs:appinfo>
+                    <libhpc:displayName>Kinematic Viscosity</libhpc:displayName>
                     <libhpc:documentation>(kinematic viscosity) = 1 / (Reynolds number)</libhpc:documentation>
                     <libhpc:default>1/Re</libhpc:default>
                   </xs:appinfo>

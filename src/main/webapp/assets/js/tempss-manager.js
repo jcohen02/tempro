@@ -242,6 +242,10 @@ function displayTemplate(templateID, templateText) {
             // Attach handlers for custom Function element processing
             attachCustomFunctionHandlers();
             
+            // If we have any pre-populated default values, trigger change on 
+            // their nodes so that they are shown as valid (or invalid!)
+            $('input[data-default="true"]').trigger('change');
+            
             $("#template-tree-loading").hide(0);
             dfd.resolve();
         },

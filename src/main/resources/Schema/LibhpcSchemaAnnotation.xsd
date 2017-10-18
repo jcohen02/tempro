@@ -34,4 +34,6 @@ PA: surely not necessary for an xsd? Lets delete this line.
   </xs:element>
   <!-- Allows to provide an xpath using the refersToFile dataXPath as root to the data we need to map from our file-->
   <xs:element name="locationInFile" type="xs:string"/>
+  <!-- An optional default value for the parameter being defined -->
+  <xs:element name="default" type="xs:string"/>
 </xs:schema>

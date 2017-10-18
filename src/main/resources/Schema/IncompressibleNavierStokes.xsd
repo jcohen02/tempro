@@ -407,6 +407,7 @@ When running a specific problem through the solver, the incompressible Navier-St
                 <xs:annotation>
                   <xs:appinfo>
                     <libhpc:documentation>(kinematic viscosity) = 1 / (Reynolds number)</libhpc:documentation>
+                    <libhpc:default>1/Re</libhpc:default>
                   </xs:appinfo>
                 </xs:annotation>
               </xs:element>

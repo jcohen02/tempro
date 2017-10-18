@@ -12,7 +12,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <!-- ignore white space. Otherwise you get a great long html output full of new lines -->
   <xsl:strip-space elements="xs:schema xs:element xs:complexType xs:simpleType xs:restriction"/>
   <xsl:strip-space elements="xs:sequence xs:choice xs:minExclusive xs:simpleContent xs:extension"/>
-  <xsl:strip-space elements="xs:annotation xs:appinfo libhpc:documentation"/>
+  <xsl:strip-space elements="xs:annotation xs:appinfo libhpc:documentation libhpc:default"/>
 
   <!--xsl:template match="xs:element[@type]" mode="findChildNodes"-->
   <xsl:template match="xs:element" mode="findChildNodes">
@@ -204,14 +204,20 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:if test="xs:annotation/xs:appinfo/libhpc:editDisabled">
               <xsl:attribute name="disabled">disabled</xsl:attribute>
             </xsl:if>
+            <xsl:if test="xs:annotation/xs:appinfo/libhpc:default">
+              <xsl:attribute name="value"><xsl:value-of select="xs:annotation/xs:appinfo/libhpc:default"/></xsl:attribute>
+              <xsl:attribute name="data-default">true</xsl:attribute>
+            </xsl:if>
           </input>
         </xsl:if>
         <xsl:if test="@type">
           <xsl:apply-templates select="/xs:schema/xs:complexType[@name=$type]" mode="findChildNodes">
             <xsl:with-param name="path" select="$this_path"/>
+            <xsl:with-param name="default" select="xs:annotation/xs:appinfo/libhpc:default"/>
           </xsl:apply-templates>
           <xsl:apply-templates select="/xs:schema/xs:simpleType[@name=$type]" mode="findChildNodes">
             <xsl:with-param name="path" select="$this_path"/>
+            <xsl:with-param name="default" select="xs:annotation/xs:appinfo/libhpc:default"/>
           </xsl:apply-templates>
         </xsl:if>
         <xsl:apply-templates mode="findChildNodes">
@@ -429,7 +435,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   </xsl:template>
 
   <xsl:template match="xs:restriction" mode="findChildNodes">
+    <xsl:param name="default" />
     <input type="text" class="data">
+      <xsl:if test="$default">
+        <xsl:attribute name="value"><xsl:value-of select="$default"/></xsl:attribute>
+        <xsl:attribute name="data-default">true</xsl:attribute>
+      </xsl:if>
       <xsl:attribute name="onchange">
         <xsl:text>validateEntries($(this), '</xsl:text>
         <xsl:value-of select="@base"/>
@@ -495,6 +506,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <xsl:template match="libhpc:documentation" mode="findChildNodes"/>
   <xsl:template match="libhpc:alias" mode="findChildNodes"/>
   <xsl:template match="libhpc:units" mode="findChildNodes"/>
+  <xsl:template match="libhpc:default" mode="findChildNodes"/>
   <xsl:template match="libhpc:nodeInfo" mode="findChildNodes"/>
   <xsl:template match="libhpc:editableUnits" mode="findChildNodes"/>
   <xsl:template match="libhpc:locationInFile" mode="findChildNodes"/>

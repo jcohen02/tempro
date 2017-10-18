@@ -362,8 +362,21 @@ public class TemPSSSchemaBuilder {
 				node.removeChild("documentation", _namespaces.get("libhpc"));
 			}
 
+			// Now see if there is a <libhpc:default> element defining a default 
+			// value as the child of the element we're currently processing. If so, 
+			// we'll add this into the appinfo block along with any units and 
+			// documentation that we need to add.
+			boolean haveDefault = false;
+			String defaultStr = "";
+			Element defaultEl = node.getChild("default", _namespaces.get("libhpc"));
+			if(defaultEl != null) {
+				defaultStr = defaultEl.getText();
+				haveDefault = true;
+				node.removeChild("default", _namespaces.get("libhpc"));
+			}
+			
 			// If we have either units or documentation, add the data
-			if(haveUnits || haveDoc) {
+			if(haveUnits || haveDoc || haveDefault) {
 				Element annot = new Element("annotation", _namespaces.get("xs"));
 				Element appinf = new Element("appinfo", _namespaces.get("xs"));
 				if(haveDoc) {
@@ -375,6 +388,11 @@ public class TemPSSSchemaBuilder {
 					Element unitsEl = new Element("units", _namespaces.get("libhpc"));
 					unitsEl.setText(units);
 					appinf.addContent(unitsEl);
+				}
+				if(haveDefault) {
+					Element defEl = new Element("default", _namespaces.get("libhpc"));
+					defEl.setText(defaultStr);
+					appinf.addContent(defEl);
 				}
 				annot.addContent(appinf);
 				e.addContent(annot);

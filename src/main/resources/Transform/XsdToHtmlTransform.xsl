@@ -33,6 +33,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     <xsl:param name="type" select="@type"/>
     <xsl:param name="this_path" select="concat($path,concat('.',$nodeName))"/>
     <xsl:param name="documentation" select="xs:annotation/xs:appinfo/libhpc:documentation"/>
+    <xsl:param name="defaultValue" select="xs:annotation/xs:appinfo/libhpc:default"/>
     <xsl:param name="units" select="xs:annotation/xs:appinfo/libhpc:units"/>
     <xsl:param name="editable_units" select="xs:annotation/xs:appinfo/libhpc:editableUnits"/>
     <xsl:param name="node_info" select="xs:annotation/xs:appinfo/libhpc:nodeInfo"/>
@@ -229,6 +230,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:if>
         <xsl:apply-templates mode="findChildNodes">
           <xsl:with-param name="path" select="$this_path"/>
+          <xsl:with-param name="defaultValue" select="$defaultValue"/>
         </xsl:apply-templates>
         <xsl:text> </xsl:text>
         <xsl:value-of select="$units" disable-output-escaping="yes"/>
@@ -370,6 +372,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   </xsl:template>
 
   <xsl:template match="xs:restriction[@base='xs:string']" mode="findChildNodes">
+    <xsl:param name="defaultValue" />
     <xsl:choose>
       <xsl:when test="xs:pattern">
         <input type="text">
@@ -397,6 +400,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             </xsl:call-template>
             <xsl:text>]}');</xsl:text>
           </xsl:attribute>
+          <xsl:if test="$defaultValue">
+            <xsl:attribute name="data-default">true</xsl:attribute>
+          </xsl:if>
           <option value="Select from list">Select from list</option>
           <xsl:for-each select="xs:enumeration">
             <option>
@@ -407,6 +413,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 <xsl:attribute name="title">
                   <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation"/>
                 </xsl:attribute>
+              </xsl:if>
+              <xsl:if test="$defaultValue=@value">
+                <xsl:attribute name="selected">selected</xsl:attribute>
               </xsl:if>
               <xsl:value-of select="@value"/>
             </option>
@@ -464,10 +473,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="xs:choice" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="defaultValue" />
     <select class="choice" onchange="selectChoiceItem(event);">
       <xsl:attribute name="choice-path">
         <xsl:value-of select="$path" />
       </xsl:attribute>
+      <xsl:if test="$defaultValue">
+        <xsl:attribute name="data-default">true</xsl:attribute>
+      </xsl:if>
       <option value="Select from list">Select from list</option>
       <xsl:for-each select="xs:element">
         <option>
@@ -478,6 +491,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             <xsl:attribute name="title">
               <xsl:value-of select="xs:annotation/xs:appinfo/libhpc:documentation" />
             </xsl:attribute>
+          </xsl:if>
+          <xsl:if test="$defaultValue=@name">
+            <xsl:attribute name="selected">selected</xsl:attribute>
           </xsl:if>
           <xsl:value-of select="@name"/>
         </option>
@@ -497,8 +513,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
   <xsl:template match="xs:complexType" mode="findChildNodes">
     <xsl:param name="path" />
+    <xsl:param name="defaultValue" />
     <xsl:apply-templates mode="findChildNodes">
+      <!-- Propagate values through to child node processing... -->
       <xsl:with-param name="path" select="$path"/>
+      <xsl:with-param name="defaultValue" select="$defaultValue"/>
     </xsl:apply-templates>
   </xsl:template>
 

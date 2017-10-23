@@ -245,6 +245,9 @@ function displayTemplate(templateID, templateText) {
             // If we have any pre-populated default values, trigger change on 
             // their nodes so that they are shown as valid (or invalid!)
             $('input[data-default="true"]').trigger('change');
+            // In the case of select nodes, this should also trigger re-checking
+            // of any constraints.
+            $('select[data-default="true"]').trigger('change');
             
             $("#template-tree-loading").hide(0);
             dfd.resolve();

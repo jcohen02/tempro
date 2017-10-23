@@ -462,6 +462,7 @@ DirectSolver: see http://www.nektar.info/wiki/3.2/Tutorial/IncNavierStokesSolver
                     <libhpc:documentation>
                       Sets the form in which the advection term is treated. See http://www.nektar.info/wiki/3.4/UserGuide/Tutorial/IncNavierStokesSolver
                     </libhpc:documentation>
+                    <libhpc:default>Linearised</libhpc:default>
                   </xs:appinfo>
                 </xs:annotation>
                 <xs:simpleType>

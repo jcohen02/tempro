@@ -3,6 +3,10 @@ package uk.ac.imperial.libhpc2.tempss.xml;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +34,9 @@ public class TemPSSXMLTemplateProcessor {
 	
 	private static final Logger LOG = 
 			LoggerFactory.getLogger(TemPSSXMLTemplateProcessor.class);
+	
+	private static final boolean CONVERTER_DEBUG = false;
+	private static final String CONVERTER_DEBUG_DIR = "/tmp/schemas";
 	
 	public static void main(String[] args) {
 		if(args.length < 1) {
@@ -176,10 +183,25 @@ public class TemPSSXMLTemplateProcessor {
 	}
 	
 	public String getConvertedResult() {
-		
 		TemPSSSchemaBuilder tsb = new TemPSSSchemaBuilder();
 		Document doc = tsb.convertXMLTemplateToSchema(this._xml);
-		return tsb.getDocumentAsString(doc);
+		String xsdTemplate = tsb.getDocumentAsString(doc);
 		
+		// If debug is enabled, write out the converted schema to the specified location
+		if(CONVERTER_DEBUG) {
+			Path tempDir = Paths.get(CONVERTER_DEBUG_DIR);
+			Path tempFile = null;
+			try {
+				tempDir = Files.createDirectories(tempDir);
+				tempFile = Files.createTempFile(tempDir, "tempss-schema-", ".xsd");
+				Files.write(tempFile, xsdTemplate.getBytes());
+			} catch(FileAlreadyExistsException e) {
+				LOG.error("The specified file already exists and is not a directory...");
+			} catch(IOException e) {
+				LOG.error("Couldn't create or write to the temporary file to store the " +
+						  "converted schema for debugging.");
+			}
+		}
+		return xsdTemplate;
 	}
 }

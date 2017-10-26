@@ -371,7 +371,10 @@ public class ConstraintsRestResource {
     				varIdMap.put(baseKey, new ArrayList<String>());
     			}
     			varIdMap.get(baseKey).add(id);
-    			solveMap.get("global").put(baseKey, value);
+    			String currentKeyVal = solveMap.get("global").get(baseKey);
+    			if( (currentKeyVal == null) || (currentKeyVal.equals("NONE")) ) {
+    				solveMap.get("global").put(baseKey, value);	
+    			}
     		}
     		else if(key.indexOf("__") > 0) {
     			String baseKey = key.substring(0, key.indexOf("__"));

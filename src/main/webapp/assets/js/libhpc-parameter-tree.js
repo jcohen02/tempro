@@ -974,7 +974,9 @@ function isInteger(valueToCheck) {
     	// represent may not be expanded. To ensure that all selects that are 
     	// constrained to a single value are expanded, trigger a change event 
     	// on each one.
-    	$branchContent.find('li.parent_li.constraint').find('> select').trigger('change');
+        // FIXME: Constraint tags are not set at this point so think this is incorrect...
+    	//var $branchConstraintNodes = $branchContent.find('li.parent_li.constraint');
+    	//$branchConstraintNodes.find('> select').trigger('change');
     	
     	// Set any optional branches to disabled
     	var optionalULs = $branchContent.find('ul[data-optional="true"]');
@@ -993,6 +995,11 @@ function isInteger(valueToCheck) {
     	if(window.hasOwnProperty("constraints") && window.constraints.hasOwnProperty("constraintInfo")) {
     		var constraintInfoClone = JSON.parse(JSON.stringify(window.constraints.constraintInfo));
     		constraints.setupLocalBranch(constraintInfoClone, $branchContent);
+    		var templateName = treeRoot.find('> li.parent_li > span').data('fqname'); 
+    		var templateId = $('#template-select option:selected').val();
+    		if($branchContent.find('li.parent_li.constraint').length > 0) {
+    			constraints.updateConstraints(templateName, templateId, $($branchContent.find('li.parent_li.constraint')[0]));
+    		}
     		constraints.updateUndoStateWithNewBranch($branchContent);
     	}
     	

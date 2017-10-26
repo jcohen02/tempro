@@ -254,7 +254,7 @@ var constraints = {
 		// Where we have an on/off switchable element, the easiest way to 
 		// switch it while maintaining all the associated behaviour is to 
 		// trigger a click on the element. However, when we do this, it 
-		// triggers a re-run of the solver putting is into an infinite loop. 
+		// triggers a re-run of the solver putting us into an infinite loop. 
 		// To prevent this, when a switchable element needs to be changed as 
 		// a result of processing a constraint, we add a flag to it which is 
 		// picked up here and prevents the solver running again as a result of 

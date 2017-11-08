@@ -261,10 +261,17 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:apply-templates select="AdditionalParameters" mode ="BoolParameters"/>
         </BOOLPARAMETERS>
         
-        <xsl:apply-templates select="LineRefinements" mode ="LineRefinementParameters"/>
-      
+        <xsl:choose>
+        <xsl:when test="LineRefinements[@toggle-value='off']">
+         <!-- Do nothing here since line refinements is set to off  -->
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:if test="LineRefinements">
+            <xsl:apply-templates select="LineRefinements" mode ="LineRefinementParameters"/>
+          </xsl:if>  
+        </xsl:otherwise>
+        </xsl:choose>
       </MESHING>
-
     </NEKTAR>
   </xsl:template>
 

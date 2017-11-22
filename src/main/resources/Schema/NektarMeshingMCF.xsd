@@ -40,6 +40,12 @@ File (MCF) for NekMesh.
   </xs:restriction>
 </xs:simpleType>
 
+<xs:simpleType name="positiveDoubleGE2">
+  <xs:restriction base="xs:double">
+    <xs:minInclusive value="2"/>
+  </xs:restriction>
+</xs:simpleType>
+
 <xs:complexType name="stepFileName">
   <xs:simpleContent>
     <xs:extension base="xs:string">
@@ -87,7 +93,7 @@ File (MCF) for NekMesh.
     <xs:element name="AOA" type="xs:double">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>The angle of attack for the aerofoil.</libhpc:documentation>
+          <libhpc:documentation>The angle of attack for the aerofoil in degrees.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
@@ -173,7 +179,35 @@ File (MCF) for NekMesh.
   </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="BoundaryLayerMeshType">
+<xs:complexType name="BoundaryLayerThicknessAdjustmentType">
+  <xs:sequence>
+    <xs:element name="BoundaryLayerAdjustmentValue" type="positiveDoubleGE2">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>
+Boundary layer adjustment value (double). Must be greater than or equal to 2.0. 
+A value of 2.0 defines full adjustment such that the distance between the 
+boundary layer and the vertex on which the adjustment is being applied is the 
+same as the distance along the entire boundary. As this value tends towards 
+infinity, we move back towards an unadjusted state.  
+          </libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="BoundaryLayerAdjustEverywhere"  minOccurs="0" maxOccurs="1">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>
+If not set, then adjustment is only made at the vertex where two boundary lines
+join. If set, adjustment is made along the full boundary.
+          </libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="BoundaryLayerMesh2DType">
     <xs:sequence>
       <xs:element name="BoundaryLayerSurfaces" type="xs:string">
         <xs:annotation>
@@ -188,6 +222,79 @@ File (MCF) for NekMesh.
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayerThicknessAdjustment" type="BoundaryLayerThicknessAdjustmentType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Adjust the thickness of the boundary layer in relation to vertices.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SplitBoundaryLayer">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+Whether or not to split the boundary layer into sections. If you select 
+Yes then you have the option to select the layer elements to split and 
+to set a progression that determines how the size of the created 
+sections changes across the space.
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:choice>
+            <xs:element name="Yes" type="BoundaryLayerSplitType"/>
+            <xs:element name="No"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PeriodicBoundaryLayers" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>
+Pairs of boundary layer IDs that are periodic. 
+Note that the mesh of the first surface overrides mesh of the 
+second surface.
+            </libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BoundaryLayerID1" type="xs:positiveInteger"/>
+            <xs:element name="BoundaryLayerID2" type="xs:positiveInteger"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="BoundaryLayerMesh3DType">
+    <xs:sequence>
+      <xs:element name="BoundaryLayerSurfaces" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Specify the boundary layer surfaces using this format: ...
+            </libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>        
+      </xs:element>
+      <xs:element name="BoundaryLayerThickness" type="ConstantOrExpressionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Ideal thickness of the prism layer, will be smaller in some regions depending on the geometry. This is required only if using a BoundaryLayer mesh type. Enter 0 if this value is not used.</libhpc:documentation>
+            <libhpc:units></libhpc:units>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BoundaryLayerThicknessAdjustment" type="BoundaryLayerThicknessAdjustmentType">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>Adjust the thickness of the boundary layer in relation to vertices.</libhpc:documentation>
             <libhpc:units></libhpc:units>
           </xs:appinfo>
         </xs:annotation>
@@ -217,7 +324,7 @@ File (MCF) for NekMesh.
     <xs:element name="MinimumDelta" type="xs:double">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Smallest element size the mesh generator will aim for.</libhpc:documentation>
+          <libhpc:documentation>Lower threshold for element size of generated elements.</libhpc:documentation>
           <libhpc:units></libhpc:units>
         </xs:appinfo>
       </xs:annotation>
@@ -225,7 +332,7 @@ File (MCF) for NekMesh.
     <xs:element name="MaximumDelta" type="xs:double">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>Largest element size the mesh generator will aim for.</libhpc:documentation>
+          <libhpc:documentation>Upper threshold for element size of generated elements.</libhpc:documentation>
           <libhpc:units></libhpc:units>
         </xs:appinfo>
       </xs:annotation>
@@ -288,18 +395,18 @@ File (MCF) for NekMesh.
       </xs:annotation>
     </xs:element>
     <xs:element name="MeshType">
-      <xs:complexType>
-        <xs:annotation>
-          <xs:appinfo>
-            <libhpc:documentation>
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>
 The type of mesh to generate -- 2D: A 2D mesh without boundary layer surfaces;
 3D: A 3D mesh without boundary layer surfaces; 2DBoundaryLayer: A 2D mesh 
 with boundary layer surfaces specified; 3DBoundaryLayer: A 3D mesh with  
-boundary layer surfaces specified 
-            </libhpc:documentation>
-            <libhpc:units></libhpc:units>
-          </xs:appinfo>
-        </xs:annotation>
+boundary layer surfaces specified. Manifold: A 3D mesh without the volume
+element.          
+          </libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
         <xs:choice>
       <xs:element name="Mesh2D" type="Mesh2D">
         <xs:annotation>
@@ -315,17 +422,24 @@ boundary layer surfaces specified
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="BoundaryLayerMesh2D" type="BoundaryLayerMeshType">
+      <xs:element name="BoundaryLayerMesh2D" type="BoundaryLayerMesh2DType">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>2D mesh with boundary layers.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="BoundaryLayerMesh3D" type="BoundaryLayerMeshType">
+      <xs:element name="BoundaryLayerMesh3D" type="BoundaryLayerMesh3DType">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>3D mesh with boundary layers.</libhpc:documentation>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Manifold" type="Mesh3D">
+        <xs:annotation>
+          <xs:appinfo>
+            <libhpc:documentation>A 3D mesh without the volume element.</libhpc:documentation>
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -337,14 +451,62 @@ boundary layer surfaces specified
 
 <xs:complexType name="LineRefinementsType">
   <xs:sequence>
-    <xs:element name="X1" type="xs:double"/>
-    <xs:element name="Y1" type="xs:double"/>
-    <xs:element name="Z1" type="xs:double"/>
-    <xs:element name="X2" type="xs:double"/>
-    <xs:element name="Y2" type="xs:double"/>
-    <xs:element name="Z2" type="xs:double"/>
-    <xs:element name="R" type="xs:double"/>
-    <xs:element name="D" type="xs:double"/>
+    <xs:element name="X1" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The X coordinate for the starting point of the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Y1" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Y coordinate for the starting point of the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>    
+    </xs:element>
+    <xs:element name="Z1" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Z coordinate for the starting point of the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>    
+    </xs:element>
+    <xs:element name="X2" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The X coordinate for the end point of the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Y2" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Y coordinate for the end point of the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>    
+    </xs:element>
+    <xs:element name="Z2" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The Z coordinate for the end point of the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>    
+    </xs:element>
+    <xs:element name="R" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The radius of the cylinder around the refinement line.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>    
+    </xs:element>
+    <xs:element name="D" type="xs:double">
+      <xs:annotation>
+        <xs:appinfo>
+          <libhpc:documentation>The approximate size for elements within the cylinder around the refinement line. This setting will not coarsen regions that are already finer than the specified value.</libhpc:documentation>
+        </xs:appinfo>
+      </xs:annotation>    
+    </xs:element>
   </xs:sequence>
 </xs:complexType>
 
@@ -373,7 +535,7 @@ The base element for a NekMesh mesh configuration that is used to provide the pa
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="LineRefinements" type="LineRefinementsType" minOccurs="0" maxOccurs="1">
+        <xs:element name="LineRefinements" type="LineRefinementsType" minOccurs="0" maxOccurs="unbounded">
           <xs:annotation>
             <xs:appinfo>
               <libhpc:documentation>This optional section is used to add line refinement parameters.</libhpc:documentation>

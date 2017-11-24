@@ -90,6 +90,10 @@
                         // by presence of class.
                         if (!($owningUL.hasInput())) {
                             $owningUL.markValidity('valid');
+                        // If we have a tristate toggle as a leaf node...
+                        } else if($owningUL.find('> li.parent_li > span.toggle_button_tristate').length == 1) {
+                        	var $tristateToggle = $owningUL.find('> li.parent_li > span.toggle_button_tristate input.toggle_button');
+                        	if($tristateToggle.val() == "1") $owningUL.markValidity('valid');
                         } else {
                             if ($owningUL.hasClass('valid')) {
                                 $owningUL.markValidity('valid');

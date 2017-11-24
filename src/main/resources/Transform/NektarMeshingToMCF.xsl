@@ -283,7 +283,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
           <xsl:apply-templates select="MeshConfiguration" mode ="MeshingInformation"/>
         </INFORMATION>
         
-        <xsl:if test="MeshConfiguration/MeshType/BoundaryLayerMesh2D/PeriodicBoundaryLayers">
+        <xsl:if test="MeshConfiguration/MeshType/BoundaryLayerMesh2D/PeriodicBoundaryLayers[not(@toggle-value)]">
         <PERIODIC>
           <xsl:apply-templates select="MeshConfiguration/MeshType/BoundaryLayerMesh2D/PeriodicBoundaryLayers" mode ="PeriodicBoundaryLayers"/>
         </PERIODIC>

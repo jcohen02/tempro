@@ -6,9 +6,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <xsl:output method="xml" indent="yes"/>
   <xsl:strip-space elements="*"/>
 
-  <xsl:variable name="BLadjusteverywhere2d" select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustEverywhere[not(@toggle-value)]"/>
-  <xsl:variable name="BLadjusteverywhere3d" select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustEverywhere[not(@toggle-value)]"/>
-
   <!-- These two templates allow us to copy a region of xml but convert
         the node names to upper case. 
         NB: when two templates match, the last one gets triggered first.
@@ -173,7 +170,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustmentValue"/>
             </xsl:attribute>
           </P>
-          <xsl:message>The value of the adjust everywhere variable is: <xsl:value-of select="$BLadjusteverywhere2d"/></xsl:message>
         </xsl:if>
       </xsl:if>
       <xsl:if test="$meshtype = 'BoundaryLayerMesh3D'">
@@ -220,7 +216,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustmentValue"/>
             </xsl:attribute>
           </P>
-          <xsl:message>The value of the adjust everywhere variable is: <xsl:value-of select="$BLadjusteverywhere3d"/></xsl:message>
         </xsl:if>
       </xsl:if>
     </xsl:if>

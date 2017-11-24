@@ -6,6 +6,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   <xsl:output method="xml" indent="yes"/>
   <xsl:strip-space elements="*"/>
 
+  <xsl:variable name="BLadjusteverywhere2d" select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustEverywhere[not(@toggle-value)]"/>
+  <xsl:variable name="BLadjusteverywhere3d" select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustEverywhere[not(@toggle-value)]"/>
 
   <!-- These two templates allow us to copy a region of xml but convert
         the node names to upper case. 
@@ -26,7 +28,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     </xsl:element>
   </xsl:template>
 
-  
 
   <xsl:template match="MeshConfiguration" mode="MeshingInformation">
     <xsl:variable name="meshtype" select="name(MeshType/*[1])"/>
@@ -88,6 +89,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:attribute>
       </P>  
     </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="MeshConfiguration/MeshType/BoundaryLayerMesh2D/PeriodicBoundaryLayers" mode ="PeriodicBoundaryLayers">
+    <P>
+      <xsl:attribute name="PAIR">
+        <xsl:value-of select="BoundaryLayerID1"/>,<xsl:value-of select="BoundaryLayerID2"/>
+      </xsl:attribute>
+    </P>
   </xsl:template>
 
   <xsl:template match="MeshParameters" mode="MeshingParameters">
@@ -156,7 +165,16 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
               <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/SplitBoundaryLayer/Yes/BoundaryLayerProgression"/>
             </xsl:attribute>
           </P>
-        </xsl:if>        
+        </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThicknessAdjustment))">
+          <P PARAM="BndLayerThicknessAdjustment">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustmentValue"/>
+            </xsl:attribute>
+          </P>
+          <xsl:message>The value of the adjust everywhere variable is: <xsl:value-of select="$BLadjusteverywhere2d"/></xsl:message>
+        </xsl:if>
       </xsl:if>
       <xsl:if test="$meshtype = 'BoundaryLayerMesh3D'">
         <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces) and (/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerSurfaces != ''))">
@@ -195,52 +213,65 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             </xsl:attribute>
           </P>
         </xsl:if>
+        
+        <xsl:if test="((/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThicknessAdjustment))">
+          <P PARAM="BndLayerThicknessAdjustment">
+            <xsl:attribute name="VALUE">
+              <xsl:value-of select="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustmentValue"/>
+            </xsl:attribute>
+          </P>
+          <xsl:message>The value of the adjust everywhere variable is: <xsl:value-of select="$BLadjusteverywhere3d"/></xsl:message>
+        </xsl:if>
       </xsl:if>
     </xsl:if>
                     
   </xsl:template>
   
   <xsl:template match="AdditionalParameters" mode="BoolParameters">
-    <xsl:if test="SurfaceOptimiser">
+    <xsl:if test="SurfaceOptimiser[not(@toggle-value)]">
       <P PARAM="SurfaceOptimiser" />
     </xsl:if>
-    <xsl:if test="VariationalOptimiser">
+    <xsl:if test="VariationalOptimiser[not(@toggle-value)]">
       <P PARAM="VariationalOptimiser" />
     </xsl:if>
-    <xsl:if test="WriteOctree">
+    <xsl:if test="WriteOctree[not(@toggle-value)]">
       <P PARAM="WriteOctree" />
+    </xsl:if>
+    <xsl:if test="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh2D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustEverywhere[not(@toggle-value)]">
+      <P PARAM="BoundaryLayerAdjustEverywhere" />
+    </xsl:if>
+    <xsl:if test="/NektarMeshing/MeshConfiguration/MeshType/BoundaryLayerMesh3D/BoundaryLayerThicknessAdjustment/BoundaryLayerAdjustEverywhere[not(@toggle-value)]">
+      <P PARAM="BoundaryLayerAdjustEverywhere" />
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="LineRefinements" mode="LineRefinementParameters">
-    <REFINEMENT>
-      <LINE>
-        <xsl:if test="X1">
-          <X1><xsl:value-of select="X1"/></X1>
-        </xsl:if>
-        <xsl:if test="Y1">
-          <Y1><xsl:value-of select="Y1"/></Y1>
-        </xsl:if>
-        <xsl:if test="Z1">
-          <Z1><xsl:value-of select="Z1"/></Z1>
-        </xsl:if>
-        <xsl:if test="X2">
-          <X2><xsl:value-of select="X2"/></X2>
-        </xsl:if>
-        <xsl:if test="Y2">
-          <Y2><xsl:value-of select="Y2"/></Y2>
-        </xsl:if>
-        <xsl:if test="Z2">
-          <Z2><xsl:value-of select="Z2"/></Z2>
-        </xsl:if>
-        <xsl:if test="R">
-          <R><xsl:value-of select="R"/></R>
-        </xsl:if>
-        <xsl:if test="D">
-          <D><xsl:value-of select="D"/></D>
-        </xsl:if>
-      </LINE>
-    </REFINEMENT>  
+    <LINE>
+      <xsl:if test="X1">
+        <X1><xsl:value-of select="X1"/></X1>
+      </xsl:if>
+      <xsl:if test="Y1">
+        <Y1><xsl:value-of select="Y1"/></Y1>
+      </xsl:if>
+      <xsl:if test="Z1">
+        <Z1><xsl:value-of select="Z1"/></Z1>
+      </xsl:if>
+      <xsl:if test="X2">
+        <X2><xsl:value-of select="X2"/></X2>
+      </xsl:if>
+      <xsl:if test="Y2">
+        <Y2><xsl:value-of select="Y2"/></Y2>
+      </xsl:if>
+      <xsl:if test="Z2">
+        <Z2><xsl:value-of select="Z2"/></Z2>
+      </xsl:if>
+      <xsl:if test="R">
+        <R><xsl:value-of select="R"/></R>
+      </xsl:if>
+      <xsl:if test="D">
+        <D><xsl:value-of select="D"/></D>
+      </xsl:if>
+    </LINE>  
   </xsl:template>
 
   <!-- NekMesh Mesh Configuration File transform -->
@@ -251,6 +282,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         <INFORMATION>
           <xsl:apply-templates select="MeshConfiguration" mode ="MeshingInformation"/>
         </INFORMATION>
+        
+        <xsl:if test="MeshConfiguration/MeshType/BoundaryLayerMesh2D/PeriodicBoundaryLayers">
+        <PERIODIC>
+          <xsl:apply-templates select="MeshConfiguration/MeshType/BoundaryLayerMesh2D/PeriodicBoundaryLayers" mode ="PeriodicBoundaryLayers"/>
+        </PERIODIC>
+        </xsl:if>
         
         <PARAMETERS>
           <xsl:apply-templates select="MeshParameters" mode ="MeshingParameters"/>
@@ -267,7 +304,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         </xsl:when>
         <xsl:otherwise>
           <xsl:if test="LineRefinements">
+            <REFINEMENT>
             <xsl:apply-templates select="LineRefinements" mode ="LineRefinementParameters"/>
+            </REFINEMENT>
           </xsl:if>  
         </xsl:otherwise>
         </xsl:choose>

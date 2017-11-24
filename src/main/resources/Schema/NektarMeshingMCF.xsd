@@ -226,7 +226,7 @@ join. If set, adjustment is made along the full boundary.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="BoundaryLayerThicknessAdjustment" type="BoundaryLayerThicknessAdjustmentType">
+      <xs:element name="BoundaryLayerThicknessAdjustment" type="BoundaryLayerThicknessAdjustmentType" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>Adjust the thickness of the boundary layer in relation to vertices.</libhpc:documentation>
@@ -291,7 +291,7 @@ second surface.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="BoundaryLayerThicknessAdjustment" type="BoundaryLayerThicknessAdjustmentType">
+      <xs:element name="BoundaryLayerThicknessAdjustment" type="BoundaryLayerThicknessAdjustmentType" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:appinfo>
             <libhpc:documentation>Adjust the thickness of the boundary layer in relation to vertices.</libhpc:documentation>

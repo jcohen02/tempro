@@ -65,28 +65,28 @@ File (MCF) for NekMesh.
     <xs:element name="Xmin" type="negativeDouble">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>The Xmin value for the NACA aerofoil.</libhpc:documentation>
+          <libhpc:documentation>The X value for min point of the bounding box surrounding the NACA aerofoil.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
     <xs:element name="Ymin" type="negativeDouble">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>The Ymin value for the NACA aerofoil.</libhpc:documentation>
+          <libhpc:documentation>The Y value for min point of the bounding box surrounding the NACA aerofoil.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
     <xs:element name="Xmax" type="gtOneDouble">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>The Xmax value for the NACA aerofoil.</libhpc:documentation>
+          <libhpc:documentation>The X value for max point of the bounding box surrounding the NACA aerofoil.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>
     <xs:element name="Ymax" type="positiveDouble">
       <xs:annotation>
         <xs:appinfo>
-          <libhpc:documentation>The Ymax value for the NACA aerofoil.</libhpc:documentation>
+          <libhpc:documentation>The Y value for max point of the bounding box surrounding the NACA aerofoil.</libhpc:documentation>
         </xs:appinfo>
       </xs:annotation>
     </xs:element>

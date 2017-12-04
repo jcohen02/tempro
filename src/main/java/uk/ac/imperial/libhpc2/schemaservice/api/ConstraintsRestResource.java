@@ -231,7 +231,7 @@ public class ConstraintsRestResource {
     		return Response.status(Response.Status.NOT_FOUND).build();
     	}
     	
-    	String templateName = problem.getSolverName();
+    	String templateFile = problem.getTemplateFile();
   
       	// Process the constraint satisfaction problem data to be returned to the caller as HTML.
     	List<Variable> vars = problem.getVariables();
@@ -279,7 +279,7 @@ public class ConstraintsRestResource {
     	// Render the template
     	Map<String, Object> templateContext = new HashMap<String, Object>();
     	templateContext.put("templateId", templateId);
-    	templateContext.put("templateName", templateName);
+    	templateContext.put("templateFile", templateFile);
     	templateContext.put("variables", varNames);
     	templateContext.put("variableNameMap", varFQNameLocalNameMap);
     	templateContext.put("variableDomains", varDomains);
@@ -350,7 +350,7 @@ public class ConstraintsRestResource {
     			}
     		}
     		
-    		definition = CSProblemDefinition.fromVarsAndConstraints(definition.getSolverName(), newVars, newConstraints);
+    		definition = CSProblemDefinition.fromVarsAndConstraints(definition.getTemplateFile(), newVars, newConstraints);
     		
     	}
     	*/
@@ -459,7 +459,7 @@ public class ConstraintsRestResource {
 			}
 		}
 		
-		CSProblemDefinition newDefinition = CSProblemDefinition.fromVarsAndConstraints(definition.getSolverName(), 
+		CSProblemDefinition newDefinition = CSProblemDefinition.fromVarsAndConstraints(definition.getTemplateFile(), 
 																solverVars, solverConstraints);
     	List<AssignedVariable> avList = new ArrayList<AssignedVariable>();
     	// Now go through the variables 

@@ -72,9 +72,12 @@
         <!-- A simple description of the problem represented by this constraint
              set -->
         <element name="description" type="string" minOccurs="1" maxOccurs="1"/>
-        <!-- This should be the solver name exactly as it appears in the root
-             node of the tempss template tree -->
-        <element name="solver" type="string" minOccurs="1" maxOccurs="1"/>
+        <!-- This property references the TemPSS template schema file that these
+         constraints relate to. This may be either an XML or XSD template 
+         file. Only the base name of the template file is required, no path
+         information should be provided.  
+        -->
+        <element name="templateFile" type="string" minOccurs="1" maxOccurs="1"/>
         <element name="variables" type="prism:variables"/>
         <element name="constraints" type="prism:constraints"/>
       </sequence>

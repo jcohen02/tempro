@@ -173,7 +173,7 @@
 		  <artifactId>prism-constraints-xml</artifactId>
 		  <version>0.0.3</version>
 		  <scope>system</scope>
-		  <systemPath>${basedir}/lib/prism-constraints-xml-0.0.3.jar</systemPath>
+		  <systemPath>${basedir}/lib/prism-constraints-xml-0.0.4.jar</systemPath>
 		</dependency>
 	</dependencies>
 	<build>

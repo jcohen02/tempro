@@ -7,10 +7,12 @@
     
     <description>Constraints for the Nektar++ ADR solver</description>
     
-    <!-- This should be the solver name exactly as it appears in the root node
-         of the tree that these constraints relate to. 
+    <!-- This property references the TemPSS template schema file that these
+     constraints relate to. This may be either an XML or XSD template 
+     file. Only the base name of the template file is required, no path
+     information should be provided.  
     -->
-    <solver>AdvectionDiffusionReaction</solver>
+    <templateFile>AdvectionDiffusionReaction.xml</templateFile>
     
     <variables>
       <variable path="ProblemSpecification.EquationType" name="EquationType">

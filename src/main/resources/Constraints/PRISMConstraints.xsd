@@ -50,13 +50,21 @@
     </sequence>
   </complexType>
   
+  <simpleType name="MappingType">
+    <restriction base="string">
+      <enumeration value="sharedVariable"></enumeration>
+    </restriction>
+  </simpleType>
+  
   <complexType name="mapping">
-    <sequence>
+    <choice>
       <element name="targetValue" type="string" minOccurs="1" maxOccurs="unbounded"/>
-    </sequence>
+      <element name="variablePath" type="string" minOccurs="1" maxOccurs="unbounded"/>
+    </choice>
     <attribute name="variable" type="string"/>
     <attribute name="varvalue" type="string"/>
     <attribute name="targetVariable" type="string"/>
+    <attribute name="mappingType" type="prism:MappingType"/>
   </complexType>
   
   <complexType name="constraints">

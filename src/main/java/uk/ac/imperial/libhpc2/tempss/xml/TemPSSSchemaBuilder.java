@@ -64,6 +64,15 @@ public class TemPSSSchemaBuilder {
 		include.setAttribute("schemaLocation", "NektarTypes.xsd");
 		schemaRoot.addContent(include);
 
+		// See if the incoming XML document contains any xs:include elements
+		List<Element> includeElements = _template.getRootElement().getChildren("include", xsNS);
+		LOG.debug("We have <{}> xs:include elements...", includeElements.size());
+		for(Element extraInclude : includeElements) {
+			Element newInclude = new Element("include", xsNS);
+			newInclude.setAttribute("schemaLocation", extraInclude.getAttributeValue("schemaLocation"));
+			schemaRoot.addContent(newInclude);
+		}
+		
 		// Process incoming XML and convert to schema
 		processNodeTopDown(_template.getRootElement(), true, schemaRoot);
 		
@@ -110,6 +119,11 @@ public class TemPSSSchemaBuilder {
 		if(pNode.getCType() == Content.CType.Element) {
 			Element e = null;
 			Element node = (Element)pNode;
+			
+			// If the node is an xs:include node, then it will already have been 
+			// processed above so we ignore it.
+			if(node.getName().equals("include") && node.getNamespace() == _namespaces.get("xs")) return;
+			
 			// If the node has only a documentation child node
 			// then its not the start of a new complex type (or simple type) so
 			// we just process it as though it was just a leaf node...

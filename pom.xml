@@ -171,7 +171,7 @@
 		<dependency>
 		  <groupId>uk.ac.imperial.jhc02.prism</groupId>
 		  <artifactId>prism-constraints-xml</artifactId>
-		  <version>0.0.3</version>
+		  <version>0.0.4</version>
 		  <scope>system</scope>
 		  <systemPath>${basedir}/lib/prism-constraints-xml-0.0.4.jar</systemPath>
 		</dependency>
@@ -243,6 +243,7 @@
 			    </webResources>
 			  </configuration>
 			</plugin>
+                        <!--
 			<plugin>
 			  <groupId>com.github.eirslett</groupId>
 			  <artifactId>frontend-maven-plugin</artifactId>
@@ -278,6 +279,7 @@
 			    </execution>
 			  </executions>
 			</plugin>
+                        -->
 		</plugins>
 	</build>
 	<dependencyManagement>
